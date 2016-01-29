@@ -1,0 +1,39 @@
+{
+  "name": "relm",
+  "version": "0.5.0",
+  "description": "Component based app architecture",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/a-s-o/relm.git"
+  },
+  "keywords": [
+    "frontend",
+    "component",
+    "framework",
+    "react",
+    "mithril",
+    "redux",
+    "elm",
+    "architecture"
+  ],
+  "author": "Amandeep",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/a-s-o/relm/issues"
+  },
+  "homepage": "https://github.com/a-s-o/relm#readme",
+  "devDependencies": {
+    "eslint": "^1.10.3",
+    "eslint-config-strict": "^7.0.4",
+    "eslint-plugin-filenames": "^0.2.0"
+  },
+  "dependencies": {
+    "babel-register": "^6.4.3",
+    "react": "^0.14.7",
+    "react-dom": "^0.14.7"
+  }
+}
