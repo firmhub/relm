@@ -1,4 +1,3 @@
-// Re-export everything
 import {
   component
 } from './component';
@@ -18,6 +17,8 @@ import {
   addStyles,
 } from './stylesheet';
 
+// Usage:
+//    import { component, ... } from 'relm';
 export {
   component,
   joinArgs,
@@ -28,6 +29,9 @@ export {
   addStyles,
 };
 
+// Usage:
+//    import relm from 'relm';
+//    relm.component(), etc.
 export default {
   component,
   joinArgs,

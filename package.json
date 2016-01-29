@@ -4,6 +4,7 @@
   "description": "Component based app architecture",
   "main": "index.js",
   "scripts": {
+    "build": "babel src --out-dir ./",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -27,13 +28,17 @@
   },
   "homepage": "https://github.com/a-s-o/relm#readme",
   "devDependencies": {
+    "babel-cli": "^6.4.5",
+    "babel-plugin-lodash": "^2.0.1",
+    "babel-plugin-syntax-object-rest-spread": "^6.3.13",
+    "babel-preset-es2015": "^6.3.13",
     "eslint": "^1.10.3",
     "eslint-config-strict": "^7.0.4",
     "eslint-plugin-filenames": "^0.2.0"
   },
   "dependencies": {
-    "babel-register": "^6.4.3",
     "react": "^0.14.7",
-    "react-dom": "^0.14.7"
+    "react-dom": "^0.14.7",
+    "lodash": "^4.0.1"
   }
 }

@@ -1,6 +1,5 @@
 import webpack from 'webpack';
 import extend from 'lodash/extend';
-import noop from 'lodash/noop';
 
 function configure (opts = {}, mode = 'development') {
   const ext = mode === 'production' ? 'min.js' : 'js';
