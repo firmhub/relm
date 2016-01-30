@@ -1,92 +1,50 @@
-import webpack from 'webpack';
-import { extend } from 'lodash';
-import { resolve } from 'path';
-import util from 'gulp-util';
+import _ from 'lodash';
+import Webpack from 'webpack';
 
-function configure (opts = {}, mode = 'development') {
-  const cwd = opts.workingDirectory || process.cwd();
-  const cfg = extend(opts, {
-    source: resolve(cwd, opts.source),
-    output: resolve(cwd, opts.output),
-    loaders: [
-      {
-        // jsx
-        test: /\.(js|jsx)$/,
-        exclude: /(node_modules)/,
-        loader: 'babel',
-        query: {
-          presets: [ 'es2015', 'react' ],
-          plugins: [ 'lodash' ]
-        }
+import {
+  getEntry,
+  getPath,
+  getPlugins,
+  getLoaders,
+  createBuilder,
+  createWatcher,
+} from '../internals/compiler';
+
+function compiler (opts, mode = 'development') {
+  _.merge(opts, {
+    // Make mithril a global variable in all modules
+    globals: {
+      m: 'mithril'
+    },
+
+    // Compile js
+    loaders: (opts.loaders || []).concat({
+      test: /\.(js)$/,
+      exclude: /(node_modules)/,
+      loader: 'babel',
+      query: {
+        presets: [ 'es2015' ],
+        plugins: [ 'lodash' ]
       }
-    ],
-    externals: opts.externals || {},
-    plugins: (opts.plugins || []).concat([
-      new webpack.ProvidePlugin(opts.globals || {}),
-      new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(mode)
-      })
-    ])
+    })
   });
 
-  if (mode === 'production') {
-    cfg.plugins.push(
-      new webpack.optimize.DedupePlugin(),
-      new webpack.optimize.UglifyJsPlugin({ minimize: true })
-    );
-  } else {
-    cfg.devtool = 'source-map';
-  }
-
-  return cfg;
-}
-
-function compiler (cfg) {
-  return webpack({
-    entry: cfg.source,
+  return new Webpack({
+    entry: getEntry(opts.source, mode),
     output: {
-      filename: '[name].js',
-      path: cfg.output
+      filename: '[name]/bundle.js',
+      path: getPath(opts.workingDirectory)(opts.output)
     },
-    devtool: cfg.devtool,
-    plugins: cfg.plugins,
-    externals: cfg.externals,
+    devtool: mode !== 'production' ? 'source-map' : null,
+    plugins: getPlugins(opts.plugins, mode, opts),
     module: {
-      loaders: cfg.loaders
+      loaders: getLoaders(opts.loaders, opts),
     },
     resolve: {
-      alias: cfg.alias || {},
-      extensions: [ '', '.jsx', '.js' ]
-    },
+      extensions: [ '', '.js' ],
+    }
   });
 }
 
-function onDone (cb) {
-  return function webpackFinished (err, stats) {
-    if (err) return cb(err);
-    if (stats.hasErrors()) return cb(stats.toString({ colors: true }));
-    cb(null, stats);
-  };
-}
-
-export function compile (opts = {}) {
-  return function run (cb) {
-    compiler(configure(opts, 'production')).run(onDone(cb));
-  };
-}
-
-export function watch (opts = {}) {
-  return function start () {
-    compiler(configure(opts)).watch({}, (err, stats) => {
-      if (err) return console.log(err);
-      if (stats.hasErrors()) return console.log(stats.toString({ colors: true }));
-
-      // Success
-      const json = stats.toJson({ source: false });
-      util.log(`Compiled`, util.colors.green(opts.dest), `(took ${json.time}ms)`);
-      if (stats.hasWarnings()) {
-        console.log(JSON.stringify(json.warnings, null, 2));
-      }
-    });
-  };
-}
+export const build = createBuilder(compiler);
+export const watch = createWatcher(compiler);

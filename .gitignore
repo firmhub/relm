@@ -20,6 +20,7 @@ node_modules/
 # Compiled files
 /example/build/
 /mithril/
+/internals/
 /react-dom/
 /component.js
 /index.js
