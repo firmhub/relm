@@ -1,73 +1,120 @@
+import _ from 'lodash';
 import webpack from 'webpack';
-import extend from 'lodash/extend';
+import HtmlWebpackPlugin from 'html-webpack-plugin';
+import CopyWebpackPlugin from 'copy-webpack-plugin';
+import { isAbsolute, resolve as resolvePath } from 'path';
 
-function configure (opts = {}, mode = 'development') {
-  const ext = mode === 'production' ? 'min.js' : 'js';
-
-  const cfg = extend(opts, {
-    loaders: [
-      {
-        // jsx
-        test: /\.(js|jsx)$/,
-        exclude: /(node_modules)/,
-        loader: 'babel',
-        query: {
-          presets: [ 'es2015', 'react' ],
-          plugins: [ 'lodash' ]
-        }
-      }
-    ],
-    externalPaths: {
-      React: `react/dist/react.${ext}`,
-      ReactDOM: `react-dom/dist/react-dom.${ext}`,
-    },
-    plugins: (opts.plugins || []).concat([
-      new webpack.ProvidePlugin(opts.globals || {}),
-      new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(mode)
-      })
-    ])
-  });
-
-  if (mode === 'production') {
-    cfg.plugins.push(
-      new webpack.optimize.DedupePlugin(),
-      new webpack.optimize.UglifyJsPlugin({ minimize: true })
-    );
-  } else {
-    cfg.devtool = 'source-map';
-  }
-
-  return cfg;
+function getPath (basePath = process.cwd()) {
+  return (path) => isAbsolute(path) ? path : resolvePath(basePath, path);
 }
 
-function compiler (cfg) {
+function getHtml (template, opts) {
+  const htmlOptions = {
+    title: opts.title || 'Relm App',
+    filename: 'index.html',
+    inject: 'body',
+  };
+
+  if (!template) return htmlOptions;
+
+  if (_.includes(template, '<')) {
+    // If html template is provided
+    htmlOptions.templateContent = template;
+  } else {
+    // If path to html template is provided
+    htmlOptions.template = getPath(opts.workingDirectory)(template);
+  }
+
+  return htmlOptions;
+}
+
+function getAssets (assets = [], opts) {
+  const resolveFromCwd = getPath(opts.workingDirectory);
+  return _.map(assets, (asset) => _.extend(asset, {
+    to: resolveFromCwd(asset.to),
+    from: resolveFromCwd(asset.from),
+  }));
+}
+
+function getPlugins (plugins = [], mode, opts) {
+  plugins.push(
+    new webpack.ProvidePlugin(opts.globals || {}),
+    new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode) }),
+    new HtmlWebpackPlugin(getHtml(opts.template, opts)),
+    new CopyWebpackPlugin(getAssets(opts.assets, opts))
+  );
+
+  if (mode !== 'production') return plugins;
+
+  plugins.push(
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.UglifyJsPlugin({ minimize: true })
+  );
+
+  return plugins;
+}
+
+function getLoaders (loaders = []/*, opts*/) {
+  loaders.push(
+    {
+      // jsx
+      test: /\.(js|jsx)$/,
+      exclude: /(node_modules)/,
+      loader: 'babel',
+      query: {
+        presets: [ 'es2015', 'react' ],
+        plugins: [ 'lodash' ]
+      }
+    }
+  );
+
+  return loaders;
+}
+
+function compiler (opts, mode = 'development') {
+  const ext = mode === 'production' ? 'min.js' : 'js';
+
+  _.merge(opts, {
+    // Make react a global variable in all modules
+    globals: {
+      React: 'react'
+    }
+  });
+
   return webpack({
-    entry: cfg.src,
+    entry: opts.source,
     output: {
       filename: '[name].js',
-      path: cfg.dest
+      path: getPath(opts.workingDirectory)(opts.output)
     },
-    devtool: cfg.devtool,
-    plugins: cfg.plugins,
-    externals: {
-      [cfg.externalPaths.React]: 'React'
-    },
+    devtool: mode !== 'production' ? 'source-map' : null,
+    plugins: getPlugins(opts.plugins, mode, opts),
     module: {
-      loaders: cfg.loaders
+      loaders: getLoaders(opts.loaders, opts),
+      noParse: [
+        // /react\/dist\//,
+        // /react-dom\/dist\//
+      ],
     },
     resolve: {
       extensions: [ '', '.jsx', '.js' ],
       alias: {
-        'react-dom': cfg.externalPaths.ReactDOM
-      },
+        // 'react': `react/dist/react-with-addons.${ext}`,
+        // 'react-dom': `react-dom/dist/react-dom.${ext}`
+      }
     },
+    externals: {
+      // Alias react plugins in case some dependencies need them
+      'react-addons-css-transition-group': 'React.addons.CSSTransitionGroup',
+      'react-addons-transition-group': 'React.addons.TransitionGroup',
+      'react-addons-update': 'React.addons.update',
+    }
   });
 }
 
-export function compile (opts = {}) {
+export function build (opts = {}) {
   return new Promise(function exec (resolve, reject) {
-    compiler(configure(opts, 'production')).run((err, stats) => {
+    compiler(opts, 'production').run((err, stats) => {
       if (err) {
         reject(err);
       } else if (stats.hasErrors()) {
@@ -80,13 +127,13 @@ export function compile (opts = {}) {
 }
 
 export function watch (opts = {}) {
-  compiler(configure(opts)).watch({}, (err, stats) => {
+  compiler(opts).watch({}, (err, stats) => {
     if (err) return console.log(err);
     if (stats.hasErrors()) return console.log(stats.toString({ colors: true }));
 
     // Success
     const json = stats.toJson({ source: false });
-    console.log(`Compiled`, opts.dest, `(took ${json.time}ms)`);
+    console.log(`Compiled`, opts.output, `(took ${json.time}ms)`);
     if (stats.hasWarnings()) {
       console.log(JSON.stringify(json.warnings, null, 2));
     }

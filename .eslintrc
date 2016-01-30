@@ -1,7 +1,0 @@
-{
-  "extends": ["./config/eslint.json"],
-  "root": true,
-  "env": {
-    "browser": true
-  }
-}

@@ -18,6 +18,7 @@ coverage/
 node_modules/
 
 # Compiled files
+/example/build/
 /mithril/
 /react-dom/
 /component.js
@@ -25,3 +26,4 @@ node_modules/
 /state.js
 /stylesheet.js
 /updaters.js
+/eslint.js
