@@ -114,8 +114,6 @@ function getEntry (entry = {}, mode) {
 }
 
 function compiler (opts, mode = 'development') {
-  // const ext = mode === 'production' ? 'min.js' : 'js';
-
   _.merge(opts, {
     // Make react a global variable in all modules
     globals: {
@@ -133,17 +131,9 @@ function compiler (opts, mode = 'development') {
     plugins: getPlugins(opts.plugins, mode, opts),
     module: {
       loaders: getLoaders(opts.loaders, opts),
-      noParse: [
-        // /react\/dist\//,
-        // /react-dom\/dist\//
-      ],
     },
     resolve: {
       extensions: [ '', '.jsx', '.js' ],
-      alias: {
-        // 'react': `react/dist/react-with-addons.${ext}`,
-        // 'react-dom': `react-dom/dist/react-dom.${ext}`
-      }
     },
     externals: {
       // Alias react plugins in case some dependencies need them
