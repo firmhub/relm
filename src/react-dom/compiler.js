@@ -1,14 +1,18 @@
 import _ from 'lodash';
 import webpack from 'webpack';
+import DevServer from 'webpack-dev-server';
 import HtmlWebpackPlugin from 'html-webpack-plugin';
 import CopyWebpackPlugin from 'copy-webpack-plugin';
 import { isAbsolute, resolve as resolvePath } from 'path';
+
+const serverHost = 'localhost';
+const serverPort = 8080;
 
 function getPath (basePath = process.cwd()) {
   return (path) => isAbsolute(path) ? path : resolvePath(basePath, path);
 }
 
-function getHtml (template, opts) {
+function getHtmlOptions (template, opts) {
   const htmlOptions = {
     title: opts.title || 'Relm App',
     filename: 'index.html',
@@ -28,6 +32,23 @@ function getHtml (template, opts) {
   return htmlOptions;
 }
 
+function getHtml (template, opts) {
+  const htmlOptions = getHtmlOptions(template, opts);
+
+  if (!_.isPlainObject(opts.source)) {
+    return [new HtmlWebpackPlugin(htmlOptions)];
+  }
+
+  return _.reduce(opts.source, (files, entry, chunkName) => {
+    const copy = _.clone(htmlOptions);
+    copy.chunks = [chunkName];
+    copy.filename = `${chunkName}/index.html`;
+
+    files.push(new HtmlWebpackPlugin(copy));
+    return files;
+  }, []);
+}
+
 function getAssets (assets = [], opts) {
   const resolveFromCwd = getPath(opts.workingDirectory);
   return _.map(assets, (asset) => _.extend(asset, {
@@ -37,12 +58,15 @@ function getAssets (assets = [], opts) {
 }
 
 function getPlugins (plugins = [], mode, opts) {
+  // Add some common plugins
   plugins.push(
     new webpack.ProvidePlugin(opts.globals || {}),
     new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode) }),
-    new HtmlWebpackPlugin(getHtml(opts.template, opts)),
     new CopyWebpackPlugin(getAssets(opts.assets, opts))
   );
+
+  // Create html files (multiple for multiple chunks)
+  plugins.push(...getHtml(opts.template, opts));
 
   if (mode !== 'production') return plugins;
 
@@ -71,8 +95,26 @@ function getLoaders (loaders = []/*, opts*/) {
   return loaders;
 }
 
+function getEntry (entry = {}, mode) {
+  if (mode === 'production') return entry;
+
+  const devServer = `webpack-dev-server/client?http://${serverHost}:${serverPort}`;
+
+  function mapEntry (x) {
+    if (_.isString(x)) return [devServer, x];
+    if (_.isArray(x)) return [devServer, ...x];
+    return x;
+  }
+
+  if (_.isPlainObject(entry)) {
+    return _.mapValues(entry, mapEntry);
+  }
+
+  return mapEntry(entry);
+}
+
 function compiler (opts, mode = 'development') {
-  const ext = mode === 'production' ? 'min.js' : 'js';
+  // const ext = mode === 'production' ? 'min.js' : 'js';
 
   _.merge(opts, {
     // Make react a global variable in all modules
@@ -82,9 +124,9 @@ function compiler (opts, mode = 'development') {
   });
 
   return webpack({
-    entry: opts.source,
+    entry: getEntry(opts.source, mode),
     output: {
-      filename: '[name].js',
+      filename: '[name]/bundle.js',
       path: getPath(opts.workingDirectory)(opts.output)
     },
     devtool: mode !== 'production' ? 'source-map' : null,
@@ -127,15 +169,14 @@ export function build (opts = {}) {
 }
 
 export function watch (opts = {}) {
-  compiler(opts).watch({}, (err, stats) => {
-    if (err) return console.log(err);
-    if (stats.hasErrors()) return console.log(stats.toString({ colors: true }));
+  const base = getPath(opts.workingDirectory)(opts.output);
+  const server = new DevServer(compiler(opts), {
+    contentBase: base,
+    stats: { colors: true }
+  });
 
-    // Success
-    const json = stats.toJson({ source: false });
-    console.log(`Compiled`, opts.output, `(took ${json.time}ms)`);
-    if (stats.hasWarnings()) {
-      console.log(JSON.stringify(json.warnings, null, 2));
-    }
+  server.listen(serverPort, serverHost, (err) => {
+    if (err) return console.log(err);
+    console.log(`DevServer started on http://${serverHost}:${serverPort}/`);
   });
 }
