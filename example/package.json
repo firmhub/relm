@@ -14,7 +14,7 @@
     "eslint-plugin-filenames": "^0.2.0",
     "eslint-plugin-react": "^3.16.1"
   },
-  "relm": {
+  "relm-compile": {
     "outputDir": "./build",
     "entry": {
       "1": "./1/index.js",

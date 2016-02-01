@@ -1,5 +1,5 @@
 # Saying hello
-Learn __relm__ by example - No. 1
+> __relm guide__ \ Tutorial no. 1 - Basic component
 
 In this example we will be using the relm framework to render a basic message on a page. We will be introducing two concepts in order to do that; a concept of relm __components__ which will contain our application's view and a __bootstrap__ step where we render that view onto the page.
 

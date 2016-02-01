@@ -14,7 +14,7 @@ const workingDir = process.env.PWD;
 const json = require(resolve(workingDir, 'package.json'));
 
 // Build the compiler configuration from package.json
-const config = _.defaults(json.relm || {}, {
+const config = _.defaults(json['relm-compile'] || {}, {
   // Resolve all paths from the package directory
   workingDir,
 

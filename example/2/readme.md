@@ -1,5 +1,6 @@
-__relm__ guide - Tutorial no. 2
 # Saying howdy
+> __relm guide__ \ Tutorial no. 2 - Component props
+
 
 In the previous example we learned how to display a message on our page. There was nothing fancy about it. Let's add some style to it, and also since we may want to re-use the component in several places within our application, we will make the displayed message configurable.
 
