@@ -30,10 +30,10 @@ function compiler (opts, mode = 'development') {
   });
 
   return new Webpack({
-    entry: getEntry(opts.source, mode),
+    entry: getEntry(opts.entry, mode),
     output: {
       filename: '[name]/bundle.js',
-      path: getPath(opts.workingDirectory)(opts.output)
+      path: getPath(opts.workingDirectory)(opts.outputDir)
     },
     devtool: mode !== 'production' ? 'source-map' : null,
     plugins: getPlugins(opts.plugins, mode, opts),

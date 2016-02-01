@@ -5,12 +5,20 @@
   "author": "Amandeep",
   "license": "MIT",
   "scripts": {
+    "build": "relm-compile",
+    "watch": "relm-compile --watch",
     "test": "mocha --watch --colors */*.test.js"
   },
   "dependencies": {},
   "devDependencies": {
-    "eslint": "^1.10.3",
     "eslint-plugin-filenames": "^0.2.0",
     "eslint-plugin-react": "^3.16.1"
+  },
+  "relm": {
+    "outputDir": "./build",
+    "entry": {
+      "1": "./1/index.js",
+      "2": "./2/index.js"
+    }
   }
 }

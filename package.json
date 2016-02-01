@@ -5,8 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "babel src --out-dir ./",
-    "watch": "npm run build; babel src --watch --out-dir ./",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "npm run build; babel src --watch --out-dir ./"
   },
   "repository": {
     "type": "git",
@@ -48,6 +47,7 @@
     "react-dom": "^0.14.7",
     "redux": "^3.1.5",
     "webpack": "^1.12.12",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-server": "^1.14.1",
+    "yargs": "^3.32.0"
   }
 }

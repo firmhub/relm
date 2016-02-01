@@ -124,7 +124,7 @@ export function createBuilder (compiler) {
 
 export function createWatcher (compiler) {
   return function watch (opts = {}) {
-    const base = getPath(opts.workingDirectory)(opts.output);
+    const base = getPath(opts.workingDirectory)(opts.outputDir);
     const server = new DevServer(compiler(opts), {
       contentBase: base,
       stats: { colors: true }
