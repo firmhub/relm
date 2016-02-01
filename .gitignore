@@ -18,7 +18,7 @@ coverage/
 node_modules/
 
 # Compiled files
-/example/build/
+/guide/build/
 /bin/
 /mithril/
 /internals/
