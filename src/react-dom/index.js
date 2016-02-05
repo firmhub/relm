@@ -6,6 +6,7 @@ import { createStore } from '../state';
 export function startApp (el, component, middleware = []) {
   const init = component.init || _.noop;
   const update = component.update || _.identity;
+
   const store = createStore(update, init(), middleware);
 
   function renderApp () {

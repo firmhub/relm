@@ -17,8 +17,10 @@
   "relm-compile": {
     "outputDir": "./build",
     "entry": {
-      "1": "./1/index.js",
-      "2": "./2/index.js"
+      "one": "./1/index.js",
+      "two": "./2/index.js",
+      "three": "./3/index.js",
+      "four": "./4/index.js"
     }
   }
 }

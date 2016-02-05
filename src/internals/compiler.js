@@ -32,18 +32,18 @@ function getHtmlOptions (template, opts) {
   return htmlOptions;
 }
 
-export function getHtml (template, opts) {
+export function getHtml (entry, template, opts) {
   const htmlOptions = getHtmlOptions(template, opts);
 
-  if (!_.isPlainObject(opts.source)) {
+  if (!_.isPlainObject(entry)) {
     return [new HtmlWebpackPlugin(htmlOptions)];
   }
 
-  return _.reduce(opts.source, (files, entry, chunkName) => {
+  return _.reduce(entry, (files, __, name) => {
     const copy = _.clone(htmlOptions);
-    copy.chunks = [chunkName];
-    copy.title = [copy.title, chunkName].join(' | ');
-    copy.filename = `${chunkName}/index.html`;
+    copy.chunks = [name];
+    copy.title = [copy.title, name].join(' | ');
+    copy.filename = `${name}/index.html`;
 
     files.push(new HtmlWebpackPlugin(copy));
     return files;
@@ -67,7 +67,7 @@ export function getPlugins (plugins = [], mode, opts) {
   );
 
   // Create html files (multiple for multiple chunks)
-  plugins.push(...getHtml(opts.template, opts));
+  plugins.push(...getHtml(opts.entry, opts.template, opts));
 
   if (mode !== 'production') return plugins;
 

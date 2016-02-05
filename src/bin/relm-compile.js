@@ -19,7 +19,7 @@ const config = _.defaults(json['relm-compile'] || {}, {
   workingDir,
 
   // If source is not provided, go with main from package.json
-  entry: json.main || 'index.js',
+  entry: 'index.js',
 
   // Default build dir
   outputDir: './build'

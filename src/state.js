@@ -61,10 +61,10 @@ export function createDispatcher (boundArgs, done) {
   return dispatch;
 }
 
-export function createStore (reducer, middleware = []) {
+export function createStore (reducer, initialState, middleware = []) {
   // Create a store with the supplied reducer
   const withMiddleware = Redux.applyMiddleware(...middleware);
-  const store = withMiddleware(Redux.createStore)(reducer);
+  const store = withMiddleware(Redux.createStore)(reducer, initialState);
 
   return {
     ...store,
