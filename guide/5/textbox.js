@@ -16,10 +16,10 @@ export default component('Textbox', {
   view: ({ dispatch, state }) => (
     <div>
       <label style={{ display: 'block' }}>
-        Value of input box is: {state}
+        Enter your name
       </label>
       <input
-        onInput={dispatch.partial($CHANGE)}
+        onInput={dispatch.using($CHANGE)}
         type='text'
         value={state}
       />

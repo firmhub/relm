@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import { addStyles } from './stylesheet';
-import { updateStrategy } from './state';
+import { updateStrategy } from './updaters';
 
 export function component (displayName, src) {
   const init = (src.init || _.noop);

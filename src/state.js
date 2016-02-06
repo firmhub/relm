@@ -45,14 +45,23 @@ export function createDispatcher (boundArgs, done) {
   // Useful when providing a parent dispatcher down to child
   // components and the parent needs to attach some variadic
   // arguments to all child actions
-  dispatch.partial = function applyBeforeDispatch (...args) {
+  dispatch.partial = function dispatchPartial (...args) {
     return createDispatcher(boundArgs.concat(args), done);
+  };
+
+  dispatch.using = function dispatchUsing (f, ...args) {
+    if (!_.isFunction(f)) {
+      throw new Error(
+        `The first argument passed to dispatch.using must be a function`
+      );
+    }
+    return createDispatcher(boundArgs.concat(f, args), done);
   };
 
   // Useful in the most common case of dispatch.partial() when
   // we just want to dispatch some props along with the
   // action being emitted by the child component
-  dispatch.assign = function assignBeforeDispatch (actionProp, obj) {
+  dispatch.assign = function dispatchAssign (actionProp, obj) {
     return createDispatcher(boundArgs, (action) => {
       done({ ...obj, [actionProp]: action });
     });

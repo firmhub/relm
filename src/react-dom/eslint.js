@@ -15,6 +15,7 @@ module.exports = merge(cfg, {
   },
 
   rules: {
+    'jsx-quotes': 0,
     'react/display-name': 0,
     'react/forbid-prop-types': 1,
     'react/jsx-boolean-value': 1,
