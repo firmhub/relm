@@ -8,11 +8,8 @@ export function init (value = '') {
 
 // Update
 export function update (state = init(), action = {}) {
-  if (action.type === CHANGE) {
-    return action.value;
-  } else {
-    return state;
-  }
+  if (action.type === CHANGE) return action.value;
+  return state;
 }
 
 // View

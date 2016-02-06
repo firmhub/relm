@@ -10,12 +10,14 @@ export function init () {
 }
 
 export function update (state = init(), action = {}) {
-  if (action.type === TEXTBOX_ACTION) {
-    return {
-      name: Textbox.update(state.name, action.payload)
-    };
-  } else {
-    return state;
+  switch (action.type) {
+    case TEXTBOX_ACTION:
+      return {
+        name: Textbox.update(state.name, action.payload)
+      };
+
+    default:
+      return state;
   }
 }
 

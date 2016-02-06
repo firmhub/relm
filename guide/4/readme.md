@@ -16,7 +16,7 @@ Note: This is also where the `relm` approach starts to differ from the approach 
 
 ### Component
 
-Enough talk, the component we are building will be a simple `form` that will use both of the components `textbox` and `fancy-greeting` which we have created in previous examples. Those components are completely unchanged from our previous examples, so let's go through the new file `fancy-form.js`:
+Enough talk, the component we are building will be a `form` that will use both of the components `Textbox` and `FancyGreeting` which we have created in previous examples. Those components are completely unchanged from our previous examples, so let's go through the new file `fancy-form.js`:
 
 ##### Action types
 
@@ -42,17 +42,22 @@ The `FancyForm`'s state will be an object with a property `name` where we will s
 
 ```javascript
 export function update (state = init(), action = {}) {
-  if (action.type === TEXTBOX_ACTION) {
-    return {
-      name: Textbox.update(state.name, action.payload)
-    };
-  } else {
-    return state;
+  switch (action.type) {
+    case TEXTBOX_ACTION:
+      return {
+        name: Textbox.update(state.name, action.payload)
+      };
+
+    default:
+      return state;
   }
 }
+
 ```
 
-We still only need to worry about one action (`TEXTBOX_ACTION`) so our update function has a single if statement, but how we handle that action has changed. Instead of doing the mutation to the `Textbox` state ourselves, we are instead passing the previous state and the action `payload` to the `Textbox.update` function.
+We still only need to worry about one action (`TEXTBOX_ACTION`) so our update function has a single conditional (a switch statement in this case).
+
+What has also changed is how we handle the state update.  Instead of doing the mutation to the `Textbox` state ourselves, we are instead passing the previous state and the action `payload` to the `Textbox.update` function.
 
 As you can see the logic for making nested updates remains in the child component (in this case, `Textbox`, and the parent simply stores the state and call the child methods when needed.
 

@@ -4,7 +4,7 @@ Step by step guide to learning the framework and building a functioning applicat
 
 ### Fundamentals
 
-1 - [Basic component - Hello world]() `view`
+1 - [Basic component - Hello world]() `view` `startApp`
 
 2 - [Components with props]() `props`
 
@@ -14,13 +14,9 @@ Step by step guide to learning the framework and building a functioning applicat
 
 ### More features
 
-5 - [Reducing boilerplate in update]() `updateStrategy` `updateNestedState`
+5 - [Helpers to reduce boilerplate]() `component` `partial` `assign`
 
-6 - [Reducing boilerplate in views]() `partial` `assign`
-
-7 - [All together]() `component`
-
-8 - [HTTP helpers]() `$HTTP`
+8 - [$HTTP action creator]() `$HTTP`
 
 9 - [Extensible component styles]() `styles` `classes`
 
