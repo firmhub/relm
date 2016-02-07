@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import * as Redux from 'redux';
+import { createStore as createReduxStore, applyMiddleware } from 'redux';
 
 const result = (x) => _.isFunction(x) ? x() : x;
 const join = (args, it) => _.isFunction(it) ? [ it(...args) ] : [ it, ...args ];
@@ -70,10 +70,21 @@ export function createDispatcher (boundArgs, done) {
   return dispatch;
 }
 
-export function createStore (reducer, initialState, middleware = []) {
-  // Create a store with the supplied reducer
-  const withMiddleware = Redux.applyMiddleware(...middleware);
-  const store = withMiddleware(Redux.createStore)(reducer, initialState);
+export function createStore ({
+  reducer,
+  initialState,
+  middleware,
+  enhancers = []
+}) {
+  // If middleware is proveded, add it to enhancers array
+  if (middleware && middleware.length) {
+    enhancers.push(applyMiddleware(...middleware));
+  }
+
+  // Apply enhancers, if any, and create the store
+  const store = enhancers.length > 0
+    ? createReduxStore(reducer, initialState, _.flow(enhancers))
+    : createReduxStore(reducer, initialState);
 
   return {
     ...store,

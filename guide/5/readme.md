@@ -1,4 +1,4 @@
-# Santa's little helpers
+# Fewer plates in your boiler
 > __relm guide__: Tutorial no. 5 - Component helpers
 
 If you notice, so far in this guide we have not seen too many features provided by `relm` as a framework. In fact, we have only seen `startApp`, which we used in each tutorial to render our top level component into an element. Much of what we have seen has been the elm architecture pattern in just plain javascript. This has intentional to aid your learning and explain the steps involved.

@@ -105,7 +105,6 @@ export function getEntry (entry = {}, mode) {
   return mapEntry(entry);
 }
 
-
 export function createBuilder (compiler) {
   return function build (opts = {}) {
     return new Promise(function exec (resolve, reject) {
@@ -125,6 +124,7 @@ export function createBuilder (compiler) {
 export function createWatcher (compiler) {
   return function watch (opts = {}) {
     const base = getPath(opts.workingDirectory)(opts.outputDir);
+
     const server = new DevServer(compiler(opts), {
       contentBase: base,
       stats: { colors: true }
@@ -132,7 +132,7 @@ export function createWatcher (compiler) {
 
     server.listen(serverPort, serverHost, (err) => {
       if (err) return console.log(err);
-      console.log(`DevServer started on http://${serverHost}:${serverPort}/`);
+      console.log(`Development server started on http://${serverHost}:${serverPort}/`);
     });
   };
 }

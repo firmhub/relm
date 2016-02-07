@@ -42,6 +42,11 @@ function compiler (opts, mode = 'development') {
     },
     resolve: {
       extensions: [ '', '.jsx', '.js' ],
+      // alias: mode === 'production' ? {
+      //   '@@relm/start': resolve(__dirname, './start')
+      // } : {
+      //   '@@relm/start': resolve(__dirname, './start-dev')
+      // }
     },
     externals: {
       // Alias react plugins in case some dependencies need them
