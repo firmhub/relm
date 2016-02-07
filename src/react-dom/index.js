@@ -4,11 +4,13 @@ import _ from 'lodash';
 import { render } from 'react-dom';
 import { createStore } from '../internals/state';
 
-function getConfiguration (Component, opts = {}) {
+function getConfiguration (Component/*, opts = {}*/) {
   return {
     reducer: Component.update || _.identity,
     initialState: _.isFunction(Component.init) ? Component.init() : null,
-    middleware: opts.middleware || [],
+
+    // Currently no support for external middleware
+    middleware: [],
     enhancers: []
   };
 }

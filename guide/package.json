@@ -14,14 +14,15 @@
     "eslint-plugin-filenames": "^0.2.0",
     "eslint-plugin-react": "^3.16.1"
   },
-  "relm-compile": {
+  "relm-compile-settings": {
     "outputDir": "./build",
     "entry": {
-        "one"   : "./1/index.js"
-      , "two"   : "./2/index.js"
-      , "three" : "./3/index.js"
-      , "four"  : "./4/index.js"
-      , "five"  : "./5/index.js"
+        "1"   : "./1/index.js"
+      , "2"   : "./2/index.js"
+      , "3" : "./3/index.js"
+      , "4"  : "./4/index.js"
+      , "5"  : "./5/index.js"
+      , "6"  : "./6/index.js"
     }
   }
 }

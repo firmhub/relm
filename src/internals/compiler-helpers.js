@@ -64,7 +64,6 @@ export function getPlugins (plugins = [], mode, opts) {
     new webpack.ProvidePlugin(opts.globals || {}),
     new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode) }),
     new CopyWebpackPlugin(getAssets(opts.assets, opts)),
-    new webpack.optimize.DedupePlugin(),
     new webpack.optimize.CommonsChunkPlugin({
       name: 'common',
       filename: 'common.js'
@@ -74,11 +73,13 @@ export function getPlugins (plugins = [], mode, opts) {
     ...getHtml(opts.entry, opts.template, opts)
   );
 
-  // Development only plugins
+  // Hot module replacement
+  if (mode === 'hot') {
+    plugins.push(new webpack.HotModuleReplacementPlugin());
+  }
+
+  // Development mode plugins can be added here
   if (mode !== 'production') {
-    plugins.push(
-      new webpack.HotModuleReplacementPlugin()
-    );
     return plugins;
   }
 
@@ -102,20 +103,19 @@ export function getLoaders (loaders = []/*, opts*/) {
 export function getEntry (entry = {}, mode) {
   if (mode === 'production') return entry;
 
-  const devServer = `webpack-dev-server/client?http://${serverHost}:${serverPort}`;
-  const hotServer = `webpack/hot/dev-server`;
+  const webpackEntries = [
+    `webpack-dev-server/client?http://${serverHost}:${serverPort}`
+  ];
 
-  function mapEntry (x) {
-    if (_.isString(x)) return [devServer, hotServer, x];
-    if (_.isArray(x)) return [devServer, hotServer, ...x];
-    return x;
+  if (mode === 'hot') {
+    webpackEntries.push(`webpack/hot/dev-server`);
   }
 
   if (_.isPlainObject(entry)) {
-    return _.mapValues(entry, mapEntry);
+    return _.mapValues(entry, x => webpackEntries.concat(x));
   }
 
-  return mapEntry(entry);
+  return webpackEntries.concat(entry);
 }
 
 export function createBuilder (compiler) {
@@ -135,19 +135,25 @@ export function createBuilder (compiler) {
 }
 
 export function createWatcher (compiler) {
-  return function watch (opts = {}) {
+  return function watch (opts = {}, mode = 'development') {
     const base = getPath(opts.workingDirectory)(opts.outputDir);
 
-    const server = new DevServer(compiler(opts), {
+    const server = new DevServer(compiler(opts, mode), {
       contentBase: base,
-      hot: true,
+      hot: mode === 'hot',
       historyApiFallback: true,
       stats: { colors: true }
     });
 
     server.listen(serverPort, serverHost, (err) => {
-      if (err) return console.log(err);
-      console.log(`Development server started on http://${serverHost}:${serverPort}/`);
+      if (err) {
+        console.log(err);
+      } else {
+        console.log(
+          `Development server started on `
+        + `http://${serverHost}:${serverPort}/`
+        );
+      }
     });
   };
 }
