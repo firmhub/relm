@@ -19,7 +19,7 @@ export default component('Textbox', {
         Enter your name
       </label>
       <input
-        onInput={dispatch.using($CHANGE)}
+        onChange={dispatch.using($CHANGE)}
         type='text'
         value={state}
       />

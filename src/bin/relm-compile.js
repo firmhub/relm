@@ -31,6 +31,6 @@ if (opts.watch) {
   compiler.watch(config);
 } else {
   compiler.build(config)
-    .then(() => console.log(`Build results saved to ${config.output}`))
+    .then(() => console.log(`Build results saved to ${config.outputDir}`))
     .then(null, (err) => console.error(err));
 }

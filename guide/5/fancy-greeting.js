@@ -4,7 +4,7 @@ export default component('FancyGreeting', {
   view ({ name, styles }) {
     return (
       <h1 style={styles.heading}>
-        Howdy {name || 'stranger'}!
+        Hello {name || 'stranger'}!
       </h1>
     );
   },

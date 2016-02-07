@@ -41,9 +41,9 @@ export function getHtml (entry, template, opts) {
 
   return _.reduce(entry, (files, __, name) => {
     const copy = _.clone(htmlOptions);
-    copy.chunks = [name];
+    copy.chunks = ['common', name];
     copy.title = [copy.title, name].join(' | ');
-    copy.filename = `${name}/index.html`;
+    copy.filename = `${name}.html`;
 
     files.push(new HtmlWebpackPlugin(copy));
     return files;
@@ -59,18 +59,30 @@ export function getAssets (assets = [], opts) {
 }
 
 export function getPlugins (plugins = [], mode, opts) {
-  // Add some common plugins
+  // Common plugins
   plugins.push(
     new webpack.ProvidePlugin(opts.globals || {}),
     new webpack.DefinePlugin({ 'process.env.NODE_ENV': JSON.stringify(mode) }),
-    new CopyWebpackPlugin(getAssets(opts.assets, opts))
+    new CopyWebpackPlugin(getAssets(opts.assets, opts)),
+    new webpack.optimize.DedupePlugin(),
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'common',
+      filename: 'common.js'
+    }),
+
+    // Create html files (multiple for multiple chunks)
+    ...getHtml(opts.entry, opts.template, opts)
   );
 
-  // Create html files (multiple for multiple chunks)
-  plugins.push(...getHtml(opts.entry, opts.template, opts));
+  // Development only plugins
+  if (mode !== 'production') {
+    plugins.push(
+      new webpack.HotModuleReplacementPlugin()
+    );
+    return plugins;
+  }
 
-  if (mode !== 'production') return plugins;
-
+  // Production only plugins
   plugins.push(
     new webpack.optimize.DedupePlugin(),
     new webpack.optimize.UglifyJsPlugin({ minimize: true })
@@ -91,10 +103,11 @@ export function getEntry (entry = {}, mode) {
   if (mode === 'production') return entry;
 
   const devServer = `webpack-dev-server/client?http://${serverHost}:${serverPort}`;
+  const hotServer = `webpack/hot/dev-server`;
 
   function mapEntry (x) {
-    if (_.isString(x)) return [devServer, x];
-    if (_.isArray(x)) return [devServer, ...x];
+    if (_.isString(x)) return [devServer, hotServer, x];
+    if (_.isArray(x)) return [devServer, hotServer, ...x];
     return x;
   }
 
@@ -127,6 +140,8 @@ export function createWatcher (compiler) {
 
     const server = new DevServer(compiler(opts), {
       contentBase: base,
+      hot: true,
+      historyApiFallback: true,
       stats: { colors: true }
     });
 

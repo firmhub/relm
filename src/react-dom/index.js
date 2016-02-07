@@ -1,5 +1,5 @@
 /* globals React */
-/* eslint global-require: 0 */
+/* eslint global-require: 0, func-style: 0 */
 import _ from 'lodash';
 import { render } from 'react-dom';
 import { createStore } from '../internals/state';
@@ -13,7 +13,7 @@ function getConfiguration (Component, opts = {}) {
   };
 }
 
-function production (el, Component, opts) {
+export let startApp = function production (el, Component, opts) {
   const storeOpts = getConfiguration(Component, opts);
   const store = createStore(storeOpts);
 
@@ -31,51 +31,85 @@ function production (el, Component, opts) {
   store.subscribe(renderApp);
 
   return store;
-}
+};
 
-function development (el, Component, opts) {
-  const { createDevTools } = require('redux-devtools');
-  const { default: LogMonitor } = require('redux-devtools-log-monitor');
-  const { default: DockMonitor } = require('redux-devtools-dock-monitor');
+if (process.env.NODE_ENV !== 'production') {
+  startApp = function development (el, Component, opts) {
+    const { createDevTools } = require('redux-devtools');
+    const { persistState } = require('../internals/persist-state');
+    const { default: LogMonitor } = require('redux-devtools-log-monitor');
+    const { default: DockMonitor } = require('redux-devtools-dock-monitor');
 
-  const dockOpts = {
-    toggleVisibilityKey: 'ctrl-h',
-    changePositionKey: 'ctrl-q',
-    defaultIsVisible: true
-  };
+    const dockOpts = {
+      toggleVisibilityKey: 'ctrl-h',
+      changePositionKey: 'ctrl-q',
+      defaultIsVisible: false
+    };
 
-  // Create the dev tools
-  const log = React.createElement(LogMonitor, { theme: 'tomorrow' });
-  const dock = React.createElement(DockMonitor, dockOpts, log);
-  const DevTools = createDevTools( dock );
+    // Create the dev tools
+    const log = React.createElement(LogMonitor, { theme: 'tomorrow' });
+    const dock = React.createElement(DockMonitor, dockOpts, log);
+    const DevTools = createDevTools( dock );
 
-  // Add devtool to the store
-  const storeOpts = getConfiguration(Component, opts);
-  storeOpts.enhancers.push( DevTools.instrument() );
+    const urlMatches = window.location.href.match(/[?&]debug_session=([^&]+)\b/);
+    const sessionKey = (urlMatches && urlMatches.length > 0) ? urlMatches[1] : null;
 
-  // Create the store
-  const store = createStore(storeOpts);
+    console.info(`Dev tools:`, {
+      sessionKey,
+      toggleVisibility: dockOpts.toggleVisibilityKey,
+      changePosition: dockOpts.changePositionKey
+    });
 
-  function renderApp () {
-    const html = React.createElement(
-      'div', {},
-      React.createElement(DevTools, { store }),
-      React.createElement(Component.view, {
-        state: store.getState(),
-        dispatch: store.dispatch
-      })
+    // Add devtool to the store
+    const storeOpts = getConfiguration(Component, opts);
+
+    storeOpts.enhancers.push(
+      // Instrument the devtools
+      DevTools.instrument(),
+
+      // Allow state to be restored if debug_session is provided
+      persistState(sessionKey)
     );
 
-    render(html, el);
-  }
+    // Create the store
+    const store = createStore(storeOpts);
 
-  // Initial render
-  renderApp();
+    let view = Component.view;
 
-  // Re-render on state change
-  store.subscribe(renderApp);
+    function renderApp () {
+      const html = React.createElement(
+        'div', {},
+        React.createElement(DevTools, { store }),
+        React.createElement(view, {
+          state: store.getState(),
+          dispatch: store.dispatch
+        })
+      );
 
-  return store;
+      render(html, el);
+    }
+
+    // Initial render
+    renderApp();
+
+    // Re-render on state change
+    store.subscribe(renderApp);
+
+    return {
+      getState () {
+        return store.getState();
+      },
+      subscribeState (f) {
+        return store.subscribe(f);
+      },
+      dispatchAction (action) {
+        return store.dispatch(action);
+      },
+      hotReload (component) {
+        view = component.view;
+        store.replaceReducer(component.update || _.identity);
+        renderApp();
+      }
+    };
+  };
 }
-
-export const startApp = process.env.NODE_ENV === 'production' ? production : development;
