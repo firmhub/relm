@@ -1,73 +1,58 @@
 import _ from 'lodash';
 import { createStore as createReduxStore, applyMiddleware } from 'redux';
 
-const result = (x) => _.isFunction(x) ? x() : x;
-const join = (args, it) => _.isFunction(it) ? [ it(...args) ] : [ it, ...args ];
-
-// Used in the dispatcher to reduce arguments from right to
-// left, using any included functions for composition
-export function joinArgs (args) {
-  if (!_.isArray(args)) {
-    throw new Error('Join args expects an array to be joined');
-  }
-
-  const first = _.head(args);
-
-  switch (args.length) {
-    case 0: return [];
-    case 1: return [ result(first) ];
-  }
-
-  if (!_.isFunction(first)) {
-    throw new Error(`
-      relm.joinArgs was provided ${args.length} args to be joined,
-      but the first argument is not a function so the arguments cannot
-      be joined. If using dispatch.partial() make sure, a function is
-      provided before any other arguments;
-
-      ${JSON.stringify(args)}
-    `);
-  }
-
-  // When multiple arguments are supplied, they are handled as follows:
-  // Any functions get joined with all arguments provided
-  // to the right of them; ex:
-  //   [fnX, a, b, fnY, d, e] --is equal to--> fnX(a, b, fnY(d, e))
-  return _.reduceRight(_.initial(args), join, [ result(_.last(args)) ]);
-}
-
-export function createDispatcher (boundArgs, done) {
-  function dispatch (...args) {
-    const joined = joinArgs(boundArgs.concat(args));
-    return joined.length === 1 ? done(joined[0]) : done(...joined);
-  }
-
-  // Useful when providing a parent dispatcher down to child
-  // components and the parent needs to attach some variadic
-  // arguments to all child actions
-  dispatch.partial = function dispatchPartial (...args) {
-    return createDispatcher(boundArgs.concat(args), done);
-  };
-
-  dispatch.using = function dispatchUsing (f, ...args) {
+// Helpers to be assigned to a dispatch function; using inheritance
+// instead of closures to avoid creating many copies of helper
+// functions
+const helpers = {
+  using (f, ...args) {
     if (!_.isFunction(f)) {
       throw new Error(
-        `The first argument passed to dispatch.using must be a function`
+        `The first argument passed to "dispatch.using" method `
+      + `must be a function. I got "${typeof f}"`
       );
     }
-    return createDispatcher(boundArgs.concat(f, args), done);
-  };
 
-  // Useful in the most common case of dispatch.partial() when
-  // we just want to dispatch some props along with the
-  // action being emitted by the child component
-  dispatch.assign = function dispatchAssign (actionProp, obj) {
-    return createDispatcher(boundArgs, (action) => {
-      done({ ...obj, [actionProp]: action });
+    const self = this; // dispatch function
+
+    return wrapDispatcher(function dispatchUsing (...moreArgs) {
+      self(f(...args, ...moreArgs));
     });
-  };
+  },
 
-  return dispatch;
+  callback (f, ...args) {
+    if (!_.isFunction(f)) {
+      throw new Error(
+        `The first argument passed to "dispatch.callback" method `
+      + `must be a function. I got "${typeof f}"`
+      );
+    }
+
+    const self = this; // dispatch function
+
+    return wrapDispatcher(function dispatchAsync (...moreArgs) {
+      f(self, ...args, ...moreArgs);
+    });
+  },
+
+  payload (target, prop = 'payload') {
+    const self = this; // dispatch function
+
+    // Allow target to be a string representing type. Example:
+    //    dispatch.payload(CHANGE, 'result')
+    //
+    // Prop is also optional and defaults to 'payload'
+    //    dispatch.payload({ type: CHANGE, index: 1 });
+    const obj = _.isString(target) ? { type: target } : (target || {});
+
+    return wrapDispatcher(function dispatchAssign (action) {
+      self({ ...obj, [prop]: action });
+    });
+  }
+};
+
+function wrapDispatcher (dispatch) {
+  return _.extend(dispatch, helpers);
 }
 
 export function createStore ({
@@ -86,8 +71,7 @@ export function createStore ({
     ? createReduxStore(reducer, initialState, _.flow(enhancers))
     : createReduxStore(reducer, initialState);
 
-  return {
-    ...store,
-    dispatch: createDispatcher([], store.dispatch),
-  };
+  store.dispatch = wrapDispatcher(store.dispatch);
+
+  return store;
 }
