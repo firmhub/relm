@@ -19,8 +19,10 @@ export let startApp = function production (el, Component, opts) {
   const storeOpts = getConfiguration(Component, opts);
   const store = createStore(storeOpts);
 
+  let view = Component.view;
+
   function renderApp () {
-    render(React.createElement(Component.view, {
+    render(React.createElement(view, {
       dispatch: store.dispatch,
       state: store.getState()
     }), el);
@@ -32,10 +34,25 @@ export let startApp = function production (el, Component, opts) {
   // Re-render on state change
   store.subscribe(renderApp);
 
-  return store;
+  return {
+    getState () {
+      return store.getState();
+    },
+    subscribeState (f) {
+      return store.subscribe(f);
+    },
+    dispatchAction (action) {
+      return store.dispatch(action);
+    },
+    hotReload (replacement) {
+      view = replacement.view;
+      store.replaceReducer(replacement.update || _.identity);
+      renderApp();
+    }
+  };
 };
 
-if (process.env.NODE_ENV !== 'production') {
+if (process.env.NODE_ENV === 'hot') {
   startApp = function development (el, Component, opts) {
     const { createDevTools } = require('redux-devtools');
     const { persistState } = require('../internals/persist-state');
@@ -94,9 +111,6 @@ if (process.env.NODE_ENV !== 'production') {
     // Initial render
     renderApp();
 
-    // Re-render on state change
-    store.subscribe(renderApp);
-
     return {
       getState () {
         return store.getState();
@@ -107,9 +121,9 @@ if (process.env.NODE_ENV !== 'production') {
       dispatchAction (action) {
         return store.dispatch(action);
       },
-      hotReload (component) {
-        view = component.view;
-        store.replaceReducer(component.update || _.identity);
+      hotReload (replacement) {
+        view = replacement.view;
+        store.replaceReducer(replacement.update || _.identity);
         renderApp();
       }
     };
