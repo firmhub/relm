@@ -22,11 +22,10 @@ export function addStyles (src, displayName = 'UnamedComponent') {
 
   return function augmented (props, ...args) {
     // Add styles and classes (with any overrides) to the props
-    const extendedProps = {
-      ...props,
+    const extendedProps = _.defaults({
       classes: _.defaults(props.classes || {}, classes),
       styles: _.defaults(props.styles || {}, styles),
-    };
+    }, props);
 
     return view(extendedProps, ...args);
   };

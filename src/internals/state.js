@@ -20,7 +20,7 @@ const helpers = {
     });
   },
 
-  callback (f, ...args) {
+  from (f, ...args) {
     if (!_.isFunction(f)) {
       throw new Error(
         `The first argument passed to "dispatch.callback" method `

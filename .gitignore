@@ -21,11 +21,9 @@ node_modules/
 /guide/build/
 /bin/
 /mithril/
+/ui/
 /internals/
 /react-dom/
 /component.js
 /index.js
-/state.js
-/stylesheet.js
-/updaters.js
 /eslint.js
