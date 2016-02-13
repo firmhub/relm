@@ -1,0 +1,1 @@
+export { checkable } from './checkable';
