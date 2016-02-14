@@ -1,1 +1,9 @@
-export { checkable } from './checkable';
+import { checkable } from './checkable';
+
+export {
+  checkable
+};
+
+export default {
+  checkable
+};

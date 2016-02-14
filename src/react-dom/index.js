@@ -1,5 +1,5 @@
-/* globals React */
 /* eslint global-require: 0, func-style: 0 */
+import { createElement } from 'react';
 import _ from 'lodash';
 import { render } from 'react-dom';
 import { createStore } from '../internals/state';
@@ -22,7 +22,7 @@ export let startApp = function production (el, Component, opts) {
   let view = Component.view;
 
   function renderApp () {
-    render(React.createElement(view, {
+    render(createElement(view, {
       dispatch: store.dispatch,
       state: store.getState()
     }), el);
@@ -66,8 +66,8 @@ if (process.env.NODE_ENV === 'hot') {
     };
 
     // Create the dev tools
-    const log = React.createElement(LogMonitor, { theme: 'tomorrow' });
-    const dock = React.createElement(DockMonitor, dockOpts, log);
+    const log = createElement(LogMonitor, { theme: 'tomorrow' });
+    const dock = createElement(DockMonitor, dockOpts, log);
     const DevTools = createDevTools( dock );
 
     const urlMatches = window.location.href.match(/[?&]debug_session=([^&]+)\b/);
@@ -96,10 +96,10 @@ if (process.env.NODE_ENV === 'hot') {
     let view = Component.view;
 
     function renderApp () {
-      const html = React.createElement(
+      const html = createElement(
         'div', {},
-        React.createElement(DevTools, { store }),
-        React.createElement(view, {
+        createElement(DevTools, { store }),
+        createElement(view, {
           state: store.getState(),
           dispatch: store.dispatch
         })

@@ -1,7 +1,8 @@
 import React from 'react';
 import { component } from '../internals/component';
 
-export default function pragma (tag, attrs, ...children) {
-  if (component.is(tag)) return tag(attrs, children);
-  return React.createElement(tag, attrs, children);
-}
+module.exports = function pragma (tag, attrs, ...args) {
+  if (component.is(tag)) return tag.view(attrs, args);
+  args.unshift(tag, attrs);
+  return React.createElement(...args);
+};

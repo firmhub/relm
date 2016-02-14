@@ -15,6 +15,7 @@ function compiler (opts, mode = 'development') {
   const ext = mode === 'production' ? 'min.js' : 'js';
   const nodeModules = resolve(__dirname, '../node_modules');
   const React = resolve(nodeModules, `react/dist/react.${ext}`);
+  const ReactDOM = resolve(nodeModules, `react-dom/dist/react-dom.${ext}`);
 
   const pragma = opts.jsx || 'dom';
 
@@ -59,6 +60,7 @@ function compiler (opts, mode = 'development') {
       extensions: [ '', '.js', '.jsx' ],
       alias: {
         'react': React,
+        'react-dom': ReactDOM,
       }
     },
     externals: {

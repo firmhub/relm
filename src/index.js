@@ -10,8 +10,9 @@ import {
 // Usage:
 //    import { component, ... } from 'relm';
 export {
-  component,
   createStore,
+  component,
+  combineComponents
 };
 
 // Usage:

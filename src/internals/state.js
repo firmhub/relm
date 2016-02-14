@@ -45,8 +45,10 @@ const helpers = {
     //    dispatch.payload({ type: CHANGE, index: 1 });
     const obj = _.isString(target) ? { type: target } : (target || {});
 
-    return wrapDispatcher(function dispatchAssign (action) {
+    return wrapDispatcher(function dispatchPayload (action) {
+      console.time('here');
       self({ ...obj, [prop]: action });
+      console.timeEnd('here');
     });
   }
 };

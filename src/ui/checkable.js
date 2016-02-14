@@ -1,7 +1,15 @@
 import _ from 'lodash';
 import { component } from '../internals/component';
 
+function setPath (props, propsPath, state) {
+  if (!_.isArray(propsPath)) return props;
+  if (!propsPath.length) return _.extend(props, state);
+  return _.set(props, propsPath, state);
+}
+
 function syncValiator (displayName, child, opts) {
+  const { propsPath, validate } = opts;
+
   return component(displayName, {
     init (...args) {
       return {
@@ -17,7 +25,7 @@ function syncValiator (displayName, child, opts) {
       if (updated === state.value) return state;
 
       const clone = { value: updated, isDirty: true };
-      const result = opts.validate(clone);
+      const result = validate(clone);
       if (!result) return clone;
 
       return { ...clone, ...result };
@@ -26,13 +34,10 @@ function syncValiator (displayName, child, opts) {
     view (props, ...args) {
       const { state } = props;
 
-      const childProps = {
-        error: state.error,
-        warning: state.warning,
-        isDirty: state.isDirty,
-        ...props,
-        state: state.value,
-      };
+      const childProps = { ...props, state: state.value };
+
+      // Add validation state to child props, if requested
+      setPath(childProps, propsPath, state);
 
       return child.view(childProps, ...args);
     }
@@ -42,6 +47,16 @@ function syncValiator (displayName, child, opts) {
 function asyncValiator (displayName, child, opts) {
   const UPDATE = `${displayName}/async/request`;
   const VALIDATE = `${displayName}/async/validate`;
+
+  const { propsPath } = opts;
+  let { validate } = opts;
+
+  if (opts.delay) {
+    validate = _.throttle(validate, opts.delay, {
+      leading: false,
+      trailing: true
+    });
+  }
 
   const pending = new WeakMap();
 
@@ -55,7 +70,7 @@ function asyncValiator (displayName, child, opts) {
     if (previous && _.isFunction(previous)) previous();
 
     // Create a unique reference for the
-    // cancel function returned from validator
+    // cancel function returned from validate
     const request = {};
 
     // Update the state
@@ -63,7 +78,7 @@ function asyncValiator (displayName, child, opts) {
 
     // Validate the updated value
     const done = dispatch.using($VALIDATE, request, value);
-    const cancel = opts.validate({ ...state, value }, done);
+    const cancel = validate({ ...state, value }, done);
 
     pending.set(request, cancel);
   }
@@ -90,7 +105,10 @@ function asyncValiator (displayName, child, opts) {
     },
 
     update: {
-      [UPDATE]: (state, { value, request }) => ({ ...state, value, request }),
+      [UPDATE]: (state, { value, request }) => ({
+        // Store the latest value and request in the state
+        ...state, value, request
+      }),
 
       [VALIDATE]: (state, { checked, result }) => {
         // If validation finishes after another change
@@ -111,21 +129,15 @@ function asyncValiator (displayName, child, opts) {
       const { state, dispatch } = props;
 
       const childProps = {
-        // Copy over some validation related properties from state
-        error: state.error,
-        warning: state.warning,
-        isDirty: state.isDirty,
-
-        // Allow the parent components to override validation
-        // properties, if needed
         ...props,
-
         // Unwrap the child state
         state: state.value,
-
         // Receive all child actions using $UPDATE action creator
         dispatch: dispatch.from($UPDATE, state)
       };
+
+      // Add validation state to child props, if requested
+      setPath(childProps, propsPath, state);
 
       return child.view(childProps, ...args);
     }
@@ -133,6 +145,10 @@ function asyncValiator (displayName, child, opts) {
 }
 
 export function checkable (displayName, comp, opts) {
+  _.defaults(opts, {
+    validate: _.noop
+  });
+
   if (opts.validate.length < 2) {
     return syncValiator(displayName, comp, opts);
   }

@@ -4,7 +4,7 @@ import cfg from '../eslint';
 module.exports = merge(cfg, {
   plugins: [...cfg.plugins, 'react'],
   globals: {
-    React: true
+    React: false
   },
   env: {
     browser: true

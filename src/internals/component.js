@@ -1,3 +1,4 @@
+import { createElement } from 'react';
 import _ from 'lodash';
 import { addStyles } from './stylesheet';
 import { updateStrategy } from './updaters';
@@ -59,29 +60,29 @@ export function combineComponents (displayName, components) {
         state: _.get(state, index)
       }));
 
-      return React.createElement('div', {
+      return createElement('div', {
         className: classes.container,
         style: styles.container,
       }, ...views);
     },
 
-    getViews ({ state, dispatch }) {
+    with ({ state, dispatch }) {
       function partiallyApplied (child, index) {
         const childProps = {
           state: _.get(state, index),
           dispatch: dispatch.using($PAYLOAD, index),
         };
 
-        function render (moreProps, ...args) {
+        function view (moreProps, ...args) {
           return child.view(
             { ...childProps, ...moreProps },
             ...args
           );
         }
 
-        render.displayName = `${displayName}-${child.displayName}-${index}`;
+        view.displayName = `${displayName}-${child.displayName}-${index}`;
 
-        return render;
+        return { view };
       }
 
       return _.map(components, partiallyApplied);
