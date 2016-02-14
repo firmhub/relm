@@ -11,12 +11,7 @@ const container = document.createElement('div');
 const Wrapper = {
   view () {
     return (
-      // Create a react element using the
-      // FancyGreeting's view; notice we are
-      // not passing the full component to react;
-      // just the view function plus the props we
-      // want to pass
-      <FancyGreeting.view name={'Bob'} />
+      <FancyGreeting name={'Bob'} />
     );
   }
 };

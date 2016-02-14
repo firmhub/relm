@@ -58,12 +58,7 @@ const container = document.createElement('div');
 const Wrapper = {
   view () {
     return (
-      // Create a react element using the
-      // FancyGreeting's view; notice we are
-      // not passing the full component to react;
-      // just the view function plus the props we
-      // want to pass
-      <FancyGreeting.view name={'Bob'} />
+      <FancyGreeting name={'Bob'} />
     );
   }
 };
@@ -74,12 +69,12 @@ startApp(container, Wrapper);
 
 document.body.appendChild(container);
 ```
-Let's discuss what is going on inside the Wrapper's view function. The `jsx` element `<FancyGreeting.view name={'Bob'} />` will compile into the following javascript:
+Let's discuss what is going on inside the Wrapper's view function. The `jsx` element `<FancyGreeting name={'Bob'} />` will compile into the following javascript:
 
 ```javascript
 FancyGreeting.view({ name: 'Bob' });
 ```
-It is basically just a function call with an object as the first argument. This bit of explanation is necessary since we are using jsx to write our examples. If we were not using jsx, or for example we were using `mithril` as our view layer, then we would simply write out the function call ourselves.
+It is just a function call with an object as the first argument. This bit of explanation is necessary since we are using jsx to write our examples. If we were not using jsx, or for example we were using `mithril` as our view layer, then we would simply write out the function call ourselves.
 
 To recap, we call the `FancyGreeting.view` function with an object and it returns the view contents. These contents are then get rendered from insider our `Wrapper`.
 

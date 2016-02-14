@@ -21,7 +21,7 @@ Finally, notice we have an additional property called `styles`. We have simply m
 
 ### Textbox
 
-There are a few changes inside `textbox.js`. Again we are passing our init, update, and view functions to a `component` call instead of exporting them individually. We are also using arrow functions for init and view to make them look a little cleaner.
+There are a few changes inside `textbox.js`; similar to the `fancy-greeting` component, our textbox now accepts custom styles. We are again passing our init, update, and view functions to a `component` call instead of exporting them individually. We are also using arrow functions for init and view to make them look a little cleaner.
 
 ##### Action creator and `dispatch.using`
 

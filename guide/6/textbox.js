@@ -13,12 +13,13 @@ export default component('Textbox', {
     [CHANGE]: (state, action) => action.value
   },
 
-  view: ({ dispatch, state }) => (
+  view: ({ dispatch, state, styles }) => (
     <div>
       <label style={{ display: 'block' }}>
         Enter your name
       </label>
       <input
+        style={styles.input}
         onChange={dispatch.using($CHANGE)}
         type='text'
         value={state}

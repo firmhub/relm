@@ -45,7 +45,7 @@ export default relm.component('FancyForm', {
 
       background: '#eeeeee',
       borderRadius: '4px',
-      boxShadow: '2px 2px 8px -2px #9e9e9e'
+      boxShadow: '2px 2px 8px -2px #9e9e9e',
     },
 
     textbox: {

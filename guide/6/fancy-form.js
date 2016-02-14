@@ -23,12 +23,13 @@ export default relm.component('FancyForm', {
 
   view: ({ state, dispatch, styles }) => (
     <form style={styles.container}>
-      <FancyGreeting.view
+      <FancyGreeting
         name={state.name}
         styles={{ heading: styles.greeting }}
       />
 
-      <Textbox.view
+      <Textbox
+        styles={{ input: styles.textbox }}
         dispatch={dispatch.using($TEXTBOX_ACTION)}
         state={state.name}
       />
@@ -45,6 +46,13 @@ export default relm.component('FancyForm', {
       background: '#eeeeee',
       borderRadius: '4px',
       boxShadow: '2px 2px 8px -2px #9e9e9e'
+    },
+
+    textbox: {
+      display: 'block',
+      padding: '0.5rem',
+      width: '100%',
+      boxSizing: 'border-box'
     },
 
     greeting: {

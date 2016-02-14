@@ -33,9 +33,9 @@ export function view ({ state, dispatch }) {
 
   return (
     <form>
-      <FancyGreeting.view name={state.name} />
+      <FancyGreeting name={state.name} />
 
-      <Textbox.view
+      <Textbox
         dispatch={handleTextboxAction}
         state={state.name}
       />
