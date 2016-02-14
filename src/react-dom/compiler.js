@@ -14,14 +14,16 @@ import {
 function compiler (opts, mode = 'development') {
   const ext = mode === 'production' ? 'min.js' : 'js';
   const nodeModules = resolve(__dirname, '../node_modules');
-  const React = resolve(nodeModules, `react/dist/react-with-addons.${ext}`);
-  const ReactDOM = resolve(nodeModules, `react-dom/dist/react-dom.${ext}`);
+  const React = resolve(nodeModules, `react/dist/react.${ext}`);
+
+  const pragma = opts.jsx || 'dom';
 
   _.merge(opts, {
-    // Make react a global variable in all modules
     globals: {
-      React: 'react'
+      [pragma]: resolve(__dirname, './pragma.js')
     },
+
+    jsx: pragma,
 
     // Compile js/jsx
     loaders: (opts.loaders || []).concat({
@@ -29,8 +31,12 @@ function compiler (opts, mode = 'development') {
       exclude: /(node_modules)/,
       loader: 'babel',
       query: {
-        presets: [ 'es2015', 'react' ],
-        plugins: [ 'lodash' ]
+        presets: [ 'es2015' ],
+        plugins: [
+          'lodash',
+          'syntax-jsx',
+          ['transform-react-jsx', { pragma }],
+        ]
       }
     })
   });
@@ -53,14 +59,9 @@ function compiler (opts, mode = 'development') {
       extensions: [ '', '.js', '.jsx' ],
       alias: {
         'react': React,
-        'react-dom': ReactDOM
       }
     },
     externals: {
-      // Alias react plugins in case some dependencies need them
-      'react-addons-css-transition-group': 'React.addons.CSSTransitionGroup',
-      'react-addons-transition-group': 'React.addons.TransitionGroup',
-      'react-addons-update': 'React.addons.update',
     }
   });
 }
