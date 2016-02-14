@@ -23,40 +23,68 @@ export function component (displayName, src) {
   return { ...src, displayName, init, update, view };
 }
 
+component.is = function isComponent (x) {
+  return Boolean(x) && _.isFunction(x.view);
+};
+
 export function combineComponents (displayName, components) {
+  const PAYLOAD = `${displayName}/payload`;
+
+  function $PAYLOAD (index, payload) {
+    return { type: PAYLOAD, index, payload };
+  }
+
   return component(displayName, {
     init () {
       return _.map(components, it => it.init());
     },
 
-    update (state, { index, payload }) {
-      const previous = _.get(state, index);
-      const updated = components[index].update(previous, payload);
-      if (updated === previous) return state;
+    update: {
+      [PAYLOAD]: (state, { index, payload }) => {
+        const previous = _.get(state, index);
+        const updated = components[index].update(previous, payload);
+        if (updated === previous) return state;
 
-      const clone = _.clone(state);
-      clone.splice(index, 1, updated);
-      return clone;
+        const clone = _.clone(state);
+        clone.splice(index, 1, updated);
+        return clone;
+      }
     },
 
-    view (props) {
-      const { state, dispatch } = props;
-      return _.map(components, (it, index) => it.view({
-        ...props,
-        dispatch: dispatch.payload({ index }),
+    view ({ state, dispatch, classes, styles }) {
+      const views = _.map(components, (child, index) => child.view({
+        classes: classes[index] || {},
+        styles: styles[index] || {},
+        dispatch: dispatch.using($PAYLOAD, index),
         state: _.get(state, index)
       }));
+
+      return React.createElement('div', {
+        className: classes.container,
+        style: styles.container,
+      }, ...views);
     },
 
-    partial ({ state, dispatch }) {
-      return _.map(components, (it, index) => (props, ...args) =>
-        it.view({
-          key: index,
+    getViews ({ state, dispatch }) {
+      function partiallyApplied (child, index) {
+        const childProps = {
           state: _.get(state, index),
-          dispatch: dispatch.payload({ index }),
-          ...props
-        }, ...args)
-      );
+          dispatch: dispatch.using($PAYLOAD, index),
+        };
+
+        function render (moreProps, ...args) {
+          return child.view(
+            { ...childProps, ...moreProps },
+            ...args
+          );
+        }
+
+        render.displayName = `${displayName}-${child.displayName}-${index}`;
+
+        return render;
+      }
+
+      return _.map(components, partiallyApplied);
     }
   });
 }
