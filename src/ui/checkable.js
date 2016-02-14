@@ -1,43 +1,46 @@
 import _ from 'lodash';
 import { component } from '../internals/component';
 
-function setPath (props, propsPath, state) {
-  if (!_.isArray(propsPath)) return props;
-  if (!propsPath.length) return _.extend(props, state);
-  return _.set(props, propsPath, state);
+function setPath (props, resultPath, state) {
+  if (!_.isArray(resultPath)) return props;
+  if (!resultPath.length) return _.extend(props, state);
+  return _.set(props, resultPath, state);
 }
 
 function syncValiator (displayName, child, opts) {
-  const { propsPath, validate } = opts;
+  const { resultPath, validate } = opts;
 
   return component(displayName, {
     init (...args) {
       return {
-        value: child.init(...args),
-        error: '',
-        warning: '',
-        isDirty: false
+        childState: child.init(...args),
+        validationState: {
+          error: '',
+          warning: '',
+          isDirty: false
+        }
       };
     },
 
     update (state, action) {
-      const updated = child.update(state.value, action);
-      if (updated === state.value) return state;
+      const updatedState = child.update(state.childState, action);
+      if (updatedState === state.childState) return state;
 
-      const clone = { value: updated, isDirty: true };
-      const result = validate(clone);
-      if (!result) return clone;
+      const result = validate(updatedState) || {};
 
-      return { ...clone, ...result };
+      return {
+        childState: updatedState,
+        validationState: { ...result, isDirty: true }
+      };
     },
 
     view (props, ...args) {
-      const { state } = props;
-
-      const childProps = { ...props, state: state.value };
+      const { childState, validationState } = props.state;
 
       // Add validation state to child props, if requested
-      setPath(childProps, propsPath, state);
+      const childProps = { ...props, state: childState };
+
+      setPath(childProps, resultPath, validationState);
 
       return child.view(childProps, ...args);
     }
@@ -45,10 +48,10 @@ function syncValiator (displayName, child, opts) {
 }
 
 function asyncValiator (displayName, child, opts) {
-  const UPDATE = `${displayName}/async/request`;
-  const VALIDATE = `${displayName}/async/validate`;
+  const UPDATE = `${displayName}/checkable/request`;
+  const VALIDATE = `${displayName}/checkable/validate`;
 
-  const { propsPath } = opts;
+  const { resultPath } = opts;
   let { validate } = opts;
 
   if (opts.delay) {
@@ -60,13 +63,13 @@ function asyncValiator (displayName, child, opts) {
 
   const pending = new WeakMap();
 
-  function $UPDATE (dispatch, state, action) {
+  function $UPDATE (dispatch, { childState, validationState }, action) {
     // Get the updated value and see if it has changed
-    const value = child.update(state.value, action);
-    if (value === state.value) return;
+    const updatedState = child.update(childState, action);
+    if (updatedState === childState) return;
 
     // Abort previous request, if pending
-    const previous = pending.get(state.request);
+    const previous = pending.get(validationState.request);
     if (previous && _.isFunction(previous)) previous();
 
     // Create a unique reference for the
@@ -74,11 +77,11 @@ function asyncValiator (displayName, child, opts) {
     const request = {};
 
     // Update the state
-    dispatch({ type: UPDATE, value, request });
+    dispatch({ type: UPDATE, childState: updatedState, request });
 
-    // Validate the updated value
-    const done = dispatch.using($VALIDATE, request, value);
-    const cancel = validate({ ...state, value }, done);
+    // Validate the updated childState
+    const done = dispatch.using($VALIDATE, request, updatedState);
+    const cancel = validate(updatedState, done);
 
     pending.set(request, cancel);
   }
@@ -97,47 +100,53 @@ function asyncValiator (displayName, child, opts) {
   return component(displayName, {
     init (...args) {
       return {
-        value: child.init(...args),
-        error: '',
-        warning: '',
-        isDirty: false,
+        childState: child.init(...args),
+        validationState: {
+          error: '',
+          warning: '',
+          isDirty: false,
+          isPending: false
+        }
       };
     },
 
     update: {
-      [UPDATE]: (state, { value, request }) => ({
-        // Store the latest value and request in the state
-        ...state, value, request
+      [UPDATE]: (state, { childState, request }) => ({
+        childState,
+        validationState: {
+          ...state.validationState,
+          isPending: true,
+          isDirty: true,
+          request
+        }
       }),
 
       [VALIDATE]: (state, { checked, result }) => {
         // If validation finishes after another change
         // has already occured, we ignore it
-        if (checked !== state.value) return state;
+        if (checked !== state.childState) return state;
 
-        // Update the state; take the object provided
-        // by the validation function (ex, with error or
-        // warning), then add the checked value to it
-        // This will be the new state of the control
-        result.value = checked;
+        result.isPending = false;
         result.isDirty = true;
-        return result;
+
+        return {
+          childState: checked,
+          validationState: result
+        };
       }
     },
 
     view (props, ...args) {
-      const { state, dispatch } = props;
+      const { dispatch, state } = props;
+      const { childState, validationState } = state;
 
       const childProps = {
         ...props,
-        // Unwrap the child state
-        state: state.value,
-        // Receive all child actions using $UPDATE action creator
+        state: childState,
         dispatch: dispatch.from($UPDATE, state)
       };
 
-      // Add validation state to child props, if requested
-      setPath(childProps, propsPath, state);
+      setPath(childProps, resultPath, validationState);
 
       return child.view(childProps, ...args);
     }
