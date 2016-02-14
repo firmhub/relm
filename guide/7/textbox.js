@@ -6,6 +6,29 @@ function $CHANGE (event) {
   return { type: CHANGE, value: event.target.value };
 }
 
+function errorMessage ({ styles, isDirty, error }) {
+  if (!isDirty || !error) return null;
+  return (
+    <div style={styles.error}>{error}</div>
+  );
+}
+
+function warningMessage ({ styles, isDirty, error, warning }) {
+  if (!isDirty || !warning) return null;
+  if (error) return null;
+  return (
+    <div style={styles.warning}>{warning}</div>
+  );
+}
+
+function validMessage ({ styles, isDirty, error, warning }, message) {
+  if (!isDirty) return null;
+  if (error || warning) return null;
+  return (
+    <span style={styles.valid}>{message}</span>
+  );
+}
+
 export default component('Textbox', {
   init: (value = '') => value,
 
@@ -13,17 +36,50 @@ export default component('Textbox', {
     [CHANGE]: (state, action) => action.value
   },
 
-  view: ({ dispatch, state, styles }) => (
-    <div>
-      <label style={{ display: 'block' }}>
-        Enter your name
-      </label>
-      <input
-        style={styles.input}
-        onChange={dispatch.using($CHANGE)}
-        type='text'
-        value={state}
-      />
-    </div>
-  )
+  view (props) {
+    const {
+      dispatch,
+      state,
+      styles,
+      label = 'Textbox',
+      placeholder = 'Type here...',
+    } = props;
+
+    return (
+      <div>
+        <label style={{ display: 'block' }}>
+          {label}
+          {validMessage(props, 'OK')}
+        </label>
+        <input
+          style={styles.input}
+          onChange={dispatch.using($CHANGE)}
+          type='text'
+          placeholder={placeholder}
+          value={state}
+        />
+        {errorMessage(props)}
+        {warningMessage(props)}
+      </div>
+    );
+  },
+
+  styles: {
+    input: {
+      display: 'block',
+      padding: '0.5rem',
+      width: '100%',
+      boxSizing: 'border-box'
+    },
+    valid: {
+      color: 'green',
+      float: 'right'
+    },
+    error: {
+      color: 'red'
+    },
+    warning: {
+      color: 'orange'
+    }
+  }
 });

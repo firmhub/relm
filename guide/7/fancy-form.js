@@ -1,37 +1,23 @@
 import relm from 'relm';
 import FancyGreeting from './fancy-greeting';
-import Textbox from './textbox';
-
-const TEXTBOX_ACTION = 'form/textbox_action';
-
-function $TEXTBOX_ACTION (childAction) {
-  return { type: TEXTBOX_ACTION, payload: childAction };
-}
+import UsernameTextbox from './username-textbox';
 
 export default relm.component('FancyForm', {
-  init: () => ({
-    name: Textbox.init()
-  }),
-
-  update: {
-    [TEXTBOX_ACTION]: {
-      statePath: ['name'],
-      actionPath: ['payload'],
-      updateHandler: Textbox.update
-    }
-  },
-
+  init: UsernameTextbox.init,
+  update: UsernameTextbox.update,
   view: ({ state, dispatch, styles }) => (
     <form style={styles.container}>
       <FancyGreeting
-        name={state.name}
+        name={state.childState}
         styles={{ heading: styles.greeting }}
       />
 
-      <Textbox
+      <UsernameTextbox
         styles={{ input: styles.textbox }}
-        dispatch={dispatch.using($TEXTBOX_ACTION)}
-        state={state.name}
+        label='Username'
+        placeholder='Your github username'
+        dispatch={dispatch}
+        state={state}
       />
     </form>
   ),
@@ -45,14 +31,7 @@ export default relm.component('FancyForm', {
 
       background: '#eeeeee',
       borderRadius: '4px',
-      boxShadow: '2px 2px 8px -2px #9e9e9e',
-    },
-
-    textbox: {
-      display: 'block',
-      padding: '0.5rem',
-      width: '100%',
-      boxSizing: 'border-box'
+      boxShadow: '2px 2px 8px -2px #9e9e9e'
     },
 
     greeting: {
