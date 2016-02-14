@@ -6,6 +6,29 @@ function $CHANGE (event) {
   return { type: CHANGE, value: event.target.value };
 }
 
+function errorMessage ({ styles, error }) {
+  if (!error) return null;
+  return (
+    <div style={styles.error}>{error}</div>
+  );
+}
+
+function warningMessage ({ styles, error, warning }) {
+  if (!warning) return null;
+  if (error) return null;
+  return (
+    <div style={styles.warning}>{warning}</div>
+  );
+}
+
+function validMessage ({ styles, error, warning, isDirty }, message) {
+  if (!isDirty) return null;
+  if (error || warning) return null;
+  return (
+    <span style={styles.valid}>{message}</span>
+  );
+}
+
 export default component('Textbox', {
   init: (value = '') => value,
 
@@ -13,52 +36,44 @@ export default component('Textbox', {
     [CHANGE]: (state, action) => action.value
   },
 
-  view ({
-    dispatch,
-    state,
-    styles,
-    error,
-    warning,
-    isDirty,
-    label = 'Textbox',
-    placeholder = 'Type here...',
-  }) {
-    const hasError = Boolean(error);
-    const hasWarning = Boolean(warning);
-
-    const errorMessage = !hasError ? null : (
-      <div style={styles.error}>{error}</div>
-    );
-
-    const warningMessage = (hasError || !hasWarning) ? null : (
-      <div style={styles.warning}>{warning}</div>
-    );
-
-    const validMessage = (!isDirty || hasError || hasWarning) ? null : (
-      <span style={styles.valid}>{': OK'}</span>
-    );
+  view (props) {
+    const {
+      dispatch,
+      state,
+      styles,
+      label = 'Textbox',
+      placeholder = 'Type here...',
+    } = props;
 
     return (
       <div>
         <label style={{ display: 'block' }}>
           {label}
-          {validMessage}
+          {validMessage(props, 'OK')}
         </label>
         <input
+          style={styles.input}
           onChange={dispatch.using($CHANGE)}
           type='text'
           placeholder={placeholder}
           value={state}
         />
-        {errorMessage}
-        {warningMessage}
+        {errorMessage(props)}
+        {warningMessage(props)}
       </div>
     );
   },
 
   styles: {
+    input: {
+      display: 'block',
+      padding: '0.5rem',
+      width: '100%',
+      boxSizing: 'border-box'
+    },
     valid: {
-      color: 'green'
+      color: 'green',
+      float: 'right'
     },
     error: {
       color: 'red'

@@ -1,116 +1,180 @@
-# You kids and your gizmos
-> __relm guide__: Tutorial no. 6 - Developer tools
+# Some things take time
+> __relm guide__: Tutorial no. 8 - Async actions
 
-This tutorial will function as an intermission of sorts; instead of adding more features to our application, we will explain some of the developer tools integrated in `relm`, the technologies that power them and how to use them.
+So far throughout this guide, we have only dealt with simple synchronous actions; meaning we make a change and it has effect right away and we do not have to deal with delays, blocking, etc. In real applications, this will not often be the case; we will often have to request information from the server, send it over http and wait for a response and then update our app.
 
-##### Behind the scenes
+These types of calls, called asynchronous or async calls bring their on complexity, but here is the gist of how they are handled in relm, step by step:
 
-Internally, relm uses a module bundler called `webpack`. Webpack allows us to covert code that we write with imports, jsx, etc. into code that can run in browsers (even older ones supporting only ES5). Running webpack can be a bit of challenge for starters, so for ease of use, relm provides the `relm-compile` command, which triggers webpack to do the following:
+1. request is made - we dispatch an action indicating we started a request; the state is updated to say a request is pending (for example, to show a loading icon)
+2. we wait for the response - nothing to do
+3. request comes back positive - we dispatch an action to update our state with the response
+4. request is a failure - we dispatch an action to update our state with an error message or some other indication
 
-*	compile all `js` and `jsx` files to plain ES5 file using `babel`
-* bundle all modules - separating common modules into a separate file if necessary
-* creating `html` files to run the javascript files as a webpage  
-* depending on the options used provide `React` or `mithril` as a global in all files so you do not need them in each module
-* copy any assets you specify into the build folder
-* reduce file size using minification and `babel-plugin-lodash`
+The idea is that each step should be represented by a separate action which may or may not have an impact on our application.
 
-There is also a `--watch` flag which can be added to the `relm-compile` command, which will start the build process in a continuous build mode. This will do the following:
+To demonstrate an async call, we will updating our `UsernameTextbox`. We can imagine that we may need to use this textbox on a login screen. Let's say when a user enters his username, we want to check if the user exists. If he does, then we display his full name to greet him and if not, we show an error message.
 
-* Run the `webpack-dev-server` which will server the built files on a local server. These files update and refresh the browser automatically so you can change your code and see the results instantly. Internally it uses a feature called "module hot reloading".
-* Run `redux-devtools` so you can see state changes and dispatched actions in your application
+### UsernameTextbox
 
-There are a lot of technologies and buzzwords mentioned above. You don't have to understand everything to get started with `relm` but as you app gets more complex, you may want to start customizing or re-implementing these to suit your work flow and use case.
+In this file, we have removed our `checkable` function from the previous example and instead we are using the `checkable` function provided by `relm/ui`. This function is very similar to what we had before, just with more features, which we will see below.
 
-Also, keep in mind these are all provided for developer convenience, so if there is something you would like to see included, feel free to request it or create a pull request to add it. There is a good chance others are also having similar difficulties.
-
-##### Using relm-compile
-
-The build itself is configured through the `package.json` file. To use it, first ensure that `relm` is installed and then use `relm-compile` with npm scripts. The package.json for this tutorial can look like this:
+First let's see how our validate function has changed:
 
 ```javascript
-{
-  //...
-  "scripts": {
-    "build": "relm-compile",
-    "watch": "relm-compile --watch",
-  },
-  "dependencies": {
-    "relm": "*"
-  },
-  "relm-compile-settings": {
-    // your settings go here
+validate (username, done) {
+  // Perform basic validation
+  if (!username) {
+    return done({ warning: 'Username is required' });
   }
-  //...
+
+  if (username.length < minLength) {
+    return done({ error: 'Username is too short (minimum 5 characters)' });
+  }
+
+  // Now for some more advanced stuff; check github
+  // to see if username exists
+  const req = request
+    .get(`https://api.github.com/users/${username}`)
+    .end(function handleResponse (err, res) {
+      if (err) {
+        // If a 404 error, then we have a special error message
+        if (res.notFound) return done({ error: 'Username not found' });
+
+        // For all other errors, show generic error message
+        return done({ error: res.statusText || err.message });
+      }
+
+      // No error, means a username exists
+      done({ fullName: res.body.name });
+    });
+
+  return function cancel () {
+    req.abort();
+  };
 }
-```  
-The above scripts can be run from the terminal using `npm run build` or `npm run watch`.
+```
+The top part of the function is the same, in that we still receive the textbox state as our first argument, but to mark our validation function as being asynchronous, we now declare a second argument `done` which let's relm know to ignore the function's return value and instead wait for anything we provide to the `done` callback.
 
-The property `relm-compile-settings` can be omitted if you have nothing to change. By default, `relm` will look for an entry file called `index.js` in the current directory and build the files into a `build` directory. Refer to the [API documentation](#TODO) to see what options are available.
+In the validation function after the basic validation passes, we use the `superagent` library to make a request to `api.github.com` (for demonstration purposes, you can use your own backend) to verify that the user exists. Then based on the response, we call `done` again with the appropriate validation state object.
 
-##### Output as a component
+Two more things to note here:
 
+1. Our validation result can be any object; it is not limited to errors and warnings. In this case, we store the `fullName` of the user as provided by github; we later use this property in our `fancy-form` view to display the user's name once validated as such:
+```javascript
+  <FancyGreeting
+    name={state.validationState.fullName || state.childState}
+    styles={{ heading: styles.greeting }}
+  />
+```
+2. The return value from an async validate function is a cancel function. `checkable` will call this function if the state changes before the request completes. In this case, we use this function to cancel our request to the api.
 
+### checkable async implementation
 
-##### Hot reloading
+Above we say how an async validator works, but we still need to know how the async state changes are handled. You can see the implmentation in [`src/ui/checkable`](#TODO). Internally when `checkable` receives an async validate function, it creates two action types `UPDATED` and `VALIDATED` and their corresponding action creators.
 
-If you run the `watch` script above, you will get the benefit of you browser refreshing on each change you make in your source code. This should be sufficient in most cases, however, it also means you lose all application state on each refresh.
+* `UPDATED` is used to indicate that the child state updated and we should make a validate request
+* `VALIDATED` indicates that a response to the validation request was received
 
-This can be inconvenient in certain scenarios when working with stateful components such as forms where you want to keep the data you entered. In that case you can use something called `hot module replacement` to refresh the application while keeping the state intact. This is a little bit more work.
-
-###### Step 1 - Start dev server in hot mode
-
-Use the `--hot` flag along with `--watch` in order to load the development server with hot module replacement enabled. The command will look like this:
+This is what the action creators look like:
 
 ```javascript
-"watch" : "relm-compile --watch --hot"
-```   
+function $UPDATED (dispatch, state, action) {
+  const { childState, validationState } = state;
 
-###### Step 2 - Listen for updates in the entry file
+  // Get the updated value and see if it has changed
+  const updatedState = child.update(childState, action);
+  if (updatedState === childState) return;
 
-In the entry file (in this case `index.js`), you need to add additional code which tells `relm` to reload the top level component as such:
+  // Abort previous request, if pending
+  const previous = pending.get(validationState.request);
+  if (previous && _.isFunction(previous)) previous();
 
-```javascript
+  // Create a unique reference for this request
+  const request = { /* empty object */ };
 
-import { startApp } from 'relm/react-dom';
-import FancyForm from './fancy-form';
+  // Update the state
+  dispatch({ type: UPDATED, childState: updatedState, request });
 
-const container = document.createElement('div');
-document.body.appendChild(container);
+  // Validate the updated childState
+  const done = dispatch.using($VALIDATED, request, updatedState);
+  const cancel = validate(updatedState, done);
 
-const app = startApp(container, FancyForm);
-
-// Hot module reloading
-if (module.hot) {
-  module.hot.accept('./fancy-form', function asdasd () {
-    const updatedComponent = require('./fancy-form').default;
-    app.hotReload(updatedComponent);
-  });
+  // Save the request reference and cancel fn
+  pending.set(request, cancel);
 }
 
 ```
-Until now, we have only called the `startApp` function and not cared about its return value. Here we see that it returns an object called `app`. This `app` object has a method called `hotReload` which does exactly what we need.
+You can see all of the steps we have previously discussed. When the request completes, it is handled using `$VALIDATED` as follows:
 
-The remaining code is required by webpack's hot module replace functionality. We effectively attach an event listener to the `fancy-form` module, which is our top level component and every time it change, we `require` it again and pass the updated component to `app.hotReload`.
+```javascript
+function $VALIDATED (request, checked, result = {}) {
+  // Clear reference to completed request
+  pending.delete(request);
 
-This will cause `relm` to replace the `update` and `view` functions and re-render the application.
-
-###### Step 3 - Presist state across build failures
-
-Finally, there is one peculiarity that has to do with how webpack behaves in hot mode if a build fails. In hot mode, if the build fails, due to for example a syntax error, on the next successful build, webpack will do a full refresh instead of just a hot reload. This can cause you to lose the state of the application.
-
-In order to workaround this, `relm` adds a recovery mechanism for the state, which is to save the state in local storage and then even on a full refresh, state can be recovered.
-
-In order to use this feature, you need to provide a url parameter called `debug_session`; for example:
-
+  return {
+    type: VALIDATED,
+    checked,
+    result,
+  };
+}
 ```
-http://localhost:8080/index.html?debug_session=my_session
+The `update` function is then responsible from updating the `childState` and `validatedState` as a response of these actions, as follows:
+
+```javascript
+update: {
+  [UPDATED]: (state, { childState, request }) => ({
+    childState,
+    validationState: {
+      ...state.validationState,
+      isPending: true,
+      isDirty: true,
+      request
+    }
+  }),
+
+  [VALIDATED]: (state, { checked, result }) => {
+    // If validation finishes after another change
+    // has already occured, we ignore it
+    if (checked !== state.childState) return state;
+
+    result.isPending = false;
+    result.isDirty = true;
+
+    return {
+      childState: checked,
+      validationState: result
+    };
+  }
+},
 ```
-This will let relm know to save your state to local storage using the key `my_session` and the next time the browser visits the same url (example after a refresh), it will reload the state that was previously saved.
 
-### Recap
+### `dispatch.from`
 
-We learned about the `relm-compile` command and how we can use it to build our source code into backwards compatible applications. We also learned about the develpment server that can help you write your application faster.
+The starting point for all of the above work is `$UPDATED`. Everytime it receives an action, it does a bunch of work and then calls `$VALIDATED` if needed. It is itsef used inside the `checkable`'s wrapped view as follows:
 
-We also explored an advanced feature called hot module replacement to help in some development scenarios.
+```javascript
+view (props, ...args) {
+  const { dispatch, state } = props;
 
-That's it for now. Hopefully you have a better understanding of the development tools provided by default in relm and they have made your life a bit easier.
+  return child.view({
+    ...props,
+    state: state.childState,
+    dispatch: dispatch.from($UPDATED, state)
+  }, ...args);
+}
+```
+The key item is the dispatch property that we are passing to our `child.view` (textbox in this case).
+
+It uses a helper method `dispatch.from` to pass incoming actions to `$UPDATED`. `dispatch.from` works similar to `dispatch.using` which we have seen before but instead of dispatching the return values from the action creator, it passes `dispatch` to it directly and let's it dispatch actions asyncronously.
+
+The above line is the same as writing the following (except some internal optimizations made by relm):
+
+```javascript
+  dispatch: (action) => $UPDATE(dispatch, state, action)
+```
+
+## Recap
+
+That was a lot to cover, and hopefully looking at a practical example made the idea clear to you. Basically it boils down to this; when performing async work, dispatch an action to indicate start of the request and then dispatch an action indicating the end of it.
+
+If this is still confusing for you, please feel free to make an issue in the github repo. This is a difficult concept and I don't know whether I have explained it well.

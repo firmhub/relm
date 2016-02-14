@@ -1,4 +1,3 @@
-import { component, combineComponents } from 'relm';
 import { checkable } from 'relm/ui';
 import request from 'superagent';
 
@@ -6,14 +5,10 @@ import Textbox from './textbox';
 
 const minLength = 5;
 
-const UsernameTextbox = checkable('UsernameTextbox', Textbox, {
+export default checkable('UsernameTextbox', Textbox, {
   delay: 500,
-  propsPath: [],
-  validate: function validateUsername (state, done) {
-    // The Textbox's state gets wrapped by checkable
-    // It is available at the `value` property
-    const username = state.value;
-
+  resultPath: [],
+  validate: function validateUsername (username, done) {
     // Perform some basic validation
     if (!username) {
       return done({ warning: 'Username is required' });
@@ -37,39 +32,11 @@ const UsernameTextbox = checkable('UsernameTextbox', Textbox, {
         }
 
         // No error, means a username exists
-        done({ match: res.body });
+        done({ fullName: res.body.name });
       });
 
     return function cancel () {
       req.abort();
     };
-  }
-});
-
-const LoginFields = combineComponents('LoginFields', [
-  UsernameTextbox,
-  Textbox,
-]);
-
-export default component('LoginForm', {
-  init: LoginFields.init,
-  update: LoginFields.update,
-  view (props) {
-    const [ Username, Password ] = LoginFields.with(props);
-
-    return (
-      <div className={props.classes.container}>
-        <Username label='Username' />
-        <Password label='Password' />
-      </div>
-    );
-  },
-
-  classes: {
-    container: {
-      padding: '2rem',
-      background: '#cecece',
-      margin: '2rem auto'
-    }
   }
 });
