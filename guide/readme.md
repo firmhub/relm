@@ -54,15 +54,23 @@ Explore the tools provided by relm to help convert your code that can be used in
 
 --------
 
-#### #7 [Validations and async actions](#TODO)
+#### #7 [Higher order components](#TODO)
 
-Learn a pattern which lets us wrap components to do some extend their functionality. Our basic textbox will be enhanced to perform simple and some advanced validations every time the user types something.
+Learn a pattern which lets us wrap components to extend their functionality. We will use a wrapper called `checkable` to perform simple validations every time the user types something into a textbox.
 
-*Introduction to: `dispatch.callback` `checkable`*
+*Introduction to: `checkable`*
 
 --------
 
-#### #8 [Combining components](#TODO)
+#### #8 [Async actions](#TODO)
+
+Extend the UsernameTextbox from previous tutorial to perform more advanced validations involving a remote server to learn how asynchronous actions are handled.
+
+*Introduction to: `dispatch.from`*
+
+--------
+
+#### #9 [Combining components](#TODO)
 
 Create a login form using the components we have created in preceeding tutorials. Since the pattern of combining components will be used frequently in our application, there is a relm helper for that purpose.  
 
