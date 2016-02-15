@@ -15,6 +15,7 @@ export default relm.component('FancyForm', {
       <UsernameTextbox
         styles={{ input: styles.textbox }}
         label='Username'
+        placeholder='Your github username'
         dispatch={dispatch}
         state={state}
       />

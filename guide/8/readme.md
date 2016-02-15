@@ -14,26 +14,32 @@ The idea is that each step should be represented by a separate action which may 
 
 To demonstrate an async call, we will updating our `UsernameTextbox`. We can imagine that we may need to use this textbox on a login screen. Let's say when a user enters his username, we want to check if the user exists. If he does, then we display his full name to greet him and if not, we show an error message.
 
+Before you continue, please make sure you understand the synchronous implementation of our `checkable` function from the previous tutorial.
+
 ### UsernameTextbox
 
-In this file, we have removed our `checkable` function from the previous example and instead we are using the `checkable` function provided by `relm/ui`. This function is very similar to what we had before, just with more features, which we will see below.
-
-First let's see how our validate function has changed:
+Most of the changes in this tutorial are in the `username-textbox` file, so we will cover that in sections. First let's see how our validate function has changed:
 
 ```javascript
 validate (username, done) {
-  // Perform basic validation
   if (!username) {
-    return done({ warning: 'Username is required' });
+    // Note: done needs to be called with the validation result
+    return done({
+      warning: 'Username is required'
+    });
   }
 
+  const minLength = 5;
   if (username.length < minLength) {
-    return done({ error: 'Username is too short (minimum 5 characters)' });
+    // Note: done called here as well
+    return done({
+      error: `Username is too short (need minimum ${minLength} characters)`
+    });
   }
 
   // Now for some more advanced stuff; check github
   // to see if username exists
-  const req = request
+  request
     .get(`https://api.github.com/users/${username}`)
     .end(function handleResponse (err, res) {
       if (err) {
@@ -47,15 +53,11 @@ validate (username, done) {
       // No error, means a username exists
       done({ fullName: res.body.name });
     });
-
-  return function cancel () {
-    req.abort();
-  };
 }
 ```
 The top part of the function is the same, in that we still receive the textbox state as our first argument, but to mark our validation function as being asynchronous, we now declare a second argument `done` which let's relm know to ignore the function's return value and instead wait for anything we provide to the `done` callback.
 
-In the validation function after the basic validation passes, we use the `superagent` library to make a request to `api.github.com` (for demonstration purposes, you can use your own backend) to verify that the user exists. Then based on the response, we call `done` again with the appropriate validation state object.
+In the validation function after the basic validation passes, we use the `superagent` library to make an http request to `api.github.com` (for demonstration purposes we will assume that if a user exists on github, he is considered valid). Based on the response from github, we call `done` with the appropriate validation object.
 
 Two more things to note here:
 
@@ -68,104 +70,99 @@ Two more things to note here:
 ```
 2. The return value from an async validate function is a cancel function. `checkable` will call this function if the state changes before the request completes. In this case, we use this function to cancel our request to the api.
 
-### checkable async implementation
+### checkable function
 
-Above we say how an async validator works, but we still need to know how the async state changes are handled. You can see the implmentation in [`src/ui/checkable`](#TODO). Internally when `checkable` receives an async validate function, it creates two action types `UPDATED` and `VALIDATED` and their corresponding action creators.
+In the asynchronous version of our `checkable` function we need multiple
+actions so we have some action types defined at the top:
 
-* `UPDATED` is used to indicate that the child state updated and we should make a validate request
-* `VALIDATED` indicates that a response to the validation request was received
+* `UPDATE` is used to indicate that the child state updated and we should make a validate request
+* `VALIDATE` indicates that a response to the validation request was received
 
 This is what the action creators look like:
 
 ```javascript
-function $UPDATED (dispatch, state, action) {
-  const { childState, validationState } = state;
+function $UPDATE (dispatch, state, action) {
+  // Who says child.update() has to be called inside our update()
+  // function; we can call it earlier if we need to; like we do in
+  // this case
+  const updatedState = child.update(state.childState, action);
+  if (updatedState === state.childState) return state;
 
-  // Get the updated value and see if it has changed
-  const updatedState = child.update(childState, action);
-  if (updatedState === childState) return;
+  // Dispatch actions as needed here. Since we do not want the
+  // user interface to block while the validate function runs,
+  // we update the state before running the function
+  dispatch({ type: UPDATE, updatedState });
 
-  // Abort previous request, if pending
-  const previous = pending.get(validationState.request);
-  if (previous && _.isFunction(previous)) previous();
+  // Create the callback function we will provide to the validator
+  // We partially bind the updated state, since we can match
+  // the validation results to the state that was checked
+  const callbackFn = dispatch.using($VALIDATE, updatedState);
 
-  // Create a unique reference for this request
-  const request = { /* empty object */ };
-
-  // Update the state
-  dispatch({ type: UPDATED, childState: updatedState, request });
-
-  // Validate the updated childState
-  const done = dispatch.using($VALIDATED, request, updatedState);
-  const cancel = validate(updatedState, done);
-
-  // Save the request reference and cancel fn
-  pending.set(request, cancel);
+  // Let's call our user provided validation with our
+  // callback as second argument
+  opts.validate(updatedState, callbackFn);
 }
-
 ```
-You can see all of the steps we have previously discussed. When the request completes, it is handled using `$VALIDATED` as follows:
+
+When the request completes, it is handled using `$VALIDATE` as follows:
 
 ```javascript
-function $VALIDATED (request, checked, result = {}) {
-  // Clear reference to completed request
-  pending.delete(request);
-
+function $VALIDATE (checkedState, validationResult) {
+  // $VALIDATE is a simple action creator so we just
+  // return the action object
   return {
-    type: VALIDATED,
-    checked,
-    result,
+    type: VALIDATE,
+    checkedState,
+    validationResult
   };
 }
 ```
+
 The `update` function is then responsible from updating the `childState` and `validatedState` as a response of these actions, as follows:
 
 ```javascript
 update: {
-  [UPDATED]: (state, { childState, request }) => ({
-    childState,
-    validationState: {
-      ...state.validationState,
-      isPending: true,
-      isDirty: true,
-      request
-    }
+  [UPDATE]: (state, action) => ({
+    ...state,
+    childState: action.updatedState,
+    validationState: { ...state.validationState, isDirty: true }
   }),
 
-  [VALIDATED]: (state, { checked, result }) => {
-    // If validation finishes after another change
-    // has already occured, we ignore it
-    if (checked !== state.childState) return state;
+  [VALIDATE]: (state, action) => {
+    const { checkedState, validationResult } = action;
 
-    result.isPending = false;
-    result.isDirty = true;
+    // Since $VALIDATE is called asynchronously, it means
+    // that state could have been modified since we made our
+    // request. This is why we check; if we find a mismatch
+    // then we ignore this result
+    if (state.childState !== checkedState) return state;
 
     return {
-      childState: checked,
-      validationState: result
+      ...state,
+      validationState: { ...validationResult, isDirty: true }
     };
   }
-},
-```
-
-### `dispatch.from`
-
-The starting point for all of the above work is `$UPDATED`. Everytime it receives an action, it does a bunch of work and then calls `$VALIDATED` if needed. It is itsef used inside the `checkable`'s wrapped view as follows:
-
-```javascript
-view (props, ...args) {
-  const { dispatch, state } = props;
-
-  return child.view({
-    ...props,
-    state: state.childState,
-    dispatch: dispatch.from($UPDATED, state)
-  }, ...args);
 }
 ```
-The key item is the dispatch property that we are passing to our `child.view` (textbox in this case).
 
-It uses a helper method `dispatch.from` to pass incoming actions to `$UPDATED`. `dispatch.from` works similar to `dispatch.using` which we have seen before but instead of dispatching the return values from the action creator, it passes `dispatch` to it directly and let's it dispatch actions asyncronously.
+The only other change that is left now is in the `view` where we wire this whole chain up using a new helper `dispatch.from`:
+
+```javascript
+const childProps = {
+  // Same as previous example
+  ...validationState,
+  ...props,
+  state: childState,
+
+  // dispatch.from() means actions will be dispatched
+  // from the $UPDATE action creator directly rather than using
+  // the result of $UPDATE. We partially bind state so we
+  // can use it inside the $UPDATE function
+  dispatch: dispatch.from($UPDATE, state)
+};
+```
+
+As you can see, the semantics of `dispatch.from` helper used above are similar to `dispatch.using` but it is more flexible. The action handler passed to `dispatch.from` has access to the `dispatch` directly so it can dispatch actions syncronously and asynchronously.
 
 The above line is the same as writing the following (except some internal optimizations made by relm):
 
@@ -177,4 +174,6 @@ The above line is the same as writing the following (except some internal optimi
 
 That was a lot to cover, and hopefully looking at a practical example made the idea clear to you. Basically it boils down to this; when performing async work, dispatch an action to indicate start of the request and then dispatch an action indicating the end of it.
 
-If this is still confusing for you, please feel free to make an issue in the github repo. This is a difficult concept and I don't know whether I have explained it well.
+As has been the them of these tutorials, we have done all of this work as manually as possible. As we go through the rest of the guide, more helpers will be introduced to help streamline the process as much as possible. In fact, there is a `checkable` function available in the `relm/ui` package that does everything we built in this and the previous tutorial plus some additional features. You can read the [API documentation for `checkable` here](#TODO).
+
+Now, to test out your hard work, open the example and enter a valid github username into the textbox. After a short delay, you will see the textbox get marked as `OK` and the full name (if provided) of the user will be displayed.
