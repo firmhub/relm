@@ -1,6 +1,6 @@
 import relm from 'relm';
 import request from 'superagent';
-import Textbox from './textbox';
+import Textbox from './unchanged/textbox';
 
 export function checkable (displayName, child, opts) {
   const UPDATE = 'checkable/async/updated';

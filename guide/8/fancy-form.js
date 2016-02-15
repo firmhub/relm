@@ -1,5 +1,5 @@
 import relm from 'relm';
-import FancyGreeting from './fancy-greeting';
+import FancyGreeting from './unchanged/fancy-greeting';
 import UsernameTextbox from './username-textbox';
 
 export default relm.component('FancyForm', {

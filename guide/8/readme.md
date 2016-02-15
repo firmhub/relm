@@ -170,6 +170,19 @@ The above line is the same as writing the following (except some internal optimi
   dispatch: (action) => $UPDATE(dispatch, state, action)
 ```
 
+### FancyForm
+
+There is a small change in the `fancy-form.js` file so we can display the full name of the user when a match exists, instead of just the typed in name. The revised fancy greeting tag looks like this:
+
+```javascript
+  <FancyGreeting
+    name={state.validationState.fullName || state.childState}
+    styles={{ heading: styles.greeting }}
+  />
+```
+
+In the `name` prop, we pass in the `fullName` when available.
+
 ## Recap
 
 That was a lot to cover, and hopefully looking at a practical example made the idea clear to you. Basically it boils down to this; when performing async work, dispatch an action to indicate start of the request and then dispatch an action indicating the end of it.
