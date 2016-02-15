@@ -48,8 +48,8 @@ function syncValiator (displayName, child, opts) {
 }
 
 function asyncValiator (displayName, child, opts) {
-  const UPDATE = `${displayName}/checkable/request`;
-  const VALIDATE = `${displayName}/checkable/validate`;
+  const UPDATED = `${displayName}/checkable/request`;
+  const VALIDATED = `${displayName}/checkable/validate`;
 
   const { resultPath } = opts;
   let { validate } = opts;
@@ -63,7 +63,7 @@ function asyncValiator (displayName, child, opts) {
 
   const pending = new WeakMap();
 
-  function $UPDATE (dispatch, { childState, validationState }, action) {
+  function $UPDATED (dispatch, { childState, validationState }, action) {
     // Get the updated value and see if it has changed
     const updatedState = child.update(childState, action);
     if (updatedState === childState) return;
@@ -77,21 +77,21 @@ function asyncValiator (displayName, child, opts) {
     const request = {};
 
     // Update the state
-    dispatch({ type: UPDATE, childState: updatedState, request });
+    dispatch({ type: UPDATED, childState: updatedState, request });
 
     // Validate the updated childState
-    const done = dispatch.using($VALIDATE, request, updatedState);
+    const done = dispatch.using($VALIDATED, request, updatedState);
     const cancel = validate(updatedState, done);
 
     pending.set(request, cancel);
   }
 
-  function $VALIDATE (request, checked, result = {}) {
+  function $VALIDATED (request, checked, result = {}) {
     // Clear reference to completed request
     pending.delete(request);
 
     return {
-      type: VALIDATE,
+      type: VALIDATED,
       checked,
       result,
     };
@@ -111,7 +111,7 @@ function asyncValiator (displayName, child, opts) {
     },
 
     update: {
-      [UPDATE]: (state, { childState, request }) => ({
+      [UPDATED]: (state, { childState, request }) => ({
         childState,
         validationState: {
           ...state.validationState,
@@ -121,7 +121,7 @@ function asyncValiator (displayName, child, opts) {
         }
       }),
 
-      [VALIDATE]: (state, { checked, result }) => {
+      [VALIDATED]: (state, { checked, result }) => {
         // If validation finishes after another change
         // has already occured, we ignore it
         if (checked !== state.childState) return state;
@@ -143,7 +143,7 @@ function asyncValiator (displayName, child, opts) {
       const childProps = {
         ...props,
         state: childState,
-        dispatch: dispatch.from($UPDATE, state)
+        dispatch: dispatch.from($UPDATED, state)
       };
 
       setPath(childProps, resultPath, validationState);
