@@ -6,22 +6,22 @@ function $CHANGE (event) {
   return { type: CHANGE, value: event.target.value };
 }
 
-function errorMessage ({ styles, isDirty, error }) {
-  if (!isDirty || !error) return null;
+function errorMessage ({ styles, error }) {
+  if (!error) return null;
   return (
     <div style={styles.error}>{error}</div>
   );
 }
 
-function warningMessage ({ styles, isDirty, error, warning }) {
-  if (!isDirty || !warning) return null;
+function warningMessage ({ styles, error, warning }) {
+  if (!warning) return null;
   if (error) return null;
   return (
     <div style={styles.warning}>{warning}</div>
   );
 }
 
-function validMessage ({ styles, isDirty, error, warning }, message) {
+function validMessage ({ styles, error, warning, isDirty }, message) {
   if (!isDirty) return null;
   if (error || warning) return null;
   return (
@@ -53,11 +53,11 @@ export default component('Textbox', {
           {validMessage(props, 'OK')}
         </label>
         <input
-          style={styles.input}
           onChange={dispatch.using($CHANGE)}
+          value={state}
+          style={styles.input}
           type={type}
           placeholder={placeholder}
-          value={state}
         />
         {errorMessage(props)}
         {warningMessage(props)}

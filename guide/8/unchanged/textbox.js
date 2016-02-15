@@ -42,11 +42,12 @@ export default component('Textbox', {
       state,
       styles,
       label = 'Textbox',
+      type = 'text',
       placeholder = 'Type here...',
     } = props;
 
     return (
-      <div>
+      <div style={styles.container}>
         <label style={{ display: 'block' }}>
           {label}
           {validMessage(props, 'OK')}
@@ -54,7 +55,7 @@ export default component('Textbox', {
         <input
           style={styles.input}
           onChange={dispatch.using($CHANGE)}
-          type='text'
+          type={type}
           placeholder={placeholder}
           value={state}
         />
@@ -65,6 +66,9 @@ export default component('Textbox', {
   },
 
   styles: {
+    container: {
+      margin: '1rem 0'
+    },
     input: {
       display: 'block',
       padding: '0.5rem',

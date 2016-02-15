@@ -72,6 +72,6 @@ Extend the UsernameTextbox from previous tutorial to perform more advanced valid
 
 #### #9 [Combining components](#TODO)
 
-Create a login form using the components we have created in preceeding tutorials. Since the pattern of combining components will be used frequently in our application, there is a relm helper for that purpose.  
+Create a login form using the components we have created in previous tutorials. Since the pattern of combining components will be used frequently in our application, there is a relm helper for that purpose.  
 
 *Introduction to: `combineComponents`*

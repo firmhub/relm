@@ -116,7 +116,6 @@ function asyncValiator (displayName, child, opts) {
         validationState: {
           ...state.validationState,
           isPending: true,
-          isDirty: true,
           request
         }
       }),
