@@ -19,7 +19,6 @@ node_modules/
 
 # Compiled files
 /guide/build/
-/bin/
 /mithril/
 /ui/
 /internals/
@@ -27,3 +26,4 @@ node_modules/
 /component.js
 /index.js
 /eslint.js
+/relm-compile.js

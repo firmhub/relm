@@ -1,6 +1,5 @@
 # relm
-
-Javascript framework which facilitates a component based application architecture with a focus on ease of use. It tries to reduce developer overhead by streamlining the development process and making some default choices.
+Component based application architecture
 
 ## Getting started
 
@@ -8,11 +7,11 @@ __Step 1.__ In a new folder, create a `package.json` with the following:
 
 ```json
 {
-  "name": "your package name",
+  "name": "HelloWorld",
   "version": "1.0.0",
   "scripts": {
     "build": "relm-compile",
-    "watch": "relm-compile --watch",
+    "watch": "relm-compile --watch"
   },
   "dependencies": {
     "relm": "*"
@@ -22,21 +21,20 @@ __Step 1.__ In a new folder, create a `package.json` with the following:
 __Step 2.__ Then create an `index.js` file with the following:
 
 ```javascript
+// A relm component at its most basic is an object with a view function
 const HelloWorld = {
   view: () => (
     <h1>Hello world</h1>
   )
 };
 
-// Create an element which will contain our app
+// Create an element which will contain our application
 const container = document.createElement('div');
+document.body.appendChild(container);
 
 // Render the application in the target element
 import { startApp } from 'relm/react-dom';
 startApp(container, HelloWorld);
-
-// Add the element that contains the app to the page
-document.body.appendChild(container);
 
 ```
 __Step 3.__ From the command line, go to the project directory and run the following:
@@ -45,7 +43,7 @@ __Step 3.__ From the command line, go to the project directory and run the follo
 npm install
 npm run watch
 ```
-Your application has been started in development mode; preview it by opening `http://localhost:8080/index.html` in a browser.
+Your application has been started in development mode; preview it by opening `http://localhost:8080/` in a browser.
 
 ## Features
 

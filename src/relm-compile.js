@@ -20,18 +20,18 @@ const config = _.defaults(json['relm-compile-settings'] || {}, {
   workingDir,
 
   // If source is not provided, go with main from package.json
-  entry: 'index.js',
+  entry: './index.js',
 
   // Default build dir
   outputDir: './build'
 });
 
-const compiler = require(`../${opts.framework}/compiler`);
+const compiler = require(`./${ opts.framework }/compiler`);
 
 if (opts.watch) {
   compiler.watch(config, opts.hot ? 'hot' : 'development');
 } else {
   compiler.build(config)
-    .then(() => console.log(`Build results saved to ${config.outputDir}`))
-    .then(null, (err) => console.error(err));
+    .then(() => console.log(`Build results saved to ${ config.outputDir }`))
+    .then(null, (compilationError) => console.error(compilationError));
 }

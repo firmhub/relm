@@ -1,11 +1,15 @@
 {
   "name": "relm",
-  "version": "0.5.0",
+  "version": "0.5.4",
   "description": "Component based app architecture",
   "main": "index.js",
   "scripts": {
+    "prepublish": "npm run build",
     "build": "babel src --out-dir ./",
     "watch": "npm run build; babel src --watch --out-dir ./"
+  },
+  "bin": {
+    "relm-compile": "./relm-compile.js"
   },
   "repository": {
     "type": "git",
