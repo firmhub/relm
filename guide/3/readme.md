@@ -9,7 +9,11 @@ To show how to write these stateful components, we will start just with a `textb
 
 ### Component
 
-Relm components follow [the elm architecture pattern](#TODO) for state management. This patterns has a lot of benefits for managing application state but there are also a few concepts that need to be introduced
+Relm components follow [the elm architecture pattern](#TODO) for state management. This patterns has a lot of benefits for managing application state but there are also a few concepts that need to be introduced.
+
+At a high level there are three functions, `init`, `update` and `view`. These functions work in the following pattern to manage a component's local state:
+
+[[../diagrams/state-architecture.png]]
 
 Have a glance at the code in `textbox.js` file. We will start working our way through the file and discuss each section.
 

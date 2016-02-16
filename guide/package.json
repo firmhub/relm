@@ -18,15 +18,16 @@
   "relm-compile-settings": {
     "outputDir": "./build",
     "entry": {
-      "1": "./1/index.js",
-      "2": "./2/index.js",
-      "3": "./3/index.js",
-      "4": "./4/index.js",
-      "5": "./5/index.js",
-      "6": "./6/index.js",
-      "7": "./7/index.js",
-      "8": "./8/index.js",
-      "9": "./9/index.js"
+      "1": "./1/index.js"
+    , "2": "./2/index.js"
+    , "3": "./3/index.js"
+    , "4": "./4/index.js"
+    , "5": "./5/index.js"
+    , "6": "./6/index.js"
+    , "7": "./7/index.js"
+    , "8": "./8/index.js"
+    , "9": "./9/index.js"
+    , "10": "./10/index.js"
     }
   }
 }

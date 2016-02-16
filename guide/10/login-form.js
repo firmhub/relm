@@ -3,7 +3,7 @@ import relm from 'relm';
 import FancyGreeting from './unchanged/fancy-greeting';
 import UsernameTextbox from './unchanged/username-textbox';
 import Textbox from './unchanged/textbox';
-import Checkbox from './checkbox';
+import Checkbox from './unchanged/checkbox';
 
 const LoginFields = relm.combineComponents('LoginFields', [
   UsernameTextbox,
@@ -11,18 +11,34 @@ const LoginFields = relm.combineComponents('LoginFields', [
   Checkbox,
 ]);
 
+// Serialize state; it is better to do this work here
+// so that the parent has to know less about how our form
+// stores its state
+function serialize ([ username, password, remember ]) {
+  return {
+    username: username.childState,
+    password,
+    remember
+  };
+}
+
 export default relm.component('LoginForm', {
   init: LoginFields.init,
   update: LoginFields.update,
   view (props) {
-    const { state, classes, styles } = props;
-
-    // Get the components with pre-applied props
+    // Same as before
+    const { state, classes, styles, onLogin, error } = props;
     const [ Username, Password, RememberMe ] = LoginFields.with(props);
-
-    // We will also need the username state for our fancy-greeting,
-    // so get that from the state (at index 0)
     const [ usernameState ] = state;
+
+    // New stuff; an onLogin callback and an error message, if any
+    // can be provided by the parent through the props
+    const submitForm = (event) => onLogin(serialize(state), event);
+    const errorMessage = !error ? null : (
+      <div className={classes.errorAlert}>
+        {error}
+      </div>
+    );
 
     return (
       <form className={classes.container}>
@@ -35,9 +51,12 @@ export default relm.component('LoginForm', {
         <Password label='Password' type='password' />
         <RememberMe label='Remember me' />
 
+        {errorMessage}
+
         <button
           className={classes.largeButton}
-          type='submit'>
+          type='submit'
+          onClick={submitForm}>
           Submit
         </button>
       </form>
@@ -54,6 +73,14 @@ export default relm.component('LoginForm', {
       background: '#eeeeee',
       borderRadius: '4px',
       boxShadow: '2px 2px 8px -2px #9e9e9e'
+    },
+
+    errorAlert: {
+      padding: '1rem',
+      border: '1px solid #ef9a9a',
+      borderRadius: '2px',
+      background: '#ffcdd2',
+      margin: '1rem 0',
     },
 
     largeButton: {
