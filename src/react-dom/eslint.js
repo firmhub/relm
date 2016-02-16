@@ -1,5 +1,5 @@
-import { merge } from 'lodash';
 import cfg from '../eslint';
+import { merge } from 'lodash';
 
 module.exports = merge(cfg, {
   plugins: [...cfg.plugins, 'react'],
@@ -10,8 +10,12 @@ module.exports = merge(cfg, {
     browser: true
   },
 
-  ecmaFeatures: {
-    jsx: true,
+  parserOptions: {
+    ecmaFeatures: {
+      jsx: true,
+      impliedStrict: true,
+      experimentalObjectRestSpread: true
+    }
   },
 
   rules: {

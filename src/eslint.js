@@ -1,37 +1,50 @@
 import { merge } from 'lodash';
 import cfg from 'eslint-config-strict/es6';
 
+const off = 0;
+const warn = 1;
+const on = 2;
+
 module.exports = merge(cfg, {
   root: true,
-
-  ecmaFeatures: {
-    modules: true
-  },
-
   rules: {
-    'arrow-parens': 0,
-    'array-bracket-spacing': 0,
-    'comma-dangle': 0,
-    'curly': [2, 'multi-line'],
-    'camelcase': [2, { 'properties': 'never' }],
-    'spaced-comment': 0,
-    'default-case': 0,
-    'func-style': [2, 'declaration', { 'allowArrowFunctions': true }],
-    'indent': [2, 2, { 'SwitchCase': 1 }],
-    'init-declarations': 0,
-    'id-match': 0,
-    'id-length': 0,
-    'newline-after-var': 0,
-    'no-console': 0,
-    'no-negated-condition': 0,
-    'no-arrow-condition': 0,
-    'no-warning-comments': 1,
-    'no-use-before-define': [2, 'nofunc'],
-    'no-inline-comments': 0,
-    'operator-linebreak': [2, 'before'],
-    'prefer-arrow-callback': 0,
-    'prefer-reflect': 0,
-    'space-in-parens': 0,
-    'space-before-function-paren': [2, 'always']
+    'arrow-parens': off,
+    'array-bracket-spacing': off,
+    'comma-dangle': off,
+    'curly': [on, 'multi-line'],
+    'camelcase': [on, { 'properties': 'never' }],
+    'spaced-comment': off,
+    'default-case': off,
+    'func-style': [on, 'declaration', { 'allowArrowFunctions': true }],
+    'indent': [on, on, { 'SwitchCase': 1 }],
+    'init-declarations': off,
+    'id-match': off,
+    'id-length': off,
+    'newline-after-var': off,
+    'no-console': off,
+    'no-negated-condition': off,
+    'no-arrow-condition': off,
+    'no-warning-comments': warn,
+    'no-use-before-define': [on, 'nofunc'],
+    'no-inline-comments': off,
+    'operator-linebreak': [on, 'before'],
+    'prefer-arrow-callback': off,
+    'prefer-reflect': off,
+    'sort-imports': off,
+    'space-in-parens': off,
+    'space-before-function-paren': [on, 'always']
   }
 });
+
+cfg.plugins = [];
+
+cfg.parserOptions = {
+  ecmaVersion: 6,
+  sourceType: 'module',
+  ecmaFeatures: {
+    impliedStrict: true,
+    experimentalObjectRestSpread: true
+  }
+};
+
+delete cfg.rules['filenames/filenames'];
