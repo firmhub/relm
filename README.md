@@ -88,17 +88,17 @@ Creates a relm component from a given definition object. Applies defaults as nee
 
 __Arguments__
 
-1. *name (String)*: Display name of the component
-2. *definition (Object)*: An object containing the following:
-  * *view (Function)*: A function which accepts props and children and returns the virtual dom output. Effectively the same as a react pure component.
-  * *[ init ] (Function)*: Function to initialize the component's local state (default = void)
-  * *[ update  ] (Function|Object)*: A reducer function which takes a state and action and returns updated state __or__ an object with keys as action types and values as functions which update state based on those actions (default = identity)
-  * *[ styles ] (Object)*: Object with keys as arbitrary element names and object values represeting camel-cased css styles. Ex: `{ someElement: { borderRadius: '2px' }, ... }` (default = {})
-  * *[ classes ] (Object)*: Defined the same way as styles but these are processed through `jss` and provided to the component's view as string values (default = {})
+1. `name (String)`: Display name of the component
+2. `definition (Object)`: An object containing the following:
+  - `view (Function)`: A function which accepts props and children and returns the virtual dom output. Effectively the same as a react pure component.
+  - `init (Function)` _Optional_: Function to initialize the component's local state (default = void)
+  - `update (Function|Object)` _Optional_: A reducer function which takes a state and action and returns updated state __or__ an object with keys as action types and values as functions which update state based on those actions (default = identity)
+  - `styles (Object)` _Optional_: Object with keys as arbitrary element names and object values represeting camel-cased css styles. Ex: `{ someElement: { borderRadius: '2px' }, ... }` (default = {})
+  - `classes (Object)` _Optional_: Defined the same way as styles but these are processed through `jss` and provided to the component's view as string values (default = {})
 
 __Returns__
 
-*(Object)*: An object will all the properties described above (including defaults). The `view` function is wrapped and `update` is converted to a function if it was defined as an object.
+`(Object)`: An object will all the properties described above (including defaults). The `view` function is wrapped and `update` is converted to a function if it was defined as an object.
 
 ### combineComponents
 
@@ -115,12 +115,12 @@ Additionally, a `with` method is provided to return components with partially ap
 
 __Arguments__
 
-1. *name (String)*: Display name of the combined component
-2. *sources (Array)*: A list of components to be combined. Duplicate components can be included if you need to manage the state of multiple copies (ex: multiple textboxes in a form)
+1. `name (String)`: Display name of the combined component
+2. `sources (Array)`: A list of components to be combined. Duplicate components can be included if you need to manage the state of multiple copies (ex: multiple textboxes in a form)
 
 __Returns__
 
-*(Object)*: A relm component with an additional `with` method
+`(Object)`: A relm component with an additional `with` method
 
 ## React
 
@@ -139,16 +139,16 @@ Generally the provided element should not be the document `body` as that may rep
 
 __Arguments__
 
-1. *element (DOMElement)*: Any element where you want to render the app
-2. *component (Object)*: Top-level relm component representing your application
+1. `element (DOMElement)`: Any element where you want to render the app
+2. `component (Object)`: Top-level relm component representing your application
 
 __Returns__
 
-*(Object)*: An "app" object with the following methods:
-  * *getState(): Any* - Returns the latest application state
-  * *subscribeState(subscriber: Function): Void*: Calls the subscriber each time that the application state changes
-  * *dispatchAction(action: Object): Void*: Dispatches an action to your top-level component
-  * *hotReload(component: Object): Void*: Replaces the top-level component with the provided component. Useful in development for hot reloading
+`(Object)`: An "app" object with the following methods:
+  * `getState(): Any`: Returns the latest application state
+  * `subscribeState(subscriber: Function): Void`: Calls the subscriber each time that the application state changes
+  * `dispatchAction(action: Object): Void`: Dispatches an action to your top-level component
+  * `hotReload(component: Object): Void`: Replaces the top-level component with the provided component. Useful in development for hot reloading
 
 ## UI
 
@@ -162,27 +162,27 @@ Wraps a component and allows its state to be validated on each change.
 
 __Arguments__
 
-1. *name (String)*: Display name of the resulting component
-2. *component (Object)*: The component being wrapped
-3. *config (Object)*: An object with the following properties:
-  * *validate (Function)*: A function with either of these two signatures:
-    * (state) => validationState ([see tutorial on synchronous validation](./guide/7))
-    * (state, callback) => cancelFunction ([see tutorial on asynchronous validation](./guide/8))
-  * *delay (Number)*: Throttle the calls to validate function by this amount (in milliseconds)
-  * *resultPath (String[])*: Path at which to include the validation state in the wrapped components props
+1. `name (String)`: Display name of the resulting component
+2. `component (Object)`: The component being wrapped
+3. `config (Object)`: An object with the following properties:
+  * `validate (Function)`: A function with either of these two signatures:
+    * `(state) => validationState` [see tutorial on synchronous validation](./guide/7)
+    * `(state, callback) => cancelFunction` [see tutorial on asynchronous validation](./guide/8)
+  * `delay (Number)` _Optional_: Throttle the calls to validate function by this amount (in milliseconds)
+  * `resultPath (String[])` _Optional_: Path at which to include the validation state in the wrapped components props
 
 __Returns__
 
-*(Object)*: A relm component
+`(Object)`: A relm component
 
 # Roadmap to 1.0
 
 Please have a look at these linked issues; I need feedback for most and help with some of them so if you are interested in something, please leave a comment.
 
-- [ ] Testing (#5)
-- [ ] Routing (#6)
-- [ ] More helpers (#4)
-- [ ] Performance / memory optimizations (#7)
+- [ ] Testing #5
+- [ ] Routing #6
+- [ ] More helpers #4
+- [ ] Performance / memory optimizations #7
 - [ ] It's 2016, the readmes need more gifs
 
 # Contributions
