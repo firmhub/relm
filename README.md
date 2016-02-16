@@ -74,6 +74,39 @@ In order of importance:
   * [checkable](#checkable)
 
 
+## CLI / Build process
+
+### relm-compile
+
+Defined as scripts in your `package.json`:
+
+```json
+"scripts": {
+  "build": "relm-compile",
+  "watch": "relm-compile --watch",
+},
+"relm-compile-settings": {
+
+}
+```
+
+Run from the command line using npm:
+
+```shell
+npm run build
+# or
+npm run watch
+```
+
+__Flags__
+
+* `watch`: Run the compile process in watch mode on a local development server; the result can be seen by visiting the server url (usually `localhost:8080`) and the browser window auto-refreshes on source code changes
+* `hot`: Run the development server in hot mode, so that the full page is not refreshed on change
+
+__Settings__
+
+* `outputDir (String)`: Directory where the compiled files are saved relative to the project folder; default is `./build`
+* `entry (String)`: Path to your entry file (i.e where you call startApp); default is `./index.js`
 
 ## Core
 
@@ -179,10 +212,10 @@ __Returns__
 
 Please have a look at these linked issues; I need feedback for most and help with some of them so if you are interested in something, please leave a comment.
 
-- [ ] Testing #5
-- [ ] Routing #6
-- [ ] More helpers #4
-- [ ] Performance / memory optimizations #7
+- [ ] Testing - issue #5
+- [ ] Routing - issue #6
+- [ ] More helpers - issue #4
+- [ ] Performance / memory optimizations - issue #7
 - [ ] It's 2016, the readmes need more gifs
 
 # Contributions
