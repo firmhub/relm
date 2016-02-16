@@ -23,7 +23,10 @@ const config = _.defaults(json['relm-compile-settings'] || {}, {
   entry: './index.js',
 
   // Default build dir
-  outputDir: './build'
+  outputDir: './build',
+
+  // Default page title
+  pageTitle: json.name || 'Relm Application'
 });
 
 const compiler = require(`./${ opts.framework }/compiler`);

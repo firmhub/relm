@@ -1,6 +1,6 @@
 {
   "name": "relm",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "Component based app architecture",
   "main": "index.js",
   "scripts": {

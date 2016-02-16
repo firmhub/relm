@@ -14,7 +14,7 @@ export function getPath (basePath = process.cwd()) {
 
 function getHtmlOptions (template, opts) {
   const htmlOptions = {
-    title: opts.title || 'Relm App',
+    title: opts.pageTitle || 'Title missing',
     filename: 'index.html',
     inject: 'body',
   };

@@ -52,8 +52,9 @@ __Flags__
 
 __Settings__
 
-* `outputDir (String)`: Directory where the compiled files are saved relative to the project folder; default is `./build`
 * `entry (String)`: Path to your entry file (i.e where you call startApp); default is `./index.js`
+* `outputDir (String)`: Directory where the compiled files are saved relative to the project folder; default is `./build`
+* `pageTitle (String)`: Title of your application; defaults to project name from package.json
 
 
 ## React
