@@ -1,8 +1,4 @@
 import {
-  createStore,
-} from './internals/state';
-
-import {
   component,
   combineComponents,
 } from './internals/component';
@@ -10,7 +6,6 @@ import {
 // Usage:
 //    import { component, ... } from 'relm';
 export {
-  createStore,
   component,
   combineComponents
 };
@@ -19,7 +14,6 @@ export {
 //    import relm from 'relm';
 //    relm.component(), etc.
 export default {
-  createStore,
   component,
   combineComponents
 };

@@ -1,5 +1,5 @@
 /* globals m */
-import { createStore } from '../state';
+import { createStore } from '../internals/state';
 
 export function startApp (el, component, middleware = []) {
   const store = createStore(component.update, component.init(), middleware);

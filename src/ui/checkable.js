@@ -48,8 +48,8 @@ function syncValiator (displayName, child, opts) {
 }
 
 function asyncValiator (displayName, child, opts) {
-  const UPDATED = `${displayName}/checkable/request`;
-  const VALIDATED = `${displayName}/checkable/validate`;
+  const UPDATED = `${ displayName }/checkable/request`;
+  const VALIDATED = `${ displayName }/checkable/validate`;
 
   const { resultPath } = opts;
   let { validate } = opts;
@@ -152,12 +152,14 @@ function asyncValiator (displayName, child, opts) {
   });
 }
 
+
 export function checkable (displayName, comp, opts) {
   _.defaults(opts, {
     validate: _.noop
   });
 
-  if (opts.validate.length < 2) {
+  const asyncSignature = 2;
+  if (opts.validate.length < asyncSignature) {
     return syncValiator(displayName, comp, opts);
   }
 

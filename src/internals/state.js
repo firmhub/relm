@@ -8,35 +8,35 @@ const helpers = {
   using (f, ...args) {
     if (!_.isFunction(f)) {
       throw new Error(
-        `The first argument passed to "dispatch.using" method `
-      + `must be a function. I got "${typeof f}"`
+        'The first argument passed to "dispatch.using" method '
+      + `must be a function. I got "${ typeof f }"`
       );
     }
 
-    const self = this; // dispatch function
+    const dispatch = this;
 
     return wrapDispatcher(function dispatchUsing (...moreArgs) {
-      self(f(...args, ...moreArgs));
+      dispatch(f(...args, ...moreArgs));
     });
   },
 
   from (f, ...args) {
     if (!_.isFunction(f)) {
       throw new Error(
-        `The first argument passed to "dispatch.callback" method `
-      + `must be a function. I got "${typeof f}"`
+        'The first argument passed to "dispatch.callback" method '
+      + `must be a function. I got "${ typeof f }"`
       );
     }
 
-    const self = this; // dispatch function
+    const dispatch = this;
 
     return wrapDispatcher(function dispatchAsync (...moreArgs) {
-      f(self, ...args, ...moreArgs);
+      f(dispatch, ...args, ...moreArgs);
     });
   },
 
   payload (target, prop = 'payload') {
-    const self = this; // dispatch function
+    const dispatch = this;
 
     // Allow target to be a string representing type. Example:
     //    dispatch.payload(CHANGE, 'result')
@@ -46,7 +46,7 @@ const helpers = {
     const obj = _.isString(target) ? { type: target } : (target || {});
 
     return wrapDispatcher(function dispatchPayload (action) {
-      self({ ...obj, [prop]: action });
+      dispatch({ ...obj, [prop]: action });
     });
   }
 };
@@ -67,9 +67,9 @@ export function createStore ({
   }
 
   // Apply enhancers, if any, and create the store
-  const store = enhancers.length > 0
-    ? createReduxStore(reducer, initialState, _.flow(enhancers))
-    : createReduxStore(reducer, initialState);
+  const store = _.isEmpty(enhancers)
+    ? createReduxStore(reducer, initialState)
+    : createReduxStore(reducer, initialState, _.flow(enhancers));
 
   store.dispatch = wrapDispatcher(store.dispatch);
 

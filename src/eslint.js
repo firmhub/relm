@@ -8,15 +8,23 @@ const on = 2;
 module.exports = merge(cfg, {
   root: true,
   rules: {
+    'camelcase': [on, { 'properties': 'never' }],
+    'curly': [on, 'multi-line'],
+    'func-style': [on, 'declaration', { 'allowArrowFunctions': true }],
+    'indent': [on, on, { 'SwitchCase': 1 }],
+    'no-use-before-define': [on, 'nofunc'],
+    'no-magic-numbers': [on, { ignoreArrayIndexes: true, ignore: [ 0 ] }],
+    'space-before-function-paren': [on, 'always'],
+    'operator-linebreak': [on, 'before'],
+
+    'no-warning-comments': warn,
+
     'arrow-parens': off,
     'array-bracket-spacing': off,
     'comma-dangle': off,
-    'curly': [on, 'multi-line'],
-    'camelcase': [on, { 'properties': 'never' }],
+    'consistent-this': off,
     'spaced-comment': off,
     'default-case': off,
-    'func-style': [on, 'declaration', { 'allowArrowFunctions': true }],
-    'indent': [on, on, { 'SwitchCase': 1 }],
     'init-declarations': off,
     'id-match': off,
     'id-length': off,
@@ -24,15 +32,11 @@ module.exports = merge(cfg, {
     'no-console': off,
     'no-negated-condition': off,
     'no-arrow-condition': off,
-    'no-warning-comments': warn,
-    'no-use-before-define': [on, 'nofunc'],
     'no-inline-comments': off,
-    'operator-linebreak': [on, 'before'],
     'prefer-arrow-callback': off,
     'prefer-reflect': off,
     'sort-imports': off,
     'space-in-parens': off,
-    'space-before-function-paren': [on, 'always']
   }
 });
 

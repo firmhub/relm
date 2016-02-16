@@ -73,7 +73,7 @@ if (process.env.NODE_ENV === 'hot') {
     const urlMatches = window.location.href.match(/[?&]debug_session=([^&]+)\b/);
     const sessionKey = (urlMatches && urlMatches.length > 0) ? urlMatches[1] : null;
 
-    console.info(`Dev tools:`, {
+    console.info('Dev tools:', {
       sessionKey,
       toggleVisibility: dockOpts.toggleVisibilityKey,
       changePosition: dockOpts.changePositionKey
