@@ -1,0 +1,41 @@
+{
+  "name": "relm",
+  "version": "0.7.0-alpha1",
+  "description": "Composable components",
+  "main": "main.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motorcode/relm.git"
+  },
+  "keywords": [
+    "frontend",
+    "component",
+    "framework",
+    "react",
+    "mithril",
+    "redux",
+    "elm",
+    "architecture"
+  ],
+  "author": "Amandeep Singh Othi <a-s-o@users.noreply.github.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/a-s-o/relm/issues"
+  },
+  "homepage": "https://github.com/a-s-o/relm#readme",
+  "devDependencies": {
+    "ava": "^0.15.2",
+    "babel-cli": "^6.10.1",
+    "babel-eslint": "^6.1.0",
+    "babel-plugin-lodash": "^3.2.0",
+    "eslint": "^2.13.1",
+    "eslint-config-airbnb": "^9.0.1",
+    "eslint-plugin-import": "^1.10.0",
+    "eslint-plugin-jsx-a11y": "^1.5.3",
+    "eslint-plugin-react": "^5.2.2",
+    "lodash": "^4.13.1"
+  },
+  "dependencies": {
+    "yo-yo": "^1.2.2"
+  }
+}
