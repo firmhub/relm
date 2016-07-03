@@ -107,35 +107,69 @@ const isDispatcherNeeded = (node, action, type) => {
 /**
  * createActionDispatchers returns a reducer function which creates dispatchers
  * for a given node (i.e node.actions.someAction()). These dispatchers all emit
- * action using rootState.dispatch and provide the node's path so the actions
- * can flow from using a top-down approach
+ * action using root.handleAction and provide the node's path so the actions
+ * can flow using a top-down approach
  */
 const createActionDispatchers = (node) => (output, action, type) => {
+  // Dispatchers are not needed for child action overrides, etc.
   if (!isDispatcherNeeded(node, action, type)) return output;
-  const dispatcher = (...args) => node.rootState.dispatch(node.path, type, args);
+
+  const dispatcher = (...args) => node.root.handleAction(node.path, type, args);
   return _.set(output, type, dispatcher);
 };
 
 export class Node {
-  static createRootNode (rootComponent, rootState) {
-    const rootNode = new Node(rootComponent, {
-      rootState,
-      path: []
+  static createRootNode (rootComponent) {
+    const rootNode = new Node(rootComponent, { path: [] });
+
+    let state;
+
+    Object.defineProperties(rootNode, {
+      root: {
+        get () { return rootNode; },
+      },
+      state: {
+        get () { return state; },
+        set (value) {
+          // TODO: validate root state on each set
+          state = value;
+          if (!isProduction()) Object.freeze(state);
+        }
+      }
     });
 
-    rootState.dispatch = rootNode.handleAction;
+    state = new State(rootNode);
 
     return rootNode;
   }
 
   static createChildNode (parentNode, component, key) {
-    if (_.isArray(component)) {
-      return Node.createListNode(parentNode, _.head(component), key);
-    }
-    return new Node(component, {
+    if (_.isArray(component)) return Node.createListNode(parentNode, _.head(component), key);
+
+    const root = parentNode.root || parentNode;
+
+    const node = new Node(component, {
       path: parentNode.path.concat(key),
-      rootState: parentNode.rootState,
+      root,
     });
+
+    let state;
+    let previousState;
+
+    Object.defineProperties(node, {
+      state: {
+        get () {
+          if (previousState === root.state) return state;
+
+          previousState = root.state;
+          state = new State(node);
+          if (!isProduction()) Object.freeze(state);
+          return state;
+        }
+      }
+    });
+
+    return node;
   }
 
   static createListNode (parentNode, component, key) {
@@ -145,7 +179,7 @@ export class Node {
   constructor (it, opts = {}) {
     this.render = it;
     this.path = opts.path;
-    this.rootState = opts.rootState;
+    this.root = opts.root;
 
     defineName(this, it.displayName || it.name || _.last(this.path));
 
@@ -161,18 +195,6 @@ export class Node {
     // dispatch those actions to its children
     this.handleAction = createActionHandler(this, it.actions || {});
     defineName(this.handleAction, `${this.displayName}ActionHandler`);
-  }
-
-  get state () {
-    if (this._previousRootState === this.rootState()) return this._state;
-
-    const nodeState = new State(this);
-
-    if (!isProduction()) Object.freeze(nodeState);
-
-    this._previousRootState = this.rootState();
-    this._state = nodeState;
-    return this._state;
   }
 
   toString () {

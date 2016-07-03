@@ -8,7 +8,7 @@ export class State {
 
     const collectState = mapChildrenFn => _.defaults(
       _.mapValues(node.components, mapChildrenFn),
-      _.get(node.rootState(), node.path)
+      _.get(node.root.state, node.path)
     );
 
     // Assign state properties to this instance
@@ -29,11 +29,12 @@ export class State {
     const updateSpec = _.set({}, fullStatePath, mutation);
 
     // Apply the updateSpec to the root state
-    const currentRoot = this.node.rootState();
+    const currentRoot = this.node.root.state;
     const updatedRoot = update(currentRoot, updateSpec);
-    if (currentRoot !== updatedRoot) this.node.rootState(updatedRoot);
 
-    // Return a new instance
+    if (currentRoot === updatedRoot) return this;
+
+    this.node.root.state = updatedRoot;
     return new State(this.node);
   }
 

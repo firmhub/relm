@@ -110,7 +110,7 @@ export function App ({ state, actions, components: { Todos } }) {
 }
 
 App.components = {
-  Todos: [Todo],
+  Todos: Todo,
   Filter: TodoFilter,
 };
 
