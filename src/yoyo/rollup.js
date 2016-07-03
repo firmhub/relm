@@ -11,7 +11,7 @@ export default {
     }),
     nodeResolve({
       skip: [
-        'yo-yo',
+        'lodash',
         'babel-plugin-syntax-jsx',
         'babel-plugin-transform-react-jsx',
         'babel-plugin-jsx-pragmatic',

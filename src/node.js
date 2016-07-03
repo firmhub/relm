@@ -117,14 +117,7 @@ const createActionDispatchers = (node) => (output, action, type) => {
 };
 
 export class Node {
-  static createRoot (rootComponent, initialState = {}) {
-    let currentState = initialState;
-
-    function rootState (updatedState) {
-      if (arguments.length > 0) currentState = updatedState;
-      return currentState;
-    }
-
+  static createRootNode (rootComponent, rootState) {
     const rootNode = new Node(rootComponent, {
       rootState,
       path: []

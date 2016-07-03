@@ -8,10 +8,9 @@
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
-    "yoyo:index": "rollup -c src/yoyo/rollup.js src/yoyo/index.js > yoyo/index.js",
-    "yoyo:jsx": "rollup -c src/yoyo/rollup.js src/yoyo/jsx.js > yoyo/jsx.js",
-    "yoyo:preset": "rollup -c src/yoyo/rollup.js src/yoyo/preset.js > yoyo/preset.js",
-    "yoyo": "./parallel.sh 'npm run yoyo:index' 'npm run yoyo:jsx' 'npm run yoyo:preset'"
+    "yoyo:index": "rollup -c src/yoyo/rollup.js -i src/yoyo/index.js -o yoyo/index.js",
+    "yoyo:preset": "rollup -c src/yoyo/rollup.js -i src/yoyo/preset.js -o yoyo/preset.js",
+    "yoyo": "./parallel.sh 'npm run yoyo:index' 'npm run yoyo:preset'"
   },
   "keywords": [
     "frontend",
@@ -46,7 +45,8 @@
     "rollup": "^0.33.0",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-commonjs": "^3.1.0",
-    "rollup-plugin-node-resolve": "^1.7.1"
+    "rollup-plugin-node-resolve": "^1.7.1",
+    "rollup-watch": "^2.4.0"
   },
   "dependencies": {
     "yo-yo": "^1.2.2",

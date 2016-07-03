@@ -55,7 +55,7 @@ Todo.actions = {
   },
 };
 
-export default function App ({ state, actions, components: { Todos } }) {
+export function App ({ state, actions, components: { Todos } }) {
   const todoCount = state.Todos.length;
   const visibleTodos = () => true;
   const todoView = (TodoView, index) => <TodoView onRemove={() => actions.removeTodo(index)} />;
@@ -110,6 +110,6 @@ App.actions = {
   }
 };
 
-(function startApp () {
-  console.log('here');
-}());
+import { startApp } from 'relm/yoyo';
+
+export default startApp(App);
