@@ -7,8 +7,15 @@ function isProduction () {
   // return process.env.NODE_ENV === 'production';
 }
 
-function getComponent (node, path) {
-  return _.reduce(path, (n, name) => n.components[name], node);
+function defineName (obj, name) {
+  Object.defineProperties(obj, {
+    name: { value: name },
+    displayName: { value: name }
+  });
+}
+
+function getNodeAtPath (node, path) {
+  return _.reduce(path, (n, name) => n.childNodes[name], node);
 }
 
 function getAction (node, action) {
@@ -33,7 +40,7 @@ function isActionOverrideSpecified (actions, path, type) {
 
 function isChildAction (node, path) {
   if (!path.length) return false;
-  return _.has(node, ['components', _.head(path)]);
+  return _.has(node, ['childNodes', _.head(path)]);
 }
 
 /**
@@ -43,7 +50,7 @@ function isChildAction (node, path) {
  * overriding node to call through to the underlying action
  */
 function useActionOverride (node, override, path, type, args) {
-  const child = getComponent(node, path);
+  const child = getNodeAtPath(node, path);
   if (!hasAction(child, type)) throw badAction(child, path, type);
 
   const actionShortcut = (...childArgs) => child.handleAction([], type, childArgs);
@@ -66,7 +73,7 @@ function processNestedAction (node, actions, path, type, args) {
   }
 
   const [child, ...restOfPath] = path;
-  return node.components[child].handleAction(restOfPath, type, args);
+  return node.childNodes[child].handleAction(restOfPath, type, args);
 }
 
 /**
@@ -93,14 +100,15 @@ const createActionHandler = (node, actions) => (path, type, args) => {
 
 const isDispatcherNeeded = (node, action, type) => {
   if (!_.isFunction(action)) return false; // All actions must be functions
-  if (_.has(node.components, type)) return false; // Don't need dispatchers for child action overrides
+  if (_.has(node.childNodes, type)) return false; // Don't need dispatchers for child action overrides
   return true;
 };
 
 /**
  * createActionDispatchers returns a reducer function which creates dispatchers
  * for a given node (i.e node.actions.someAction()). These dispatchers all emit
- * action using node.rootState.dispatch (top down flow)
+ * action using rootState.dispatch and provide the node's path so the actions
+ * can flow from using a top-down approach
  */
 const createActionDispatchers = (node) => (output, action, type) => {
   if (!isDispatcherNeeded(node, action, type)) return output;
@@ -127,46 +135,49 @@ export class Node {
     return rootNode;
   }
 
-  static createChildNode (parentNode, childComponent, childKey) {
-    return new Node(childComponent, {
-      path: parentNode.path.concat(childKey),
+  static createChildNode (parentNode, component, key) {
+    if (_.isArray(component)) {
+      return Node.createListNode(parentNode, _.head(component), key);
+    }
+    return new Node(component, {
+      path: parentNode.path.concat(key),
       rootState: parentNode.rootState,
     });
   }
 
-  constructor (it, opts = {}) {
-    const path = opts.path.slice();
+  static createListNode (parentNode, component, key) {
+    throw new Error(`TODO: Implement createListNode ${parentNode.name}:${key}`);
+  }
 
+  constructor (it, opts = {}) {
     this.render = it;
-    this.path = path;
+    this.path = opts.path;
     this.rootState = opts.rootState;
 
-    const name = it.displayName || it.name || _.last(path);
+    defineName(this, it.displayName || it.name || _.last(this.path));
 
-    this.components = _.mapValues(it.components, _.partial(Node.createChildNode, this));
+    // Create child nodes
+    this.childNodes = _.mapValues(it.components, _.partial(Node.createChildNode, this));
+    this.childViews = _.mapValues(this.childNodes, child => _.bind(child.view, child));
+
+    // Create node.actions object which contains all actions that this node can dispatch
     this.actions = _.reduce(it.actions || {}, createActionDispatchers(this), {});
+
+    // Create a handler function for actions that are received by this node
+    // It is the node's job to either handle actions and update rootState or
+    // dispatch those actions to its children
     this.handleAction = createActionHandler(this, it.actions || {});
-
-    Object.defineProperties(this.handleAction, {
-      displayName: { value: `${name}ActionHandler` },
-      name: { value: `${name}ActionHandler` }
-    });
-
-    Object.defineProperties(this, {
-      displayName: { value: name },
-      name: { value: name },
-    });
+    defineName(this.handleAction, `${this.displayName}ActionHandler`);
   }
 
   get state () {
-    if (this._check === this.rootState()) return this._state;
+    if (this._previousRootState === this.rootState()) return this._state;
 
-    // Create a state object and instantiate child state objects
     const nodeState = new State(this);
 
     if (!isProduction()) Object.freeze(nodeState);
 
-    this._check = this.rootState();
+    this._previousRootState = this.rootState();
     this._state = nodeState;
     return this._state;
   }
@@ -176,9 +187,7 @@ export class Node {
   }
 
   view (props = {}, children = []) {
-    const components = _.mapValues(this.components, child => child.view.bind(child));
-    const { actions, state } = this;
-    const node = { actions, state, props, children, components };
-    return this.render(node);
+    const { actions, state, childViews: components } = this;
+    return this.render({ actions, state, props, children, components });
   }
 }

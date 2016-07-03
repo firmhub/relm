@@ -1,0 +1,9 @@
+{
+  "presets": [
+    "es2015",
+    "relm/yoyo/preset"
+  ],
+  "plugins": [
+    "lodash"
+  ]
+}

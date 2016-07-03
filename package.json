@@ -8,7 +8,7 @@
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
-    "yoyo-babel": "rollup -c src/yoyo/babel.rollup.js"
+    "yoyo": "rollup -c yoyo/jsx.rollup.js"
   },
   "keywords": [
     "frontend",
@@ -30,10 +30,9 @@
     "ava": "^0.15.2",
     "babel-cli": "^6.10.1",
     "babel-eslint": "^6.1.0",
-    "babel-plugin-jsx-pragmatic": "^1.0.2",
     "babel-plugin-lodash": "^3.2.0",
-    "babel-plugin-syntax-jsx": "^6.8.0",
-    "babel-plugin-transform-react-jsx": "^6.8.0",
+    "babel-preset-es2015": "^1.1.1",
+    "babel-preset-es2015-rollup": "^1.1.1",
     "eslint": "^2.13.1",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-plugin-import": "^1.10.0",
@@ -43,10 +42,12 @@
     "rollup": "^0.33.0",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-commonjs": "^3.1.0",
-    "rollup-plugin-json": "^2.0.1",
     "rollup-plugin-node-resolve": "^1.7.1"
   },
   "dependencies": {
-    "yo-yo": "^1.2.2"
+    "yo-yo": "^1.2.2",
+    "babel-plugin-jsx-pragmatic": "^1.0.2",
+    "babel-plugin-syntax-jsx": "^6.8.0",
+    "babel-plugin-transform-react-jsx": "^6.8.0"
   }
 }
