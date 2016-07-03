@@ -55,6 +55,21 @@ Todo.actions = {
   },
 };
 
+export function TodoFilter ({ state }) {
+  return (
+    <ul className='filters'>
+      <li><a className={{ selected: state.selected === 'ALL' }} href='#/'>All</a></li>
+      <li><a className={{ selected: state.selected === 'ACTIVE' }} href='#/active'>Active</a></li>
+      <li><a className={{ selected: state.selected === 'COMPLETED' }} href='#/completed'>Completed</a></li>
+    </ul>
+  );
+}
+
+TodoFilter.actions = {
+  onInit: (state) => state.set('selected', 'ALL'),
+  changeFilter: (filter, value) => filter.state.set('selected', value)
+};
+
 export function App ({ state, actions, components: { Todos } }) {
   const todoCount = state.Todos.length;
   const visibleTodos = () => true;
@@ -86,11 +101,7 @@ export function App ({ state, actions, components: { Todos } }) {
       {todoCount === 0 ? null : (
         <footer className='footer'>
           <span className='todo-count'><strong>{todoCount}</strong> item left</span>
-          <ul className='filters'>
-            <li><a className='selected' href='#/'>All</a></li>
-            <li><a href='#/active'>Active</a></li>
-            <li><a href='#/completed'>Completed</a></li>
-          </ul>
+
           <button className='clear-completed'>Clear completed</button>
         </footer>
       )}
@@ -99,7 +110,8 @@ export function App ({ state, actions, components: { Todos } }) {
 }
 
 App.components = {
-  Todos: [Todo]
+  Todos: [Todo],
+  Filter: TodoFilter,
 };
 
 App.actions = {
@@ -111,5 +123,4 @@ App.actions = {
 };
 
 import { startApp } from 'relm/yoyo';
-
 export default startApp(App);

@@ -14,7 +14,7 @@ function defineName (obj, name) {
   });
 }
 
-function getNodeAtPath (node, path) {
+function getChildNode (node, path) {
   return _.reduce(path, (n, name) => n.childNodes[name], node);
 }
 
@@ -50,7 +50,7 @@ function isChildAction (node, path) {
  * overriding node to call through to the underlying action
  */
 function useActionOverride (node, override, path, type, args) {
-  const child = getNodeAtPath(node, path);
+  const child = getChildNode(node, path);
   if (!hasAction(child, type)) throw badAction(child, path, type);
 
   const actionShortcut = (...childArgs) => child.handleAction([], type, childArgs);

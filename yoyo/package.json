@@ -1,0 +1,4 @@
+{
+  "main": "index.js",
+  "jsnext:main": "../src/yoyo/index.js"
+}
