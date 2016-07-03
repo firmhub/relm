@@ -1,12 +1,13 @@
-/* eslint-disable no-var, global-require */
-var syntaxJsx = require('babel-plugin-syntax-jsx');
-var transformJsx = require('babel-plugin-transform-react-jsx');
-var pragmaticJsx = require('babel-plugin-jsx-pragmatic');
+'use strict';
 
-module.exports = {
-  plugins: [
-    syntaxJsx,
-    [transformJsx, { pragma: 'jsx' }],
-    [pragmaticJsx, { module: 'relm/yoyo/jsx', import: 'jsx' }]
-  ]
+function _interopDefault (ex) { return (ex && (typeof ex === 'object') && 'default' in ex) ? ex['default'] : ex; }
+
+var syntaxJsx = _interopDefault(require('babel-plugin-syntax-jsx'));
+var transformJsx = _interopDefault(require('babel-plugin-transform-react-jsx'));
+var pragmaticJsx = _interopDefault(require('babel-plugin-jsx-pragmatic'));
+
+var preset = {
+  plugins: [syntaxJsx, [transformJsx, { pragma: 'jsx' }], [pragmaticJsx, { module: 'relm/yoyo/jsx', import: 'jsx' }]]
 };
+
+module.exports = preset;

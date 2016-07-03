@@ -1,3 +1,2 @@
 node_modules/
-yoyo/jsx.js
-yoyo/index.js
+yoyo/*.js
