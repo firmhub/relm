@@ -1,0 +1,830 @@
+<html>
+<meta charset="UTF-8">
+<head><title>Todo</title></head>
+<style>
+html,
+body {
+	margin: 0;
+	padding: 0;
+}
+
+button {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	background: none;
+	font-size: 100%;
+	vertical-align: baseline;
+	font-family: inherit;
+	font-weight: inherit;
+	color: inherit;
+	-webkit-appearance: none;
+	appearance: none;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+body {
+	font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+	line-height: 1.4em;
+	background: #f5f5f5;
+	color: #4d4d4d;
+	min-width: 230px;
+	max-width: 550px;
+	margin: 0 auto;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+	font-weight: 300;
+}
+
+:focus {
+	outline: 0;
+}
+
+.hidden {
+	display: none;
+}
+
+.todoapp {
+	background: #fff;
+	margin: 130px 0 40px 0;
+	position: relative;
+	box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2),
+	            0 25px 50px 0 rgba(0, 0, 0, 0.1);
+}
+
+.todoapp input::-webkit-input-placeholder {
+	font-style: italic;
+	font-weight: 300;
+	color: #e6e6e6;
+}
+
+.todoapp input::-moz-placeholder {
+	font-style: italic;
+	font-weight: 300;
+	color: #e6e6e6;
+}
+
+.todoapp input::input-placeholder {
+	font-style: italic;
+	font-weight: 300;
+	color: #e6e6e6;
+}
+
+.todoapp h1 {
+	position: absolute;
+	top: -155px;
+	width: 100%;
+	font-size: 100px;
+	font-weight: 100;
+	text-align: center;
+	color: rgba(175, 47, 47, 0.15);
+	-webkit-text-rendering: optimizeLegibility;
+	-moz-text-rendering: optimizeLegibility;
+	text-rendering: optimizeLegibility;
+}
+
+.new-todo,
+.edit {
+	position: relative;
+	margin: 0;
+	width: 100%;
+	font-size: 24px;
+	font-family: inherit;
+	font-weight: inherit;
+	line-height: 1.4em;
+	border: 0;
+	color: inherit;
+	padding: 6px;
+	border: 1px solid #999;
+	box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
+	box-sizing: border-box;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
+}
+
+.new-todo {
+	padding: 16px 16px 16px 60px;
+	border: none;
+	background: rgba(0, 0, 0, 0.003);
+	box-shadow: inset 0 -2px 1px rgba(0,0,0,0.03);
+}
+
+.main {
+	position: relative;
+	z-index: 2;
+	border-top: 1px solid #e6e6e6;
+}
+
+label[for='toggle-all'] {
+	display: none;
+}
+
+.toggle-all {
+	position: absolute;
+	top: -55px;
+	left: -12px;
+	width: 60px;
+	height: 34px;
+	text-align: center;
+	border: none; /* Mobile Safari */
+}
+
+.toggle-all:before {
+	content: '❯';
+	font-size: 22px;
+	color: #e6e6e6;
+	padding: 10px 27px 10px 27px;
+}
+
+.toggle-all:checked:before {
+	color: #737373;
+}
+
+.todo-list {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.todo-list li {
+	position: relative;
+	font-size: 24px;
+	border-bottom: 1px solid #ededed;
+}
+
+.todo-list li:last-child {
+	border-bottom: none;
+}
+
+.todo-list li.editing {
+	border-bottom: none;
+	padding: 0;
+}
+
+.todo-list li.editing .edit {
+	display: block;
+	width: 506px;
+	padding: 12px 16px;
+	margin: 0 0 0 43px;
+}
+
+.todo-list li.editing .view {
+	display: none;
+}
+
+.todo-list li .toggle {
+	text-align: center;
+	width: 40px;
+	/* auto, since non-WebKit browsers doesn't support input styling */
+	height: auto;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	margin: auto 0;
+	border: none; /* Mobile Safari */
+	-webkit-appearance: none;
+	appearance: none;
+}
+
+.todo-list li .toggle:after {
+	content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#ededed" stroke-width="3"/></svg>');
+}
+
+.todo-list li .toggle:checked:after {
+	content: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="-10 -18 100 135"><circle cx="50" cy="50" r="50" fill="none" stroke="#bddad5" stroke-width="3"/><path fill="#5dc2af" d="M72 25L42 71 27 56l-4 4 20 20 34-52z"/></svg>');
+}
+
+.todo-list li label {
+	word-break: break-all;
+	padding: 15px 60px 15px 15px;
+	margin-left: 45px;
+	display: block;
+	line-height: 1.2;
+	transition: color 0.4s;
+}
+
+.todo-list li.completed label {
+	color: #d9d9d9;
+	text-decoration: line-through;
+}
+
+.todo-list li .destroy {
+	display: none;
+	position: absolute;
+	top: 0;
+	right: 10px;
+	bottom: 0;
+	width: 40px;
+	height: 40px;
+	margin: auto 0;
+	font-size: 30px;
+	color: #cc9a9a;
+	margin-bottom: 11px;
+	transition: color 0.2s ease-out;
+}
+
+.todo-list li .destroy:hover {
+	color: #af5b5e;
+}
+
+.todo-list li .destroy:after {
+	content: '×';
+}
+
+.todo-list li:hover .destroy {
+	display: block;
+}
+
+.todo-list li .edit {
+	display: none;
+}
+
+.todo-list li.editing:last-child {
+	margin-bottom: -1px;
+}
+
+.footer {
+	color: #777;
+	padding: 10px 15px;
+	height: 20px;
+	text-align: center;
+	border-top: 1px solid #e6e6e6;
+}
+
+.footer:before {
+	content: '';
+	position: absolute;
+	right: 0;
+	bottom: 0;
+	left: 0;
+	height: 50px;
+	overflow: hidden;
+	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2),
+	            0 8px 0 -3px #f6f6f6,
+	            0 9px 1px -3px rgba(0, 0, 0, 0.2),
+	            0 16px 0 -6px #f6f6f6,
+	            0 17px 2px -6px rgba(0, 0, 0, 0.2);
+}
+
+.todo-count {
+	float: left;
+	text-align: left;
+}
+
+.todo-count strong {
+	font-weight: 300;
+}
+
+.filters {
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	position: absolute;
+	right: 0;
+	left: 0;
+}
+
+.filters li {
+	display: inline;
+}
+
+.filters li a {
+	color: inherit;
+	margin: 3px;
+	padding: 3px 7px;
+	text-decoration: none;
+	border: 1px solid transparent;
+	border-radius: 3px;
+}
+
+.filters li a:hover {
+	border-color: rgba(175, 47, 47, 0.1);
+}
+
+.filters li a.selected {
+	border-color: rgba(175, 47, 47, 0.2);
+}
+
+.clear-completed,
+html .clear-completed:active {
+	float: right;
+	position: relative;
+	line-height: 20px;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.clear-completed:hover {
+	text-decoration: underline;
+}
+
+.info {
+	margin: 65px auto 0;
+	color: #bfbfbf;
+	font-size: 10px;
+	text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+	text-align: center;
+}
+
+.info p {
+	line-height: 1;
+}
+
+.info a {
+	color: inherit;
+	text-decoration: none;
+	font-weight: 400;
+}
+
+.info a:hover {
+	text-decoration: underline;
+}
+
+/*
+	Hack to remove background from Mobile Safari.
+	Can't use it globally since it destroys checkboxes in Firefox
+*/
+@media screen and (-webkit-min-device-pixel-ratio:0) {
+	.toggle-all,
+	.todo-list li .toggle {
+		background: none;
+	}
+
+	.todo-list li .toggle {
+		height: 40px;
+	}
+
+	.toggle-all {
+		-webkit-transform: rotate(90deg);
+		transform: rotate(90deg);
+		-webkit-appearance: none;
+		appearance: none;
+	}
+}
+
+@media (max-width: 430px) {
+	.footer {
+		height: 50px;
+	}
+
+	.filters {
+		bottom: 10px;
+	}
+}
+</style>
+<body>
+<div id="main"></div>
+<!-- <script type="text/javascript" src="https://cdn.jsdelivr.net/g/lodash@4.13.1,mithril@0.2.5,redux@3.5.2"></script> -->
+<script type="text/javascript" src="js.js"></script>
+<script type="text/javascript">
+/**
+* Sample components
+*/
+const ENTER_KEY = 13;
+const ESCAPE_KEY = 27;
+const classes = obj => _.reduce(obj, (str, v, k) => Boolean(v) ? `${str} ${k}` : str, '');
+const focus = (editing) => (el) => { if (editing) el.focus(); };
+
+function TodoMVC ({ state, actions, components: { Todos } }) {
+  const allTodos = state.Todos.length;
+  const activeTodos = state.Todos.filter(x => !x.completed).length;
+
+  const filterLink = (type, href) => ({
+    className: classes({ selected: state.filter === type }),
+    href,
+    onclick: () => actions.changeFilter(type)
+  });
+
+  return m('section.todoapp', [
+    m('header.header', [
+      m('h1', 'todos'),
+      m('input.new-todo', {
+        placeholder: 'What needs to be done?',
+        value: state.newTodo || '',
+        onkeyup: actions.newTodoInput,
+        autofocus: true
+      })
+    ]),
+
+    // Main section should be hidden by default and shown when there are todos
+    allTodos === 0 ? null : m('section.main', [
+      m('input.toggle-all', { type: 'checkbox', onclick: actions.toggleAll }),
+      m('label', { htmlFor: 'toggle-all' }, 'Mark all as complete'),
+      m('ul.todo-list', Todos.map((Todo, index) => {
+        const todoCompleted = state.Todos[index].completed;
+        if (state.filter !== 'all' && state.filter !== (todoCompleted ? 'completed' : 'active')) return null;
+        return Todo({ onRemove: () => actions.removeTodo(index) });
+      }))
+    ]),
+
+    // Footer should hidden by default and shown when there are todos
+    allTodos === 0 ? null : m('footer.footer', [
+      m('span.todo-count', m.trust(`<strong>${activeTodos}</string> items left`)),
+      m('ul.filters', [
+        m('li', m('a', filterLink('all', '#/'), 'All')),
+        m('li', m('a', filterLink('active', '#/active'), 'Active')),
+        m('li', m('a', filterLink('completed', '#/completed'), 'Completed')),
+      ]),
+      m('button.clear-completed', { onclick: actions.clearCompleted }, 'Clear completed')
+    ])
+  ]);
+}
+
+TodoMVC.components = { Todos: [Todo] };
+
+TodoMVC.actions = {
+  getInitialState: (state) => state.merge({ filter: 'all', newTodo: '' }),
+  changeFilter: (state, value) => state.set('filter', value),
+  clearCompleted: (state) => state.set('Todos', state.Todos.filter(todo => !todo.completed)),
+  removeTodo: (state, index) => state.splice('Todos', [[index, 1]]),
+
+  toggleAll: (state) => {
+    const completed = !state.Todos[0].completed;
+    return state.map('Todos', todo => todo.merge({ completed }));
+  },
+
+  newTodoInput (state, event) {
+    switch (event.keyCode) {
+      // When enter is pressed and input is not empty, create the new todo and clear the input
+      case ENTER_KEY: return !event.target.value ? state : state.update({
+        Todos: { $splice: [[0, 0, { title: event.target.value }]] },
+        newTodo: { $set: '' }
+      });
+
+      // All other keystrokes, simply update the newTodo
+      default: return state.set('newTodo', event.target.value);
+    }
+  },
+};
+
+function Todo ({ actions, props, state: { editing, completed, title } }) {
+  return m('li', { className: classes({ completed, editing }) }, editing ?
+    // Edit mode
+    m('input.edit', { value: title, onkeyup: actions.textInput, config: focus(editing) }) :
+    // View mode
+    m('div.view', [
+      m('input.toggle', { onclick: actions.toggleCompleted, type: 'checkbox', checked: completed }),
+      m('label', { ondblclick: actions.startEditing }, title),
+      m('button.destroy', { onclick: props.onRemove })
+    ]));
+}
+
+Todo.actions = {
+  toggleCompleted: (todo) => todo.set('completed', !todo.completed),
+  startEditing: (todo) => todo.merge({ editing: true, previousTitle: todo.title }),
+
+  textInput (todo, event) {
+    switch (event.keyCode) {
+      // When enter is pressed, stop editing
+      case ENTER_KEY: return todo.merge({
+        title: event.target.value.trim(),
+        previousTitle: null,
+        editing: false
+      });
+
+      // When escape is pressed; discard changes and stop editing
+      case ESCAPE_KEY: return todo.merge({
+        title: todo.previousTitle,
+        previousTitle: null,
+        editing: false,
+      });
+
+      // All other keystrokes, simply update the title
+      default: return todo.set('title', event.target.value);
+    }
+  }
+};
+
+// Update ////////////////////////////////////////////////////////////
+
+const devMode = false;
+
+function Immutable (props) {
+  if (!(this instanceof Immutable)) return new Immutable(props);
+  _.assign(this, props);
+  if (devMode) Object.freeze(this);
+}
+
+Immutable.from = function (arg) {
+  return new Immutable(arg);
+};
+
+Immutable.unwrap = function unwrapImmutable (result) {
+  if (result instanceof Immutable) return _.clone(result);
+  return result;
+};
+
+Immutable.prototype = {
+  update (spec) {
+    return Immutable.from(update(this, spec));
+  },
+
+  set (a, b) {
+    return Immutable.from(update(this, arguments.length === 1
+      ? { $set: a }
+      : _.set({}, a, { $set: b })
+    ));
+  },
+
+  splice (a, b) {
+    return Immutable.from(update(this, arguments.length === 1
+      ? { $splice: a }
+      : _.set({}, a, { $splice: b })
+    ));
+  },
+
+  map (a, b) {
+    // mapWith :: (a -> b) -> [a] -> [b]
+    const mapWith = f => arr => arr.map(function immutableMapper (v, i) {
+      const value = Immutable.from(v);
+      const result = f(value, i, arr);
+      return Immutable.unwrap(result);
+    });
+
+    return Immutable.from(update(this, arguments.length === 1
+      ? { $apply: mapWith(a) }
+      : _.set({}, a, { $apply: mapWith(b) })
+    ));
+  },
+
+  merge (a, b) {
+    return Immutable.from(update(this, arguments.length === 1
+      ? { $merge: a }
+      : _.set({}, a, { $merge: b })
+    ));
+  }
+};
+
+function update (source, mutation) {
+  let isChanged = false;
+  let value = source;
+  let newValue;
+
+  _.each(mutation, (mut, key) => {
+    if (update.isCommand(key)) {
+      newValue = update.getCommand(key)(mut, value);
+      if (newValue !== source) {
+        isChanged = true;
+        value = newValue;
+      } else {
+        value = source;
+      }
+    } else {
+      if (value === source) value = _.clone(source) || {};
+      newValue = update(value[key], mut);
+      isChanged = isChanged || (newValue !== value[key]);
+      value[key] = newValue;
+    }
+  });
+
+  return isChanged ? value : source;
+}
+
+update.isCommand = function isCommand (k) {
+  return update.commands.hasOwnProperty(k);
+};
+
+update.getCommand = function getCommand (k) {
+  return update.commands[k];
+};
+
+update.commands = {
+  $apply (f, value) {
+    return f(value);
+  },
+
+  $set (value) {
+    return value;
+  },
+
+  $push (elements, arr) {
+    if (elements.length > 0) return arr.concat(elements);
+    return arr;
+  },
+
+  $splice (splices, arr) {
+    if (splices.length > 0) {
+      return _.reduce(splices, (acc, splice) => {
+        acc.splice.apply(acc, splice);
+        return acc;
+      }, _.clone(arr));
+    }
+
+    return arr;
+  },
+
+  $merge (whatToMerge, obj) {
+    const result = _.clone(obj);
+    let isChanged = false;
+
+    _.each(whatToMerge, (v, k) => {
+      result[k] = v;
+      isChanged = isChanged || (v !== obj[k]);
+    });
+
+    return isChanged ? result : obj;
+  }
+};
+
+
+// Reducer ////////////////////////////////////////////////////////////
+
+
+function makeReducer (component) {
+  const isListComponent = _.isArray(component);
+  const source = isListComponent ? _.head(component) : component;
+
+  const components = _.mapValues(source.components, makeReducer);
+
+  const actions = _.reduce(source.actions, function convertActions (output, action, name) {
+    if (!_.isFunction(action)) return output;
+    output[name] = action;
+    return output;
+  }, {});
+
+  const init = () => {
+    const childState = _.mapValues(components, childReducer => childReducer());
+    if (!actions.getInitialState) return childState;
+
+    const clone = Immutable.from(childState);
+    const initialState = actions.getInitialState(clone);
+    return Immutable.unwrap(initialState);
+  };
+
+  const reducerType = isListComponent ? 'list' : 'normal';
+  return makeReducer[reducerType](components, actions, init);
+}
+
+makeReducer.normal = function makeNormalReducer (components, actions, init) {
+  return function reducer (state = init(), event = {}) {
+    if (!event.type) return state;
+
+    const [head, ...tail] = event.type;
+
+    const componentHasAction = _.has(actions, head);
+    const isChildEvent = _.has(components, head);
+
+    // Use action if defined
+    if (componentHasAction) {
+      const result = _.get(actions, head)(Immutable.from(state), ...(event.args || []));
+
+      // Action overrides can return undefined to let the action pass through
+      const ignoreResult = result === void 0;
+      if (!ignoreResult) return Immutable.unwrap(result);
+    }
+
+    // Call child reducer if not already handled by local action
+    if (isChildEvent) {
+      const childReducer = components[head];
+      const result = childReducer(state[head], _.defaults({ type: tail }, event));
+      return update(state, { [head]: { $set: result } });
+    }
+
+    // No-op by default
+    return state;
+  };
+};
+
+makeReducer.list = function makeListReducer (components, actions, init) {
+  return function listReducer (list = [], event = {}) {
+    if (!event.type) return list;
+
+    const [index, head, ...tail] = event.type;
+    const componentHasAction = _.has(actions, head);
+    const isChildEvent = _.has(components, head);
+
+    // Use action if defined
+    if (componentHasAction) {
+      const state = list[index] || init();
+      const result = _.get(actions, head)(Immutable.from(state), ...(event.args || []));
+
+      // Action overrides can return undefined to let the action pass through
+      const ignoreResult = result === void 0;
+      if (!ignoreResult) return update(list, { $splice: [[index, 1, Immutable.unwrap(result)]] });
+    }
+
+    // Call child reducer if not already handled by local action
+    if (isChildEvent) {
+      const childReducer = components[head];
+      const result = childReducer(list[head], _.defaults({ type: tail }, event));
+      return update(list, { [index]: { [head]: { $set: result } } });
+    }
+
+    // No-op by default
+    return list;
+  };
+};
+
+// Views /////////////////////////////////////////////////////////////
+
+function parseListComponent (component, opts) {
+  const render = component;
+  const { dispatch, getState, path, displayName } = opts;
+
+  const cache = new WeakMap();
+
+  return function getter () {
+    return getState().map((state, index) => {
+      // Check if the component was previously parsed
+      const cached = cache.get(state);
+      if (cached && cached.index === index) return cached.view;
+
+      // Cache miss - parse the component
+      const view = parseComponent(component, {
+        displayName: `${displayName}[${index}]`,
+        dispatch,
+        getState () { return _.get(getState(), index); },
+        path: path.concat(index)
+      });
+
+      cache.set(state, { index, view });
+
+      return view;
+    });
+  };
+}
+
+function parseComponent (component, opts) {
+  const render = component;
+  const { dispatch, getState, path, displayName } = opts;
+
+  // Prepare actions
+  const childKeys = _.keys(component.components);
+  const ownActions = _.omit(component.actions || {}, childKeys);
+  const actionCreator = (__, type) => (...args) => dispatch({ type: path.concat(type), args });
+  const actions = _.mapValues(ownActions, actionCreator);
+
+  // Prepare components
+  const components = _.reduce(component.components, (obj, it, name) => {
+    const childOpts = {
+      displayName: name,
+      dispatch,
+      getState () { return _.get(getState(), name); },
+      path: path.concat(name),
+    };
+
+    // List component
+    if (_.isArray(it)) {
+      return Object.defineProperty(obj, name, {
+        enumerable: true,
+        get: parseListComponent(_.head(it), childOpts)
+      });
+    }
+
+    // Normal component
+    obj[name] = parseComponent(it, childOpts);
+    return obj;
+  }, {});
+
+  function view (props, ...children) {
+    return render({ props, children, actions, components, state: getState() });
+  }
+
+  view.displayName = displayName;
+  view.actions = actions;
+
+  return view;
+}
+
+const logger = store => next => action => {
+  console.group(action.type)
+  console.info('dispatching', action)
+  let result = next(action)
+  console.log('next state', store.getState())
+  console.groupEnd(action.type)
+  return result
+};
+
+function createRoot (rootComponent, stateStore) {
+  const store = stateStore || Redux.createStore(makeReducer(rootComponent));
+
+  // Setup the component heirarchy
+  const result = parseComponent(rootComponent, {
+    displayName: rootComponent.displayName || rootComponent.name || 'app',
+    path: [],
+    dispatch: store.dispatch,
+    getState: () => store.getState()
+  });
+
+  result.subscribe = store.subscribe;
+  result.dispatch = store.dispatch;
+  result.getState = store.getState;
+
+  return result;
+}
+
+function startApp (el, component) {
+  const root = createRoot(component);
+
+  m.mount(el, { view: root });
+  root.subscribe(m.redraw);
+
+  return root;
+}
+
+window.app = startApp(document.querySelector('#main'), TodoMVC);
+
+</script>
+</body>
+</html>
