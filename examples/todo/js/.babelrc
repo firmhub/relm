@@ -1,6 +1,6 @@
 {
   "presets": [
     "es2015",
-    "relm/yoyo/preset"
+    "relm/mithril/preset"
   ]
 }
