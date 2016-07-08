@@ -1,5 +1,7 @@
 import _ from 'lodash';
 
+const devMode = process.env.NODE_ENV !== 'production';
+
 export function update (source, mutation) {
   let isChanged = false;
   let value = source;
@@ -70,3 +72,59 @@ update.commands = {
     return isChanged ? result : obj;
   }
 };
+
+export function Immutable (props) {
+  if (!(this instanceof Immutable)) return new Immutable(props);
+  _.assign(this, props);
+  if (devMode) Object.freeze(this);
+}
+
+Immutable.prototype = {
+  update (spec) {
+    return Immutable.from(update(this, spec));
+  },
+
+  set (a, b) {
+    return Immutable.from(update(this, arguments.length === 1
+      ? { $set: a }
+      : _.set({}, a, { $set: b })
+    ));
+  },
+
+  splice (a, b) {
+    return Immutable.from(update(this, arguments.length === 1
+      ? { $splice: a }
+      : _.set({}, a, { $splice: b })
+    ));
+  },
+
+  map (a, b) {
+    // mapWith :: (a -> b) -> [a] -> [b]
+    const mapWith = f => arr => arr.map(function immutableMapper (v, i) {
+      const value = Immutable.from(v);
+      const result = f(value, i, arr);
+      return Immutable.unwrap(result);
+    });
+
+    return Immutable.from(update(this, arguments.length === 1
+      ? { $apply: mapWith(a) }
+      : _.set({}, a, { $apply: mapWith(b) })
+    ));
+  },
+
+  merge (a, b) {
+    return Immutable.from(update(this, arguments.length === 1
+      ? { $merge: a }
+      : _.set({}, a, { $merge: b })
+    ));
+  }
+};
+
+export function makeImmutable (arg) {
+  return new Immutable(arg);
+}
+
+export function unwrapImmutable (result) {
+  if (result instanceof Immutable) return _.clone(result);
+  return result;
+}
