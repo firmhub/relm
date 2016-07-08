@@ -10,7 +10,10 @@
   "scripts": {
     "yoyo:index": "rollup -c src/yoyo/rollup.js -i src/yoyo/index.js -o yoyo/index.js",
     "yoyo:preset": "rollup -c src/yoyo/rollup.js -i src/yoyo/preset.js -o yoyo/preset.js",
-    "yoyo": "./parallel.sh 'npm run yoyo:index' 'npm run yoyo:preset'"
+    "yoyo": "./parallel.sh 'npm run yoyo:index' 'npm run yoyo:preset'",
+    "build:index": "rollup -c src/rollup-cjs.js -i src/main.js -o index.js",
+    "build:index.min": "rollup -c src/rollup-browser.js -i src/main.js -o index.min.js",
+    "build": "./parallel.sh 'npm run build:main'"
   },
   "keywords": [
     "frontend",
@@ -42,10 +45,12 @@
     "eslint-plugin-react": "^5.2.2",
     "lodash": "^4.13.1",
     "npm-run-parallel": "^0.5.0",
+    "redux": "^3.5.2",
     "rollup": "^0.33.0",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-commonjs": "^3.1.0",
     "rollup-plugin-node-resolve": "^1.7.1",
+    "rollup-plugin-uglify": "^1.0.1",
     "rollup-watch": "^2.4.0"
   },
   "dependencies": {

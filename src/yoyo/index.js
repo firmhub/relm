@@ -1,6 +1,5 @@
 /* eslint-env browser */
 import yo from 'yo-yo';
-import { Node } from '../node';
 
 export function startApp (rootComponent) {
   const app = Node.createRootNode(rootComponent);
