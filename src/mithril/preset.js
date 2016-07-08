@@ -6,6 +6,6 @@ export default {
   plugins: [
     syntaxJsx,
     [transformJsx, { pragma: 'jsx' }],
-    [pragmaticJsx, { module: 'relm/yoyo/jsx', import: 'jsx', export: 'jsx' }]
+    [pragmaticJsx, { module: 'relm/mithril/jsx', import: 'jsx', export: 'jsx' }]
   ]
 };

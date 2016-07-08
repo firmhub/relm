@@ -1,3 +1,6 @@
 node_modules/
-yoyo/*.js
 npm-debug.log
+
+/yoyo/
+/mithril/
+/index.js

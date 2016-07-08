@@ -8,12 +8,15 @@
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
-    "yoyo:index": "rollup -c src/yoyo/rollup.js -i src/yoyo/index.js -o yoyo/index.js",
-    "yoyo:preset": "rollup -c src/yoyo/rollup.js -i src/yoyo/preset.js -o yoyo/preset.js",
-    "yoyo": "./parallel.sh 'npm run yoyo:index' 'npm run yoyo:preset'",
-    "build:index": "rollup -c src/rollup-cjs.js -i src/main.js -o index.js",
-    "build:index.min": "rollup -c src/rollup-browser.js -i src/main.js -o index.min.js",
-    "build": "./parallel.sh 'npm run build:main'"
+    "yoyo:jsx": "webpack src/yoyo/jsx.js yoyo/jsx.js",
+    "yoyo:preset": "webpack src/yoyo/preset.js yoyo/preset.js",
+    "yoyo": "./parallel.sh 'npm run yoyo:jsx' 'npm run yoyo:preset'",
+    "mithril:jsx": "webpack src/mithril/jsx.js mithril/jsx.js",
+    "mithril:preset": "webpack src/mithril/preset.js mithril/preset.js",
+    "mithril": "./parallel.sh 'npm run mithril:jsx' 'npm run mithril:preset'",
+    "build:index": "webpack src/main.js index.js",
+    "build:index.min": "webpack src/main.js index.js --config webpack.prod.js --display-modules",
+    "build": "./parallel.sh 'npm run build:index' 'npm run build:index.min' 'npm run yoyo' 'npm run mithril'"
   },
   "keywords": [
     "frontend",
@@ -35,28 +38,26 @@
     "ava": "^0.15.2",
     "babel-cli": "^6.10.1",
     "babel-eslint": "^6.1.0",
+    "babel-loader": "^6.2.4",
     "babel-plugin-lodash": "^3.2.0",
     "babel-preset-es2015": "^1.1.1",
-    "babel-preset-es2015-rollup": "^1.1.1",
     "eslint": "^2.13.1",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-plugin-import": "^1.10.0",
     "eslint-plugin-jsx-a11y": "^1.5.3",
     "eslint-plugin-react": "^5.2.2",
+    "json-loader": "^0.5.4",
     "lodash": "^4.13.1",
+    "mithril": "^0.2.5",
     "npm-run-parallel": "^0.5.0",
     "redux": "^3.5.2",
-    "rollup": "^0.33.0",
-    "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-commonjs": "^3.1.0",
-    "rollup-plugin-node-resolve": "^1.7.1",
-    "rollup-plugin-uglify": "^1.0.1",
-    "rollup-watch": "^2.4.0"
+    "webpack": "^1.13.1"
   },
   "dependencies": {
-    "yo-yo": "^1.2.2",
     "babel-plugin-jsx-pragmatic": "^1.0.2",
+    "babel-plugin-mjsx": "^4.1.1",
     "babel-plugin-syntax-jsx": "^6.8.0",
-    "babel-plugin-transform-react-jsx": "^6.8.0"
+    "babel-plugin-transform-react-jsx": "^6.8.0",
+    "yo-yo": "^1.2.2"
   }
 }
