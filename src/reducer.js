@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { Immutable, update } from './update';
+import { makeImmutable, unwrapImmutable, update } from './update';
 
 export function makeReducer (component) {
   const isListComponent = _.isArray(component);
@@ -17,9 +17,9 @@ export function makeReducer (component) {
     const childState = _.mapValues(components, childReducer => childReducer());
     if (!actions.getInitialState) return childState;
 
-    const clone = Immutable.from(childState);
+    const clone = makeImmutable(childState);
     const initialState = actions.getInitialState(clone);
-    return Immutable.unwrap(initialState);
+    return unwrapImmutable(initialState);
   };
 
   const reducerType = isListComponent ? 'list' : 'normal';
@@ -37,11 +37,11 @@ makeReducer.normal = function makeNormalReducer (components, actions, init) {
 
     // Use action if defined
     if (componentHasAction) {
-      const result = _.get(actions, head)(Immutable.from(state), ...(event.args || []));
+      const result = _.get(actions, head)(makeImmutable(state), ...(event.args || []));
 
       // Action overrides can return undefined to let the action pass through
       const ignoreResult = result === void 0;
-      if (!ignoreResult) return Immutable.unwrap(result);
+      if (!ignoreResult) return unwrapImmutable(result);
     }
 
     // Call child reducer if not already handled by local action
@@ -67,11 +67,11 @@ makeReducer.list = function makeListReducer (components, actions, init) {
     // Use action if defined
     if (componentHasAction) {
       const state = list[index] || init();
-      const result = _.get(actions, head)(Immutable.from(state), ...(event.args || []));
+      const result = _.get(actions, head)(makeImmutable(state), ...(event.args || []));
 
       // Action overrides can return undefined to let the action pass through
       const ignoreResult = result === void 0;
-      if (!ignoreResult) return update(list, { $splice: [[index, 1, Immutable.unwrap(result)]] });
+      if (!ignoreResult) return update(list, { $splice: [[index, 1, unwrapImmutable(result)]] });
     }
 
     // Call child reducer if not already handled by local action

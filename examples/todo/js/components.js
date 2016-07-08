@@ -1,16 +1,16 @@
 import m from 'mithril';
+import classNames from 'classnames';
 
 const ENTER_KEY = 13;
 const ESCAPE_KEY = 27;
-const classes = src => Object.keys(src).reduce((str, k) => (Boolean(src[k]) ? `${str} ${k}` : str));
 const focus = (setFocus) => (el) => { if (setFocus) el.focus(); };
 
-function TodoMVC ({ state, actions, components: { Todos } }) {
+export function TodoMVC ({ state, actions, components: { Todos } }) {
   const allTodos = state.Todos.length;
   const activeTodos = state.Todos.filter(x => !x.completed).length;
   const filterLink = (type, href) => ({
     href,
-    className: classes({ selected: state.filter === type }),
+    className: classNames({ selected: state.filter === type }),
     onclick: () => actions.changeFilter(type)
   });
 
@@ -73,8 +73,8 @@ TodoMVC.actions = {
   },
 };
 
-function Todo ({ actions, props, state: { editing, completed, title } }) {
-  return m('li', { className: classes({ completed, editing }) }, editing ?
+export function Todo ({ actions, props, state: { editing, completed, title } }) {
+  return m('li', { className: classNames({ completed, editing }) }, editing ?
     // Edit mode
     m('input.edit', { value: title, onkeyup: actions.textInput, config: focus(editing) }) :
     // View mode

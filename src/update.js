@@ -79,15 +79,6 @@ export function Immutable (props) {
   if (devMode) Object.freeze(this);
 }
 
-Immutable.from = function createImmutable (arg) {
-  return new Immutable(arg);
-};
-
-Immutable.unwrap = function unwrapImmutable (result) {
-  if (result instanceof Immutable) return _.clone(result);
-  return result;
-};
-
 Immutable.prototype = {
   update (spec) {
     return Immutable.from(update(this, spec));
@@ -128,3 +119,12 @@ Immutable.prototype = {
     ));
   }
 };
+
+export function makeImmutable (arg) {
+  return new Immutable(arg);
+}
+
+export function unwrapImmutable (result) {
+  if (result instanceof Immutable) return _.clone(result);
+  return result;
+}

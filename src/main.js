@@ -2,6 +2,7 @@ import { createStore } from 'redux';
 
 import { makeReducer } from './reducer';
 import { parseComponent } from './component';
+import { makeImmutable, unwrapImmutable } from './update';
 
 export default function relm (rootComponent, opts = {}) {
   const store = opts.store || createStore(makeReducer(rootComponent));
@@ -20,3 +21,10 @@ export default function relm (rootComponent, opts = {}) {
 
   return result;
 }
+
+export {
+  makeReducer,
+  parseComponent,
+  makeImmutable,
+  unwrapImmutable,
+};
