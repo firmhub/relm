@@ -47,7 +47,7 @@ export function TodoMVC ({ state, actions, components: { Todos } }) {
   ]);
 }
 
-TodoMVC.components = { Todos: [Todo] };
+TodoMVC.components = { Todos: [TodoComponent] };
 
 TodoMVC.actions = {
   getInitialState: (state) => state.merge({ filter: 'all', newTodo: '' }),
@@ -73,7 +73,7 @@ TodoMVC.actions = {
   },
 };
 
-export function Todo ({ actions, props, state: { editing, completed, title } }) {
+export function TodoComponent ({ actions, props, state: { editing, completed, title } }) {
   return m('li', { className: classNames({ completed, editing }) }, editing ?
     // Edit mode
     m('input.edit', { value: title, onkeyup: actions.textInput, config: focus(editing) }) :
@@ -85,7 +85,7 @@ export function Todo ({ actions, props, state: { editing, completed, title } }) 
     ]));
 }
 
-Todo.actions = {
+TodoComponent.actions = {
   toggleCompleted: (todo) => todo.set('completed', !todo.completed),
   startEditing: (todo) => todo.merge({ editing: true, previousTitle: todo.title }),
 

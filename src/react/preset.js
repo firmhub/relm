@@ -5,7 +5,8 @@ import pragmaticJsx from 'babel-plugin-jsx-pragmatic';
 module.exports = {
   plugins: [
     syntaxJsx,
+    transformJsx,
     [transformJsx, { pragma: 'jsx' }],
-    [pragmaticJsx, { module: 'relm/mithril/jsx', import: 'jsx', export: 'jsx' }]
+    [pragmaticJsx, { module: 'react', import: 'jsx', export: 'createElement' }]
   ]
 };

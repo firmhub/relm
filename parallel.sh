@@ -2,7 +2,7 @@
 
 for cmd in "$@"; do {
   echo "Process \"$cmd\" started";
-  $cmd & pid=$!
+  npm run $cmd & pid=$!
   PID_LIST+=" $pid";
 } done
 

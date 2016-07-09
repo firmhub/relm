@@ -15,5 +15,5 @@ var _babelPluginJsxPragmatic2 = _interopRequireDefault(_babelPluginJsxPragmatic)
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 module.exports = {
-  plugins: [_babelPluginSyntaxJsx2.default, [_babelPluginTransformReactJsx2.default, { pragma: 'jsx' }], [_babelPluginJsxPragmatic2.default, { module: 'relm/yoyo/jsx', import: 'jsx', export: 'jsx' }]]
+  plugins: [_babelPluginSyntaxJsx2.default, [_babelPluginTransformReactJsx2.default, { pragma: 'jsx' }], [_babelPluginJsxPragmatic2.default, { module: 'relm/inferno/jsx', import: 'jsx', export: 'jsx' }]]
 };

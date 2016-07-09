@@ -2,7 +2,7 @@ import syntaxJsx from 'babel-plugin-syntax-jsx';
 import transformJsx from 'babel-plugin-transform-react-jsx';
 import pragmaticJsx from 'babel-plugin-jsx-pragmatic';
 
-export default {
+module.exports = {
   plugins: [
     syntaxJsx,
     [transformJsx, { pragma: 'jsx' }],

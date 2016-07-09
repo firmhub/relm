@@ -1,6 +1,6 @@
 {
   "presets": [
     "es2015",
-    "relm/mithril/preset"
+    "relm/inferno/preset"
   ]
 }

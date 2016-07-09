@@ -1,6 +1,10 @@
 node_modules/
 npm-debug.log
+*.bundle.js
+/examples/todo/js/app.js
+
 
 /yoyo/
 /mithril/
+/react/
 /index.js
