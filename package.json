@@ -2,18 +2,22 @@
   "name": "relm",
   "version": "0.7.0-alpha1",
   "description": "Composable components",
-  "main": "main.js",
+  "main": "index.min.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
-    "yoyo:index": "rollup -c src/yoyo/rollup.js -i src/yoyo/index.js -o yoyo/index.js",
-    "yoyo:preset": "rollup -c src/yoyo/rollup.js -i src/yoyo/preset.js -o yoyo/preset.js",
-    "yoyo": "./parallel.sh 'npm run yoyo:index' 'npm run yoyo:preset'",
-    "build:index": "rollup -c src/rollup-cjs.js -i src/main.js -o index.js",
-    "build:index.min": "rollup -c src/rollup-browser.js -i src/main.js -o index.min.js",
-    "build": "./parallel.sh 'npm run build:main'"
+    "pkg:yoyo": "babel src/yoyo/jsx.js -o yoyo/jsx.js; babel src/yoyo/preset.js -o yoyo/preset.js",
+    "pkg:mithril": "babel src/mithril/jsx.js -o mithril/jsx.js; babel src/mithril/preset.js -o mithril/preset.js",
+    "pkg:inferno": "babel src/inferno/jsx.js -o inferno/jsx.js; babel src/inferno/preset.js -o inferno/preset.js",
+    "pkg:react": "babel src/react/preset.js -o react/preset.js",
+    "examples:todo": "webpack examples/todo/js/app.inferno.js examples/todo/js/app.js",
+    "build:packages": "./parallel.sh 'pkg:yoyo' 'pkg:mithril' 'pkg:react'",
+    "build:examples": "./parallel.sh 'examples:todo'",
+    "build:index": "webpack src/main.js index.js --output-library=relm --display-modules",
+    "build:index.min": "webpack src/main.js index.min.js --output-library=relm --config=webpack.prod.js --display-modules",
+    "build": "./parallel.sh 'build:index' 'build:index.min' 'build:packages' 'build:examples'"
   },
   "keywords": [
     "frontend",
@@ -35,28 +39,32 @@
     "ava": "^0.15.2",
     "babel-cli": "^6.10.1",
     "babel-eslint": "^6.1.0",
+    "babel-loader": "^6.2.4",
     "babel-plugin-lodash": "^3.2.0",
     "babel-preset-es2015": "^1.1.1",
-    "babel-preset-es2015-rollup": "^1.1.1",
+    "babel-preset-react": "^6.11.1",
+    "classnames": "^2.2.5",
     "eslint": "^2.13.1",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-plugin-import": "^1.10.0",
     "eslint-plugin-jsx-a11y": "^1.5.3",
     "eslint-plugin-react": "^5.2.2",
+    "inferno-create-element": "^0.7.16",
+    "inferno-dom": "^0.7.16",
+    "json-loader": "^0.5.4",
     "lodash": "^4.13.1",
+    "mithril": "^0.2.5",
     "npm-run-parallel": "^0.5.0",
+    "react": "^15.2.1",
+    "react-dom": "^15.2.1",
     "redux": "^3.5.2",
-    "rollup": "^0.33.0",
-    "rollup-plugin-babel": "^2.6.1",
-    "rollup-plugin-commonjs": "^3.1.0",
-    "rollup-plugin-node-resolve": "^1.7.1",
-    "rollup-plugin-uglify": "^1.0.1",
-    "rollup-watch": "^2.4.0"
+    "webpack": "^1.13.1"
   },
   "dependencies": {
-    "yo-yo": "^1.2.2",
     "babel-plugin-jsx-pragmatic": "^1.0.2",
+    "babel-plugin-mjsx": "^4.1.1",
     "babel-plugin-syntax-jsx": "^6.8.0",
-    "babel-plugin-transform-react-jsx": "^6.8.0"
+    "babel-plugin-transform-react-jsx": "^6.8.0",
+    "yo-yo": "^1.2.2"
   }
 }

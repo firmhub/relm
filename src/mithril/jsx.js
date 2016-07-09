@@ -1,12 +1,4 @@
-/* eslint-env browser */
-import yo from 'yo-yo';
-
-export function startApp (rootComponent) {
-  const app = Node.createRootNode(rootComponent);
-  const el = app.view();
-
-  document.body.insertBefore(el, document.body.firstChild);
-}
+import m from 'mithril';
 
 function transformAttributes (attrs, k, i, props) {
   const v = props[k];
@@ -29,5 +21,5 @@ export function jsx (tag, props, ...children) {
   if (tag instanceof Function) return tag(props, children); // Sub-components
 
   const attrs = Object.keys(props || {}).reduce(transformAttributes, {});
-  return yo.createElement(tag, attrs, children);
+  return m(tag, attrs, children);
 }

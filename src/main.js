@@ -1,11 +1,23 @@
-import { createStore } from 'redux';
+/* eslint-disable no-console */
+
+import { createStore, applyMiddleware } from 'redux';
 
 import { makeReducer } from './reducer';
 import { parseComponent } from './component';
 import { makeImmutable, unwrapImmutable } from './update';
 
+const logger = store => next => action => {
+  console.group(action.type);
+  console.info('dispatching', action);
+  const result = next(action);
+  console.log('next state', store.getState());
+  console.groupEnd(action.type);
+  return result;
+};
+
 export default function relm (rootComponent, opts = {}) {
-  const store = opts.store || createStore(makeReducer(rootComponent));
+  const middleware = opts.debug ? applyMiddleware(logger) : void 0;
+  const store = opts.store || createStore(makeReducer(rootComponent), middleware);
 
   // Setup the component heirarchy
   const result = parseComponent(rootComponent, {
