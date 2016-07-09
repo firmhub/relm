@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-
+import _ from 'lodash';
 import { createStore, applyMiddleware } from 'redux';
 
 import { makeReducer } from './reducer';
@@ -15,12 +15,14 @@ const logger = store => next => action => {
   return result;
 };
 
-export default function relm (rootComponent, opts = {}) {
+export default function relm (createElement, rootComponent, opts = {}) {
   const middleware = opts.debug ? applyMiddleware(logger) : void 0;
-  const store = opts.store || createStore(makeReducer(rootComponent), middleware);
+  const reducer = makeReducer(rootComponent);
+  const initialState = _.merge(reducer() || {}, opts.initialState || {});
+  const store = opts.store || createStore(reducer, initialState, middleware);
 
   // Setup the component heirarchy
-  const result = parseComponent(rootComponent, {
+  const result = parseComponent(createElement, rootComponent, {
     displayName: rootComponent.displayName || rootComponent.name || 'app',
     path: [],
     dispatch: store.dispatch,
