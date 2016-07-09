@@ -1,10 +1,8 @@
 node_modules/
 npm-debug.log
 *.bundle.js
-/examples/todo/js/app.js
+*.dist.js
 
-
-/yoyo/
-/mithril/
-/react/
-/index.js
+/inferno.js
+/react.js
+/morphdom.js

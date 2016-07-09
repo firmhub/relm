@@ -1,17 +1,28 @@
 const webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
   module: {
-    loaders: [
-      { test: /\.(js|jsx)$/, loader: 'babel', exclude: /(node_modules)/ },
-      { test: /\.json$/, loader: 'json' }
-    ]
+    loaders: [{
+      test: /\.(js|jsx)$/,
+      loader: 'babel',
+      exclude: [
+        /(node_modules)/,                         // Skip node modules
+
+        path.resolve(__dirname, 'inferno.js'),    // Don't process compiled versions
+        path.resolve(__dirname, 'main.js'),       // (for instance when required from the examples)
+      ]
+    }, {
+      test: /\.json$/,
+      loader: 'json'
+    }]
   },
   output: {
     libraryTarget: 'umd'
   },
   externals: [
-    /^babel+$/
+    /^babel.+$/,
+    // /^lodash.+$/,
   ],
   plugins: [
     new webpack.optimize.DedupePlugin(),

@@ -2,22 +2,18 @@
   "name": "relm",
   "version": "0.7.0-alpha1",
   "description": "Composable components",
-  "main": "index.min.js",
+  "main": "main.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
-    "pkg:yoyo": "babel src/yoyo/jsx.js -o yoyo/jsx.js; babel src/yoyo/preset.js -o yoyo/preset.js",
-    "pkg:mithril": "babel src/mithril/jsx.js -o mithril/jsx.js; babel src/mithril/preset.js -o mithril/preset.js",
-    "pkg:inferno": "babel src/inferno/jsx.js -o inferno/jsx.js; babel src/inferno/preset.js -o inferno/preset.js",
-    "pkg:react": "babel src/react/preset.js -o react/preset.js",
-    "examples:todo": "webpack examples/todo/js/app.inferno.js examples/todo/js/app.js",
-    "build:packages": "./parallel.sh 'pkg:yoyo' 'pkg:mithril' 'pkg:react'",
+    "examples:todo": "webpack examples/todo/js/components.jsx examples/todo/js/components.dist.js --output-library=components",
     "build:examples": "./parallel.sh 'examples:todo'",
-    "build:index": "webpack src/main.js index.js --output-library=relm --display-modules",
-    "build:index.min": "webpack src/main.js index.min.js --output-library=relm --config=webpack.prod.js --display-modules",
-    "build": "./parallel.sh 'build:index' 'build:index.min' 'build:packages' 'build:examples'"
+    "build:inferno": "webpack src/packages/inferno.js inferno.js --output-library=inferno",
+    "build:react": "webpack src/packages/react.js react.js --output-library=react",
+    "build:morphdom": "webpack src/packages/morphdom.js morphdom.js --output-library=morphdom",
+    "build": "./parallel.sh 'build:examples' 'build:inferno -- --config=webpack.prod.js' 'build:react -- --config=webpack.prod.js' 'build:morphdom -- --config=webpack.prod.js'"
   },
   "keywords": [
     "frontend",

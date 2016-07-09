@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-function parseListComponent (component, opts) {
+function parseListComponent (createElement, component, opts) {
   const { dispatch, getState, path, displayName } = opts;
 
   const cache = new WeakMap();
@@ -13,7 +13,7 @@ function parseListComponent (component, opts) {
 
       // Cache miss - parse the component
       // eslint-disable-next-line no-use-before-define
-      const view = parseComponent(component, {
+      const view = parseComponent(createElement, component, {
         displayName: `${displayName}[${index}]`,
         dispatch,
         getState () { return _.get(getState(), index); },
@@ -27,8 +27,8 @@ function parseListComponent (component, opts) {
   };
 }
 
-export function parseComponent (component, opts) {
-  const render = component;
+export function parseComponent (createElement, component, opts) {
+  const render = component.bind(null, createElement);
   const { dispatch, getState, path, displayName } = opts;
 
   // Prepare actions
@@ -50,12 +50,12 @@ export function parseComponent (component, opts) {
     if (_.isArray(it)) {
       return Object.defineProperty(obj, name, {
         enumerable: true,
-        get: parseListComponent(_.head(it), childOpts)
+        get: parseListComponent(createElement, _.head(it), childOpts)
       });
     }
 
     // Normal component
-    obj[name] = parseComponent(it, childOpts);
+    obj[name] = parseComponent(createElement, it, childOpts);
     return obj;
   }, {});
 
@@ -64,7 +64,6 @@ export function parseComponent (component, opts) {
   }
 
   view.displayName = displayName;
-  view.actions = actions;
 
   return view;
 }
