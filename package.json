@@ -11,7 +11,8 @@
     "examples:todo": "webpack examples/todo/js/components.jsx examples/todo/js/components.dist.js --output-library=components",
     "build:examples": "./parallel.sh 'examples:todo'",
     "build:inferno": "webpack src/inferno.js inferno.js --output-library=inferno --display-modules --config=webpack.prod.js",
-    "build": "./parallel.sh 'build:inferno' 'build:examples'"
+    "build:morphdom": "webpack src/morphdom.js morphdom.js --output-library=morphdom --display-modules --config=webpack.prod.js",
+    "build": "./parallel.sh 'build:inferno' 'build:morphdom' 'build:examples'"
   },
   "keywords": [
     "frontend",

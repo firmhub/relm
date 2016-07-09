@@ -16,7 +16,7 @@ const logger = store => next => action => {
   return result;
 };
 
-export default function relm (createElement, rootComponent, opts = {}) {
+export function createApp (createElement, rootComponent, opts = {}) {
   const middleware = opts.debug ? applyMiddleware(logger) : void 0;
   const reducer = makeReducer(rootComponent);
   const initialState = _.merge(reducer() || {}, opts.initialState || {});

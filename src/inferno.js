@@ -1,11 +1,11 @@
 import Inferno from 'inferno-dom';
 import InfernoElement from 'inferno-create-element';
 
-import relm, { extendHyperscript } from './main';
+import { createApp, extendHyperscript } from './index';
 
 export function relmApp (el, component, opts = {}) {
   const createElement = extendHyperscript(InfernoElement);
-  const app = relm(createElement, component, opts);
+  const app = createApp(createElement, component, opts);
 
   Inferno.render(app(), el);
 
