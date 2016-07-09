@@ -2,7 +2,7 @@
   "name": "relm",
   "version": "0.7.0-alpha1",
   "description": "Composable components",
-  "main": "index.min.js",
+  "main": "main.js",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/motorcode/relm.git"
@@ -15,9 +15,9 @@
     "examples:todo": "webpack examples/todo/js/app.inferno.js examples/todo/js/app.js",
     "build:packages": "./parallel.sh 'pkg:yoyo' 'pkg:mithril' 'pkg:react'",
     "build:examples": "./parallel.sh 'examples:todo'",
-    "build:index": "webpack src/main.js index.js --output-library=relm --display-modules",
-    "build:index.min": "webpack src/main.js index.min.js --output-library=relm --config=webpack.prod.js --display-modules",
-    "build": "./parallel.sh 'build:index' 'build:index.min' 'build:packages' 'build:examples'"
+    "build:main": "webpack src/main.js main.js --output-library=relm --display-modules",
+    "build:inferno": "webpack src/inferno.js inferno.js --output-library=relm --display-modules",
+    "build": "./parallel.sh 'build:main' 'build:inferno' 'build:packages' 'build:examples'"
   },
   "keywords": [
     "frontend",

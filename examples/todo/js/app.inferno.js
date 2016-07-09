@@ -1,13 +1,11 @@
 /* eslint-env browser */
-import Inferno from 'inferno-dom';
-import relm from 'relm';
+import { startApp } from 'relm/inferno';
 import { TodoMVC } from './components.jsx';
 
-const App = relm(TodoMVC);
+const app = startApp(document.querySelector('#main'), TodoMVC, {
+  initialState: JSON.parse(localStorage.getItem('myTodos') || '{}')
+});
 
-function draw () {
-  Inferno.render(<App />, document.querySelector('#main'));
-}
-
-App.subscribe(draw);
-draw();
+app.subscribe(function presist () {
+  localStorage.setItem('myTodos', JSON.stringify(app.getState()));
+});

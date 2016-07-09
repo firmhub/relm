@@ -1,9 +1,8 @@
-import classNames from 'classnames';
-
+/* @jsx html */
 const ENTER_KEY = 13;
 const ESCAPE_KEY = 27;
 
-export function TodoMVC ({ state, actions, components: { Todos } }) {
+export function TodoMVC (html, { state, actions, components: { Todos } }) {
   const allTodos = state.Todos.length;
   const activeTodos = state.Todos.filter(x => !x.completed).length;
 
@@ -15,7 +14,7 @@ export function TodoMVC ({ state, actions, components: { Todos } }) {
 
   function filterLink (type) {
     return {
-      className: classNames({ selected: state.filter === type }),
+      className: { selected: state.filter === type },
       onClick () { actions.changeFilter(type); }
     };
   }
@@ -82,9 +81,14 @@ TodoMVC.actions = {
   },
 };
 
-export function TodoComponent ({ actions, props, state: { editing, completed, title } }) {
+
+// TodoComponent
+//
+// Responsible for managing the state of each todo item
+// and providing ability to edit and delete them individually
+export function TodoComponent (html, { actions, props, state: { editing, completed, title } }) {
   return (
-    <li className={classNames({ completed, editing })}>
+    <li className={{ completed, editing }}>
       {editing === true ? (
         // Edit mode
         <input

@@ -4,7 +4,5 @@ npm-debug.log
 /examples/todo/js/app.js
 
 
-/yoyo/
-/mithril/
-/react/
-/index.js
+/inferno.js
+/main.js

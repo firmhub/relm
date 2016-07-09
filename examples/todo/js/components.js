@@ -10,7 +10,7 @@ export function TodoMVC (m, { state, actions, components: { Todos } }) {
   const filterLink = (type, href) => ({
     href,
     className: classNames({ selected: state.filter === type }),
-    onclick: () => actions.changeFilter(type)
+    onClick: () => actions.changeFilter(type)
   });
 
   return m('section.todoapp', [
@@ -19,29 +19,29 @@ export function TodoMVC (m, { state, actions, components: { Todos } }) {
       m('input.new-todo', {
         placeholder: 'What needs to be done?',
         value: state.newTodo || '',
-        onkeyup: actions.newTodoInput,
+        onKeyUp: actions.newTodoInput,
         autofocus: true
       })
     ]),
     // Main section should be hidden by default and shown when there are todos
     allTodos === 0 ? null : m('section.main', [
-      m('input.toggle-all', { type: 'checkbox', onclick: actions.toggleAll }),
+      m('input.toggle-all', { type: 'checkbox', onClick: actions.toggleAll }),
       m('label', { htmlFor: 'toggle-all' }, 'Mark all as complete'),
       m('ul.todo-list', Todos.map((Item, index) => {
         const todoCompleted = state.Todos[index].completed;
         if (state.filter !== 'all' && state.filter !== (todoCompleted ? 'completed' : 'active')) return null;
-        return Item({ onRemove: () => actions.removeTodo(index) });
+        return m(Item, { onRemove: () => actions.removeTodo(index) });
       }))
     ]),
     // Footer should hidden by default and shown when there are todos
     allTodos === 0 ? null : m('footer.footer', [
-      m('span.todo-count', m.trust(`<strong>${activeTodos}</string> items left`)),
+      m('span.todo-count', [m('strong', activeTodos), ' items left']),
       m('ul.filters', [
         m('li', m('a', filterLink('all', '#/'), 'All')),
         m('li', m('a', filterLink('active', '#/active'), 'Active')),
         m('li', m('a', filterLink('completed', '#/completed'), 'Completed')),
       ]),
-      m('button.clear-completed', { onclick: actions.clearCompleted }, 'Clear completed')
+      m('button.clear-completed', { onClick: actions.clearCompleted }, 'Clear completed')
     ])
   ]);
 }
@@ -75,12 +75,12 @@ TodoMVC.actions = {
 export function TodoComponent (m, { actions, props, state: { editing, completed, title } }) {
   return m('li', { className: classNames({ completed, editing }) }, editing ?
     // Edit mode
-    m('input.edit', { value: title, onkeyup: actions.textInput, config: focus(editing) }) :
+    m('input.edit', { value: title, onKeyUp: actions.textInput, onAttached: focus(editing) }) :
     // View mode
     m('div.view', [
-      m('input.toggle', { onclick: actions.toggleCompleted, type: 'checkbox', checked: completed }),
-      m('label', { ondblclick: actions.startEditing }, title),
-      m('button.destroy', { onclick: props.onRemove })
+      m('input.toggle', { onClick: actions.toggleCompleted, type: 'checkbox', checked: completed }),
+      m('label', { onDblClick: actions.startEditing }, title),
+      m('button.destroy', { onClick: props.onRemove })
     ]));
 }
 

@@ -1,6 +1,9 @@
 {
   "presets": [
     "es2015",
-    "relm/inferno/preset"
+  ],
+  "plugins": [
+    "syntax-jsx",
+    "transform-react-jsx"
   ]
 }
