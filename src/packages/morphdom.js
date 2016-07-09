@@ -14,9 +14,15 @@ function transformAttributes (attrs, k) {
     return attrs;
   }
 
+  // Normalize checkbox value
+  if (k === 'checked') {
+    if (!v) return attrs;
+    attrs.checked = 'checked';
+    return attrs;
+  }
+
   // Other attributes get passed through
   attrs[k] = v;
-
   return attrs;
 }
 

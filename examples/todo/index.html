@@ -10,13 +10,13 @@
 	<body>
     <div id="main"></div>
 		<script src="node_modules/todomvc-common/base.js"></script>
-		<script src="../../react.js"></script>
+		<script src="../../inferno.js"></script>
 		<script src="js/components.dist.js"></script>
     <script>
       var targetEl = document.querySelector('#main');
 
       // Start the application
-      window.app = react.relmApp(targetEl, components.TodoMVC, {
+      window.app = inferno.relmApp(targetEl, components.TodoMVC, {
         initialState: JSON.parse(localStorage.getItem('myTodos') || '{}')
       });
 
