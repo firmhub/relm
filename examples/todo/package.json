@@ -1,0 +1,11 @@
+{
+  "private": true,
+  "dependencies": {
+    "mithril": "*",
+    "classnames": "*",
+    "todomvc-app-css": "*",
+    "todomvc-common": "*"
+  },
+  "devDependencies": {
+  }
+}
