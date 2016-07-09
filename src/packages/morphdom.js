@@ -1,5 +1,6 @@
-import { createApp, extendHyperscript } from './index';
 import yo from 'yo-yo';
+
+import { createApp, extendHyperscript } from '../index';
 
 function transformAttributes (attrs, k) {
   const v = this[k];
@@ -19,14 +20,14 @@ function transformAttributes (attrs, k) {
   return attrs;
 }
 
-function yoyoElement (tag, props, ...children) {
+function createElement (tag, props, ...children) {
   const attrs = Object.keys(props || {}).reduce(transformAttributes.bind(props), {});
   return yo.createElement(tag, attrs, children);
 }
 
 export function relmApp (el, component, opts = {}) {
-  const createElement = extendHyperscript(yoyoElement);
-  const app = createApp(createElement, component, opts);
+  const h = extendHyperscript(createElement);
+  const app = createApp(h, component, opts);
 
   let targetEl = yo.update(el, app());
 

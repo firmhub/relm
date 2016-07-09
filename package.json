@@ -10,9 +10,10 @@
   "scripts": {
     "examples:todo": "webpack examples/todo/js/components.jsx examples/todo/js/components.dist.js --output-library=components",
     "build:examples": "./parallel.sh 'examples:todo'",
-    "build:inferno": "webpack src/inferno.js inferno.js --output-library=inferno --display-modules --config=webpack.prod.js",
-    "build:morphdom": "webpack src/morphdom.js morphdom.js --output-library=morphdom --display-modules --config=webpack.prod.js",
-    "build": "./parallel.sh 'build:inferno' 'build:morphdom' 'build:examples'"
+    "build:inferno": "webpack src/packages/inferno.js inferno.js --output-library=inferno",
+    "build:react": "webpack src/packages/react.js react.js --output-library=react",
+    "build:morphdom": "webpack src/packages/morphdom.js morphdom.js --output-library=morphdom",
+    "build": "./parallel.sh 'build:examples' 'build:inferno -- --config=webpack.prod.js' 'build:react -- --config=webpack.prod.js' 'build:morphdom -- --config=webpack.prod.js'"
   },
   "keywords": [
     "frontend",

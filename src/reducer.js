@@ -15,10 +15,10 @@ export function makeReducer (component) {
 
   const init = () => {
     const childState = _.mapValues(components, childReducer => childReducer());
-    if (!actions.getInitialState) return childState;
+    if (!actions.initializeState) return childState;
 
     const clone = makeImmutable(childState);
-    const initialState = actions.getInitialState(clone);
+    const initialState = actions.initializeState(clone);
     return unwrapImmutable(initialState);
   };
 

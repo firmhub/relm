@@ -6,6 +6,10 @@ export function parseTag (tag) {
   const parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g;
   let match;
 
+  if (parseTag.cache[tag]) {
+    return Object.assign(cell, parseTag.cache[tag]);
+  }
+
   // eslint-disable-next-line no-cond-assign
   while ((match = parser.exec(tag))) {
     if (match[1] === '' && match[2]) {
@@ -20,8 +24,12 @@ export function parseTag (tag) {
     }
   }
 
+  parseTag.cache[tag] = cell;
+
   return cell;
 }
+
+parseTag.cache = {};
 
 function isAttributesObject (attrs) {
   return attrs && typeof attrs === 'object' && !Array.isArray(attrs) && !attrs.children;

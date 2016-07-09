@@ -27,7 +27,8 @@ export function TodoMVC (html, { state, actions, components: { Todos } }) {
           className='new-todo'
           placeholder='What needs to be done?'
           value={state.newTodo || ''}
-          onKeyUp={actions.newTodoInput}
+          onChange={actions.newTodoInput}
+          onKeyUp={actions.addTodoOnEnter}
           autoFocus
         />
       </header>
@@ -58,26 +59,24 @@ TodoMVC.components = {
 };
 
 TodoMVC.actions = {
-  getInitialState: (state) => state.merge({ filter: 'all', newTodo: '' }),
+  initializeState: (state) => state.merge({ filter: 'all', newTodo: '' }),
   changeFilter: (state, value) => state.set('filter', value),
   clearCompleted: (state) => state.set('Todos', state.Todos.filter(todo => !todo.completed)),
   removeTodo: (state, index) => state.splice('Todos', [[index, 1]]),
+  newTodoInput: (state, event) => state.set('newTodo', event.target.value),
+
+  addTodoOnEnter (state, event) {
+    if (event.keyCode !== ENTER_KEY || !event.target.value) return state;
+
+    return state.update({
+      Todos: { $splice: [[0, 0, { title: event.target.value }]] },
+      newTodo: { $set: '' }
+    });
+  },
 
   toggleAll: (state) => {
     const completed = !state.Todos[0].completed;
     return state.map('Todos', todo => todo.merge({ completed }));
-  },
-
-  newTodoInput (state, event) {
-    switch (event.keyCode) {
-      // When enter is pressed and input is not empty, create the new todo and clear the input
-      case ENTER_KEY: return !event.target.value ? state : state.update({
-        Todos: { $splice: [[0, 0, { title: event.target.value }]] },
-        newTodo: { $set: '' }
-      });
-      // All other keystrokes, simply update the newTodo
-      default: return state.set('newTodo', event.target.value);
-    }
   },
 };
 
@@ -94,13 +93,19 @@ export function TodoComponent (html, { actions, props, state: { editing, complet
         <input
           className='edit'
           value={title}
-          onKeyUp={actions.textInput}
+          onChange={actions.textInput}
+          onKeyUp={actions.finishEditing}
           onAttached={(el) => { if (editing) el.focus(); }}
         />
       ) : (
         // Normal mode
         <div className='view'>
-          <input className='toggle' checked={completed} type='checkbox' onClick={actions.toggleCompleted} />
+          <input
+            className='toggle'
+            type='checkbox'
+            checked={completed === true}
+            onChange={actions.toggleCompleted}
+          />
           <label onDblClick={actions.startEditing}>{title}</label>
           <button className='destroy' onClick={props.onRemove}></button>
         </div>
@@ -112,8 +117,8 @@ export function TodoComponent (html, { actions, props, state: { editing, complet
 TodoComponent.actions = {
   toggleCompleted: (todo) => todo.set('completed', !todo.completed),
   startEditing: (todo) => todo.merge({ editing: true, previousTitle: todo.title }),
-
-  textInput (todo, event) {
+  textInput: (todo, event) => todo.set('title', event.target.value),
+  finishEditing (todo, event) {
     switch (event.keyCode) {
       // When enter is pressed, stop editing
       case ENTER_KEY: return todo.merge({
@@ -127,8 +132,8 @@ TodoComponent.actions = {
         previousTitle: null,
         editing: false,
       });
-      // All other keystrokes, simply update the title
-      default: return todo.set('title', event.target.value);
+      // No other special handling
+      default: return todo;
     }
   }
 };

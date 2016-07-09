@@ -4,5 +4,5 @@ npm-debug.log
 *.dist.js
 
 /inferno.js
-/mithril.js
+/react.js
 /morphdom.js
