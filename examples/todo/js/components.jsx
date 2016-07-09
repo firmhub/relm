@@ -91,7 +91,7 @@ export function TodoComponent ({ actions, props, state: { editing, completed, ti
           className='edit'
           value={title}
           onKeyUp={actions.textInput}
-          config={(el) => { if (editing) el.focus(); }}
+          onAttached={(el) => { if (editing) el.focus(); }}
         />
       ) : (
         // Normal mode

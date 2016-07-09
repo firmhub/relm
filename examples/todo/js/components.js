@@ -1,11 +1,10 @@
-import m from 'mithril';
 import classNames from 'classnames';
 
 const ENTER_KEY = 13;
 const ESCAPE_KEY = 27;
 const focus = (setFocus) => (el) => { if (setFocus) el.focus(); };
 
-export function TodoMVC ({ state, actions, components: { Todos } }) {
+export function TodoMVC (m, { state, actions, components: { Todos } }) {
   const allTodos = state.Todos.length;
   const activeTodos = state.Todos.filter(x => !x.completed).length;
   const filterLink = (type, href) => ({
@@ -73,7 +72,7 @@ TodoMVC.actions = {
   },
 };
 
-export function TodoComponent ({ actions, props, state: { editing, completed, title } }) {
+export function TodoComponent (m, { actions, props, state: { editing, completed, title } }) {
   return m('li', { className: classNames({ completed, editing }) }, editing ?
     // Edit mode
     m('input.edit', { value: title, onkeyup: actions.textInput, config: focus(editing) }) :
