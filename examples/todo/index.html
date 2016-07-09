@@ -10,6 +10,19 @@
 	<body>
     <div id="main"></div>
 		<script src="node_modules/todomvc-common/base.js"></script>
-		<script src="js/app.js"></script>
+		<script src="../../inferno.js"></script>
+		<script src="js/components.bundle.js"></script>
+    <script>
+      var targetEl = document.querySelector('#main');
+
+      // Start the application
+      window.app = inferno.relmApp(targetEl, components.TodoMVC, {
+        initialState: JSON.parse(localStorage.getItem('myTodos') || '{}')
+      });
+
+      app.subscribe(function saveChangesToLocalStorage () {
+        localStorage.setItem('myTodos', JSON.stringify(app.getState()));
+      });
+    </script>
 	</body>
 </html>

@@ -5,6 +5,7 @@ import { createStore, applyMiddleware } from 'redux';
 import { makeReducer } from './reducer';
 import { parseComponent } from './component';
 import { makeImmutable, unwrapImmutable } from './update';
+import { extendHyperscript } from './hyperscript';
 
 const logger = store => next => action => {
   console.group(action.type);
@@ -41,4 +42,5 @@ export {
   parseComponent,
   makeImmutable,
   unwrapImmutable,
+  extendHyperscript,
 };

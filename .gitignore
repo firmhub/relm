@@ -1,8 +1,8 @@
 node_modules/
 npm-debug.log
 *.bundle.js
-/examples/todo/js/app.js
-
+*.dist.js
 
 /inferno.js
-/main.js
+/mithril.js
+/yoyo.js
