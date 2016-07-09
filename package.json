@@ -1,6 +1,6 @@
 {
   "name": "relm",
-  "version": "1.0.0-beta",
+  "version": "1.0.0",
   "description": "Composable components",
   "main": "main.js",
   "repository": {
@@ -60,6 +60,5 @@
     "webpack": "^1.13.1",
     "yo-yo": "^1.2.2"
   },
-  "dependencies": {
-  }
+  "dependencies": {}
 }
