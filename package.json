@@ -8,12 +8,10 @@
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
-    "examples:todo": "webpack examples/todo/js/components.jsx examples/todo/js/components.dist.js --output-library=components",
-    "build:examples": "./parallel.sh 'examples:todo'",
     "build:inferno": "webpack src/packages/inferno.js inferno.js --output-library=inferno",
     "build:react": "webpack src/packages/react.js react.js --output-library=react",
     "build:morphdom": "webpack src/packages/morphdom.js morphdom.js --output-library=morphdom",
-    "build": "./parallel.sh 'build:examples' 'build:inferno -- --config=webpack.prod.js' 'build:react -- --config=webpack.prod.js' 'build:morphdom -- --config=webpack.prod.js'",
+    "build": "./parallel.sh 'build:inferno -- --config=webpack.prod.js' 'build:react -- --config=webpack.prod.js' 'build:morphdom -- --config=webpack.prod.js'",
     "prepublish": "npm run build"
   },
   "keywords": [
@@ -38,11 +36,12 @@
     "babel-eslint": "^6.1.0",
     "babel-loader": "^6.2.4",
     "babel-plugin-lodash": "^3.2.0",
-    "babel-preset-es2015": "^6.9.0",
-    "babel-preset-react": "^6.8.0",
     "babel-plugin-syntax-jsx": "^6.8.0",
     "babel-plugin-transform-react-jsx": "^6.8.0",
+    "babel-preset-es2015": "^6.9.0",
+    "babel-preset-react": "^6.8.0",
     "classnames": "^2.2.5",
+    "csjs": "^1.0.5",
     "eslint": "^2.13.1",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-plugin-import": "^1.10.0",
@@ -50,6 +49,7 @@
     "eslint-plugin-react": "^5.2.2",
     "inferno-create-element": "^0.7.16",
     "inferno-dom": "^0.7.16",
+    "insert-css": "^1.0.0",
     "json-loader": "^0.5.4",
     "lodash": "^4.13.1",
     "mithril": "^0.2.5",

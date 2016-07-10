@@ -27,10 +27,10 @@ export function relmApp (el, component, opts = {}) {
   const h = extendHyperscript(createElement);
   const app = createApp(h, component, opts);
 
-  Inferno.render(app(), el);
+  Inferno.render(app.view(), el);
 
   app.subscribe(function redraw () {
-    Inferno.render(app(), el);
+    Inferno.render(app.view(), el);
   });
 
   return app;

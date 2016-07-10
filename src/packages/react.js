@@ -28,10 +28,10 @@ export function relmApp (el, component, opts = {}) {
   const h = extendHyperscript(createElement);
   const app = createApp(h, component, opts);
 
-  ReactDOM.render(app(), el);
+  ReactDOM.render(app.view(), el);
 
   app.subscribe(function redraw () {
-    ReactDOM.render(app(), el);
+    ReactDOM.render(app.view(), el);
   });
 
   return app;
