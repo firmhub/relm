@@ -1,2 +1,2 @@
-# [relm](https://motorcode.github.io/relm/)
+# relm
 Component based application architecture

@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import _ from 'lodash';
-import { createStore, applyMiddleware } from 'redux';
+import Redux from 'redux';
 
 import { makeReducer } from './reducer';
 import { parseComponent } from './component';
@@ -16,18 +16,22 @@ const logger = store => next => action => {
   return result;
 };
 
-export function createApp (createElement, rootComponent, opts = {}) {
-  const middleware = opts.debug ? applyMiddleware(logger) : void 0;
+function createStore (rootComponent, opts) {
+  const middleware = opts.debug ? Redux.applyMiddleware(logger) : void 0;
   const reducer = makeReducer(rootComponent);
   const initialState = _.merge(reducer() || {}, opts.initialState || {});
-  const store = opts.store || createStore(reducer, initialState, middleware);
+  return Redux.createStore(reducer, initialState, middleware);
+}
+
+export function createApp (createElement, rootComponent, opts = {}) {
+  const store = opts.store || createStore(rootComponent, opts);
 
   // Setup the component heirarchy
   const result = parseComponent(createElement, rootComponent, {
     displayName: rootComponent.displayName || rootComponent.name || 'app',
     path: [],
     dispatch: store.dispatch,
-    getState: () => store.getState()
+    getState: store.getState
   });
 
   result.subscribe = store.subscribe;
@@ -36,7 +40,7 @@ export function createApp (createElement, rootComponent, opts = {}) {
 
   return result;
 }
-
+cd;
 export {
   makeReducer,
   parseComponent,
