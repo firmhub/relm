@@ -18,6 +18,22 @@ const logger = store => next => action => {
   return result;
 };
 
+const usedStyles = {};
+
+function createCSS (pieces, ...substitutions) {
+  const styles = csjs(pieces, ...substitutions.map(x => {
+    if (typeof x !== 'string') return x;
+    if (!usedStyles.hasOwnProperty(x)) return x;
+    return usedStyles[x];
+  }));
+
+  insertCSS(csjs.getCss(styles));
+
+  _.assign(usedStyles, styles);
+
+  return _.mapValues(styles, x => x.toString());
+}
+
 function createStore (rootComponent, opts) {
   const middleware = opts.debug ? redux.applyMiddleware(logger) : void 0;
   const reducer = makeReducer(rootComponent);
@@ -33,13 +49,16 @@ export function createApp (createElement, rootComponent, opts = {}) {
   // push all generated csjs styles into this
   const generatedCSS = [];
 
-  // Setup the component heirarchy
-  const result = parseComponent(rootComponent, {
+  const config = {
     createElement,
-    createCSS: csjs, generatedCSS,
+    createCSS,
+    dispatch: store.dispatch,
+  };
+
+  // Setup the component heirarchy
+  const result = parseComponent(rootComponent, config, {
     displayName: rootComponent.displayName || rootComponent.name || 'app',
     path: [],
-    dispatch: store.dispatch,
     getState: store.getState
   });
 
