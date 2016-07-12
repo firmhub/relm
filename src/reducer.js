@@ -1,6 +1,62 @@
 import _ from 'lodash';
 import { makeImmutable, unwrapImmutable, update } from './update';
 
+const normalReducerFactory = (components, actions, init) => (state = init(), event = {}) => {
+  if (!event.type) return state;
+
+  const [head, ...tail] = event.type;
+
+  const componentHasAction = _.has(actions, head);
+  const isChildEvent = _.has(components, head);
+
+  // Use action if defined
+  if (componentHasAction) {
+    const result = _.get(actions, head)(makeImmutable(state), ...(event.args || []));
+
+    // Action overrides can return undefined to let the action pass through
+    const ignoreResult = result === void 0;
+    if (!ignoreResult) return unwrapImmutable(result);
+  }
+
+  // Call child reducer if not already handled by local action
+  if (isChildEvent) {
+    const childReducer = components[head];
+    const result = childReducer(state[head], _.defaults({ type: tail }, event));
+    return update(state, { [head]: { $set: result } });
+  }
+
+  // No-op by default
+  return state;
+};
+
+const listReducerFactory = (components, actions, init) => (list = [], event = {}) => {
+  if (!event.type) return list;
+
+  const [index, head, ...tail] = event.type;
+  const componentHasAction = _.has(actions, head);
+  const isChildEvent = _.has(components, head);
+
+  // Use action if defined
+  if (componentHasAction) {
+    const state = list[index] || init();
+    const result = _.get(actions, head)(makeImmutable(state), ...(event.args || []));
+
+    // Action overrides can return undefined to let the action pass through
+    const ignoreResult = result === void 0;
+    if (!ignoreResult) return update(list, { $splice: [[index, 1, unwrapImmutable(result)]] });
+  }
+
+  // Call child reducer if not already handled by local action
+  if (isChildEvent) {
+    const childReducer = components[head];
+    const result = childReducer(list[head], _.defaults({ type: tail }, event));
+    return update(list, { [index]: { [head]: { $set: result } } });
+  }
+
+  // No-op by default
+  return list;
+};
+
 export function makeReducer (component) {
   const isListComponent = _.isArray(component);
   const source = isListComponent ? _.head(component) : component;
@@ -22,66 +78,6 @@ export function makeReducer (component) {
     return unwrapImmutable(initialState);
   };
 
-  const reducerType = isListComponent ? 'list' : 'normal';
-  return makeReducer[reducerType](components, actions, init);
+  const factory = isListComponent ? listReducerFactory : normalReducerFactory;
+  return factory(components, actions, init);
 }
-
-makeReducer.normal = function makeNormalReducer (components, actions, init) {
-  return function reducer (state = init(), event = {}) {
-    if (!event.type) return state;
-
-    const [head, ...tail] = event.type;
-
-    const componentHasAction = _.has(actions, head);
-    const isChildEvent = _.has(components, head);
-
-    // Use action if defined
-    if (componentHasAction) {
-      const result = _.get(actions, head)(makeImmutable(state), ...(event.args || []));
-
-      // Action overrides can return undefined to let the action pass through
-      const ignoreResult = result === void 0;
-      if (!ignoreResult) return unwrapImmutable(result);
-    }
-
-    // Call child reducer if not already handled by local action
-    if (isChildEvent) {
-      const childReducer = components[head];
-      const result = childReducer(state[head], _.defaults({ type: tail }, event));
-      return update(state, { [head]: { $set: result } });
-    }
-
-    // No-op by default
-    return state;
-  };
-};
-
-makeReducer.list = function makeListReducer (components, actions, init) {
-  return function listReducer (list = [], event = {}) {
-    if (!event.type) return list;
-
-    const [index, head, ...tail] = event.type;
-    const componentHasAction = _.has(actions, head);
-    const isChildEvent = _.has(components, head);
-
-    // Use action if defined
-    if (componentHasAction) {
-      const state = list[index] || init();
-      const result = _.get(actions, head)(makeImmutable(state), ...(event.args || []));
-
-      // Action overrides can return undefined to let the action pass through
-      const ignoreResult = result === void 0;
-      if (!ignoreResult) return update(list, { $splice: [[index, 1, unwrapImmutable(result)]] });
-    }
-
-    // Call child reducer if not already handled by local action
-    if (isChildEvent) {
-      const childReducer = components[head];
-      const result = childReducer(list[head], _.defaults({ type: tail }, event));
-      return update(list, { [index]: { [head]: { $set: result } } });
-    }
-
-    // No-op by default
-    return list;
-  };
-};

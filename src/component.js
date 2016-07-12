@@ -1,69 +1,100 @@
 import _ from 'lodash';
 
-function parseListComponent (createElement, component, opts) {
-  const { dispatch, getState, path, displayName } = opts;
-
-  const cache = new WeakMap();
-
-  return function getter () {
-    return getState().map((state, index) => {
-      // Check if the component was previously parsed
-      const cached = cache.get(state);
-      if (cached && cached.index === index) return cached.view;
-
-      // Cache miss - parse the component
-      // eslint-disable-next-line no-use-before-define
-      const view = parseComponent(createElement, component, {
-        displayName: `${displayName}[${index}]`,
-        dispatch,
-        getState () { return _.get(getState(), index); },
-        path: path.concat(index)
-      });
-
-      cache.set(state, { index, view });
-
-      return view;
-    });
-  };
+function makeActionCreators (actions, components, path, dispatch) {
+  return _.reduce(actions, (ret, __, actionName) => {
+    if (_.has(components, actionName)) return ret;  // Skip action overrides
+    ret[actionName] = (...args) => dispatch({ type: path.concat(actionName), args });
+    return ret;
+  }, {});
 }
 
-export function parseComponent (createElement, component, opts) {
-  const render = component.bind(null, createElement);
-  const { dispatch, getState, path, displayName } = opts;
+function processStyles (styles, childStyles, css, theme) {
+  if (!_.isFunction(styles)) return {};
+  return styles(css, { theme, components: childStyles });
+}
 
-  // Prepare actions
-  const childKeys = _.keys(component.components);
-  const ownActions = _.omit(component.actions || {}, childKeys);
-  const actionCreator = (__, type) => (...args) => dispatch({ type: path.concat(type), args });
-  const actions = _.mapValues(ownActions, actionCreator);
+const parse = {
+  subComponents (components, config, getState, path) {
+    return _.reduce(components, (ret, it, componentName) => {
+      const isListComponent = _.isArray(it);
+      const parserType = isListComponent ? 'listComponent' : 'normalComponent';
 
-  // Prepare components
-  const components = _.reduce(component.components, (obj, it, name) => {
-    const childOpts = {
-      displayName: name,
-      dispatch,
-      getState () { return _.get(getState(), name); },
-      path: path.concat(name),
-    };
+      const result = parse[parserType](it, config, {
+        displayName: componentName,
+        getState: () => _.get(getState(), componentName),
+        path: path.concat(componentName)
+      });
 
-    // List component
-    if (_.isArray(it)) {
-      return Object.defineProperty(obj, name, {
-        enumerable: true,
-        get: parseListComponent(createElement, _.head(it), childOpts)
+      Object.defineProperty(ret.components, componentName, {
+        [isListComponent ? 'get' : 'value']: isListComponent ? result.getter : result.view
+      });
+
+      ret.styles[componentName] = result.styles;
+
+      return ret;
+    }, {
+      components: {},
+      styles: {}
+    });
+  },
+
+  normalComponent (component, config, opts) {
+    const { displayName, getState, path } = opts;
+
+    const render = component.bind(null, config.createElement);
+    const sub = parse.subComponents(component.components, config, getState, path);
+    const components = sub.components;
+    const styles = processStyles(component.styles, sub.styles, config.createCSS, config.theme);
+    const actions = makeActionCreators(component.actions, component.components, path, config.dispatch);
+
+    function view (props, ...children) {
+      return render({
+        props: _.assign({ className: '' }, _.omit(props, 'styles')),
+        children,
+        actions,
+        styles: _.assign(styles, (props || {}).styles),
+        components,
+        state: getState(),
       });
     }
 
-    // Normal component
-    obj[name] = parseComponent(createElement, it, childOpts);
-    return obj;
-  }, {});
+    view.displayName = displayName;
 
-  function view (props, ...children) {
-    return render({ props, children, actions, components, state: getState() });
+    return { view, styles };
+  },
+
+  listComponent ([component], config, opts) {
+    const { getState, path, displayName } = opts;
+
+    const cache = new WeakMap();
+
+    return {
+      // List component views need to be commuted at time of access since
+      // they depend on the state of the underlying list; so we return a
+      // getter function here instead of the instantiated component
+      getter () {
+        return getState().map((state, index) => {
+          // Check if the component was previously parsed
+          const cached = cache.get(state);
+          if (cached && cached.index === index) return cached.view;
+
+          // Cache miss - parse the component
+          // eslint-disable-next-line no-use-before-define
+          const view = parse.normalComponent(component, config, {
+            displayName: `${displayName}[${index}]`,
+            getState () { return _.get(getState(), index); },
+            path: path.concat(index)
+          });
+
+          cache.set(state, { index, view });
+
+          return view;
+        });
+      }
+    };
   }
+};
 
-  view.displayName = displayName;
-
-  return view;
+export function parseComponent (component, config, opts) {
+  return parse.normalComponent(component, config, opts);
 }

@@ -35,10 +35,10 @@ export function relmApp (el, component, opts = {}) {
   const h = extendHyperscript(createElement);
   const app = createApp(h, component, opts);
 
-  let targetEl = yo.update(el, app());
+  let targetEl = yo.update(el, app.view());
 
   app.subscribe(function redraw () {
-    targetEl = yo.update(targetEl, app());
+    targetEl = yo.update(targetEl, app.view());
   });
 
   return app;

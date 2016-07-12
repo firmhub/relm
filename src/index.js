@@ -1,6 +1,8 @@
 /* eslint-disable no-console */
 import _ from 'lodash';
-import Redux from 'redux';
+import * as redux from 'redux';
+import csjs from 'csjs';
+import insertCSS from 'insert-css';
 
 import { makeReducer } from './reducer';
 import { parseComponent } from './component';
@@ -16,23 +18,53 @@ const logger = store => next => action => {
   return result;
 };
 
+const usedStyles = {};
+
+function createCSS (pieces, ...substitutions) {
+  const styles = csjs(pieces, ...substitutions.map(x => {
+    if (typeof x !== 'string') return x;
+    if (!usedStyles.hasOwnProperty(x)) return x;
+    return usedStyles[x];
+  }));
+
+  insertCSS(csjs.getCss(styles));
+
+  _.assign(usedStyles, styles);
+
+  return _.mapValues(styles, x => x.toString());
+}
+
 function createStore (rootComponent, opts) {
-  const middleware = opts.debug ? Redux.applyMiddleware(logger) : void 0;
+  const middleware = opts.debug ? redux.applyMiddleware(logger) : void 0;
   const reducer = makeReducer(rootComponent);
   const initialState = _.merge(reducer() || {}, opts.initialState || {});
-  return Redux.createStore(reducer, initialState, middleware);
+  return redux.createStore(reducer, initialState, middleware);
 }
 
 export function createApp (createElement, rootComponent, opts = {}) {
   const store = opts.store || createStore(rootComponent, opts);
 
+  // We want to insert all the necessary css in one shot
+  // So this array will function as an accumulator; parseComponent will
+  // push all generated csjs styles into this
+  const generatedCSS = [];
+
+  const config = {
+    createElement,
+    createCSS,
+    dispatch: store.dispatch,
+  };
+
   // Setup the component heirarchy
-  const result = parseComponent(createElement, rootComponent, {
+  const result = parseComponent(rootComponent, config, {
     displayName: rootComponent.displayName || rootComponent.name || 'app',
     path: [],
-    dispatch: store.dispatch,
     getState: store.getState
   });
+
+  // Insert all the css
+  const stylesToString = (str, style) => (str += csjs.getCss(style));
+  insertCSS(generatedCSS.reduce(stylesToString, ''));
 
   result.subscribe = store.subscribe;
   result.dispatch = store.dispatch;
@@ -40,7 +72,7 @@ export function createApp (createElement, rootComponent, opts = {}) {
 
   return result;
 }
-cd;
+
 export {
   makeReducer,
   parseComponent,
