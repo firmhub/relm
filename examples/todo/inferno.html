@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<title>Template • TodoMVC</title>
+		<link rel="stylesheet" href="todomvc-common/base.css">
+		<link rel="stylesheet" href="todomvc-app-css/index.css">
+	</head>
+	<body>
+    <div id="main"></div>
+		<script src="todomvc-common/base.js"></script>
+		<script src="../../inferno.js"></script>
+		<script src="js/components.dist.js"></script>
+    <script>
+      var targetEl = document.querySelector('#main');
+
+      // Start the application
+      window.app = inferno.relmApp(targetEl, components.TodoMVC, {
+        debug: true,
+        initialState: JSON.parse(localStorage.getItem('myTodos') || '{}')
+      });
+
+      app.subscribe(function saveChangesToLocalStorage () {
+        localStorage.setItem('myTodos', JSON.stringify(app.getState()));
+      });
+    </script>
+	</body>
+</html>
