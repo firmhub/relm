@@ -1,10 +1,12 @@
 /* @jsx html */
+import xhr from 'xhr';
 
-export function Main (html, { state, actions }) {
+export function Main (html, { state, actions, styles }) {
+  const getRandomGif = () => actions.$getRandomGif(state.topic);
   return (
     <div>
       <h2>cats</h2>
-      <button onClick={() => actions.$getRandomGif(state.topic)}>More please</button>
+      <button className={styles.moreButton} onClick={getRandomGif}>More please</button>
       {!state.url ? null : <img alt='Cat' src={state.url} />}
     </div>
   );
@@ -19,16 +21,26 @@ Main.actions = {
   $getRandomGif (task, actions, topic = 'cats') {
     if (task.isRunning) return task.done();
 
-    const request = fetch(`http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${topic}`);
-    const decodeGifUrl = response => response.data.image_url;
+    const src = `http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${topic}`;
 
-    request
-      .then(response => response.json())
-      .then(decodeGifUrl)
-      .then(actions.fetchSuccess)
-      .then(null, actions.fetchFailure)
-      .then(task.done);
+    // Async actions can trigger other actions as needed
+    const request = xhr(src, { json: true }, function callback (err, response, body) {
+      if (err) actions.fetchFailure(err);
+      else actions.fetchSuccess(body.data.image_url);
+    });
 
-    return request.abort;
+    // Async actions can return a cancel function for cleanup
+    // which is called when a task is cancelled
+    return function cancel () {
+      request.abort();
+    };
   },
 };
+
+Main.styles = css => css`
+  .moreButton {
+    display: block;
+    padding: 0.5rem 1rem;
+    margin: 1rem 0;
+  }
+`;
