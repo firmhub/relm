@@ -8,6 +8,7 @@
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
+    "dev:http": "webpack-dev-server examples/http/app.js --output-filename=app.dist.js --inline --content-base=examples/http",
     "dev:todo": "webpack-dev-server examples/todo/js/app.js --output-public-path=/js/ --output-filename=app.dist.js --inline --content-base=examples/todo",
     "build:inferno": "webpack src/packages/inferno.js inferno.js --output-library=inferno",
     "build:react": "webpack src/packages/react.js react.js --output-library=react",

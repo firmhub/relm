@@ -1,10 +1,19 @@
 import _ from 'lodash';
 
-function makeActionCreators (actions, components, path, dispatch) {
-  return _.reduce(actions, (ret, __, actionName) => {
-    if (_.has(components, actionName)) return ret;  // Skip action overrides
-    ret[actionName] = (...args) => dispatch({ type: path.concat(actionName), args });
-    return ret;
+function makeActionCreators (source, components, path, dispatch) {
+  return _.reduce(source, (actions, __, actionName) => {
+    // Skip action overrides
+    if (_.has(components, actionName)) return actions;
+
+    const type = path.concat(actionName);
+
+    actions[actionName] = _.startsWith(actionName, '$')
+      // Async actions are given the actions in arguments
+      ? (...args) => dispatch({ type, args: [actions, ...args] })
+      // Sync actions
+      : (...args) => dispatch({ type, args });
+
+    return actions;
   }, {});
 }
 
@@ -76,25 +85,23 @@ const parse = {
       // they depend on the state of the underlying list; so we return a
       // getter function here instead of the instantiated component
       styles,
-      getter () {
-        return getState().map((state, index) => {
-          // Check if the component was previously parsed
-          const cached = listComponentCache.get(state);
-          if (cached && cached.index === index) return cached.view;
+      getter: () => getState().map((state, index) => {
+        // Check if the component was previously parsed
+        const cached = listComponentCache.get(state);
+        if (cached && cached.index === index) return cached.view;
 
-          // Cache miss - parse the component
-          // eslint-disable-next-line no-use-before-define
-          const instance = parse.normalComponent(component, config, {
-            displayName: `${displayName}[${index}]`,
-            getState () { return _.get(getState(), index); },
-            path: path.concat(index)
-          });
-
-          listComponentCache.set(state, { index, view: instance.view });
-
-          return instance.view;
+        // Cache miss - parse the component
+        // eslint-disable-next-line no-use-before-define
+        const { view } = parse.normalComponent(component, config, {
+          displayName: `${displayName}[${index}]`,
+          getState () { return _.get(getState(), index); },
+          path: path.concat(index)
         });
-      }
+
+        listComponentCache.set(state, { index, view });
+
+        return view;
+      })
     };
   }
 };
