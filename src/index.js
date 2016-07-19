@@ -5,6 +5,7 @@ import csjs from 'csjs';
 import insertCSS from 'insert-css';
 
 import { makeReducer } from './reducer';
+import { asyncMiddleware } from './middleware';
 import { parseComponent } from './component';
 import { makeImmutable, unwrapImmutable } from './update';
 import { extendHyperscript } from './hyperscript';
@@ -35,10 +36,12 @@ function createCSS (pieces, ...substitutions) {
 }
 
 function createStore (rootComponent, opts) {
-  const middleware = opts.debug ? redux.applyMiddleware(logger) : void 0;
   const reducer = makeReducer(rootComponent);
   const initialState = _.merge(reducer() || {}, opts.initialState || {});
-  return redux.createStore(reducer, initialState, middleware);
+  return redux.createStore(reducer, initialState, redux.applyMiddleware(
+    ...(opts.debug ? [logger] : []),
+    asyncMiddleware(rootComponent)
+  ));
 }
 
 export function createApp (createElement, rootComponent, opts = {}) {
