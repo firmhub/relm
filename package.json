@@ -8,6 +8,7 @@
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
+    "dev:todo": "webpack-dev-server examples/todo/js/app.js --output-public-path=/js/ --output-filename=app.dist.js --inline --content-base=examples/todo",
     "build:inferno": "webpack src/packages/inferno.js inferno.js --output-library=inferno",
     "build:react": "webpack src/packages/react.js react.js --output-library=react",
     "build:morphdom": "webpack src/packages/morphdom.js morphdom.js --output-library=morphdom",
@@ -58,6 +59,7 @@
     "react-dom": "^15.2.1",
     "redux": "^3.5.2",
     "webpack": "^1.13.1",
+    "webpack-dev-server": "^1.14.1",
     "yo-yo": "^1.2.2"
   },
   "dependencies": {}

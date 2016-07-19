@@ -15,7 +15,7 @@ function processStyles (styles, childStyles, css, theme) {
 
 const parse = {
   subComponents (components, config, getState, path) {
-    return _.reduce(components, (ret, it, componentName) => {
+    return _.reduce(components, (obj, it, componentName) => {
       const isListComponent = _.isArray(it);
       const parserType = isListComponent ? 'listComponent' : 'normalComponent';
 
@@ -25,13 +25,14 @@ const parse = {
         path: path.concat(componentName)
       });
 
-      Object.defineProperty(ret.components, componentName, {
-        [isListComponent ? 'get' : 'value']: isListComponent ? result.getter : result.view
+      Object.defineProperty(obj.components, componentName, {
+        [isListComponent ? 'get' : 'value']: isListComponent ? result.getter : result.view,
+        enumerable: true
       });
 
-      ret.styles[componentName] = result.styles;
+      obj.styles[componentName] = result.styles;
 
-      return ret;
+      return obj;
     }, {
       components: {},
       styles: {}
@@ -65,30 +66,33 @@ const parse = {
 
   listComponent ([component], config, opts) {
     const { getState, path, displayName } = opts;
+    const sub = parse.subComponents(component.components, config, getState, path);
+    const styles = processStyles(component.styles, sub.styles, config.createCSS, config.theme);
 
-    const cache = new WeakMap();
+    const listComponentCache = new WeakMap();
 
     return {
       // List component views need to be commuted at time of access since
       // they depend on the state of the underlying list; so we return a
       // getter function here instead of the instantiated component
+      styles,
       getter () {
         return getState().map((state, index) => {
           // Check if the component was previously parsed
-          const cached = cache.get(state);
+          const cached = listComponentCache.get(state);
           if (cached && cached.index === index) return cached.view;
 
           // Cache miss - parse the component
           // eslint-disable-next-line no-use-before-define
-          const view = parse.normalComponent(component, config, {
+          const instance = parse.normalComponent(component, config, {
             displayName: `${displayName}[${index}]`,
             getState () { return _.get(getState(), index); },
             path: path.concat(index)
           });
 
-          cache.set(state, { index, view });
+          listComponentCache.set(state, { index, view: instance.view });
 
-          return view;
+          return instance.view;
         });
       }
     };
