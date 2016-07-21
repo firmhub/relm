@@ -1,24 +1,25 @@
 /* @jsx html */
 import xhr from 'xhr';
 
-export function Main (html, { state, actions, styles }) {
+export function HTTPExample (html, { state, actions, styles }) {
   const getRandomGif = () => actions.$getRandomGif(state.topic);
   return (
     <div>
-      <h2>cats</h2>
+      <input className={styles.topicInput} onChange={actions.changeTopic} value={state.topic} />
       <button className={styles.moreButton} onClick={getRandomGif}>More please</button>
       {!state.url ? null : <img alt='Cat' src={state.url} />}
     </div>
   );
 }
 
-Main.actions = {
-  initializeState: (state) => state.set('topic', 'cats'),
+HTTPExample.actions = {
+  initializeState: (state) => state.set('topic', 'random'),
   fetchSuccess: (state, url) => state.set('url', url),
   fetchFailure: (state) => state,  // Do nothing on failure - for now
+  changeTopic: (state, e) => state.set('topic', e.target.value),
 
   // Async actions begin with a $ (dollar sign)
-  $getRandomGif (task, actions, topic = 'cats') {
+  $getRandomGif (task, actions, topic) {
     if (task.isRunning) return task.done();
 
     const src = `http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${topic}`;
@@ -37,7 +38,12 @@ Main.actions = {
   },
 };
 
-Main.styles = css => css`
+HTTPExample.styles = css => css`
+  .topicInput {
+    font-size: 1.4em;
+    border: 0;
+  }
+
   .moreButton {
     display: block;
     padding: 0.5rem 1rem;

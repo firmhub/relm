@@ -22,7 +22,7 @@
   },
   "settings": {
     "react": {
-      "pragma": "relm"
+      "pragma": "dom"
     }
   },
   "globals": {

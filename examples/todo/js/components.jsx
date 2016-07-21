@@ -1,8 +1,7 @@
-/* @jsx html */
 const ENTER_KEY = 13;
 const ESCAPE_KEY = 27;
 
-export function TodoMVC (html, { state, actions, components: { Todos } }) {
+export function TodoMVC (dom, { state, actions, components: { Todos } }) {
   const allTodos = state.Todos.length;
   const activeTodos = state.Todos.filter(x => !x.completed).length;
 
@@ -85,7 +84,7 @@ TodoMVC.actions = {
 //
 // Responsible for managing the state of each todo item
 // and providing ability to edit and delete them individually
-export function TodoComponent (html, { actions, props, state: { editing, completed, title } }) {
+export function TodoComponent (dom, { actions, props, state: { editing, completed, title } }) {
   return (
     <li className={['todo-item', { completed, editing }]}>
       {editing === true ? (

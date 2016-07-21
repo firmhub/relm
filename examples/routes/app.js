@@ -1,10 +1,10 @@
 /* eslint-env browser */
 import { relmApp } from '../../src/packages/inferno';
-import { HTTPExample } from './main.jsx';
+import { Main } from './main.jsx';
 
 const targetEl = document.querySelector('#main');
 
 // Start the application
-window.app = relmApp(targetEl, HTTPExample, {
+window.app = relmApp(targetEl, Main, {
   debug: true,
 });
