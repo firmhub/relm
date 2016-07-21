@@ -1,7 +1,7 @@
 /* @jsx html */
 import xhr from 'xhr';
 
-export function Main (html, { state, actions, styles }) {
+export function HTTPExample (html, { state, actions, styles }) {
   const getRandomGif = () => actions.$getRandomGif(state.topic);
   return (
     <div>
@@ -12,7 +12,7 @@ export function Main (html, { state, actions, styles }) {
   );
 }
 
-Main.actions = {
+HTTPExample.actions = {
   initializeState: (state) => state.set('topic', 'random'),
   fetchSuccess: (state, url) => state.set('url', url),
   fetchFailure: (state) => state,  // Do nothing on failure - for now
@@ -38,7 +38,7 @@ Main.actions = {
   },
 };
 
-Main.styles = css => css`
+HTTPExample.styles = css => css`
   .topicInput {
     font-size: 1.4em;
     border: 0;

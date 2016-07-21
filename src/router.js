@@ -5,6 +5,10 @@ import pathToRegexp from 'path-to-regexp';
 
 import { Component } from './types';
 
+/**
+ * Creates a single route parser given a path (ex /some/:named/:path*)
+ * The return exec method returns an object of all named parameters
+ */
 export function routeParser (path) {
   const keys = [];
   const re = pathToRegexp(path, keys);
@@ -15,20 +19,29 @@ export function routeParser (path) {
       if (!matches) return null;
 
       return _.reduce(_.tail(matches), (obj, match, i) => {
-        if (match) obj[keys[i].name] = match;
+        if (!match) return obj;
+
+        obj[keys[i].name] = match;
         return obj;
       }, {});
     }
   };
 }
 
+/**
+ * Takes multiple route definitions and returns a single
+ * parse function to match against all the definitions
+ * Example of a definition: {
+ *   SomeRoute: [Component, '/some/:named/:path*']
+ * }
+ */
 export function routeMapper (definitions) {
   const parsers = _.map(definitions, function definitionsToParser (def, name) {
     const parser = routeParser(def[1]);
-    return function exec (url) {
-      const params = parser.exec(url);
+    return function exec (str) {
+      const params = parser.exec(str);
       if (!params) return null;
-      return { name, url, params };
+      return { name, params };
     };
   });
 
@@ -45,17 +58,17 @@ export function router (routeDefinitions) {
   if (process.env.NODE_ENV !== 'production') {
     const Path = t.refinement(t.String, startsWith('/'), 'Path');
 
-    const RouteWithoutOptions = t.tuple([Component, Path]);
-    const RouteWithOptions = t.tuple([Component, Path, t.Boolean]);
+    const RouteWithoutOptions = t.tuple([Component, Path], '-');
+    const RouteWithOptions = t.tuple([Component, Path, t.Boolean], '-');
 
     const RouteDefinition = t.union([
       RouteWithoutOptions,
       RouteWithOptions
-    ], 'RouteDefinition');
+    ], 'Route');
 
-    RouteDefinition.dispatch = x => (x.length > 2 ? RouteWithOptions : RouteWithoutOptions); 
+    RouteDefinition.dispatch = x => (x.length > 2 ? RouteWithOptions : RouteWithoutOptions);
 
-    t.dict(t.String, RouteDefinition)(routeDefinitions);
+    t.dict(t.String, RouteDefinition, 'Routes')(routeDefinitions);
   }
 
   const parseRoute = routeMapper(routeDefinitions);
@@ -63,7 +76,9 @@ export function router (routeDefinitions) {
   function Router (html, params) {
     const { props, children, components } = params;
 
-    const route = parseRoute(props.url);
+    const url = props.url || '';
+    const prefixedUrl = _.startsWith(url, '/') ? url : `/${url}`;
+    const route = parseRoute(prefixedUrl);
     if (!route) return null;
 
     const child = components[route.name];

@@ -1,34 +1,50 @@
+import _ from 'lodash';
 import router from '../../src/router';
-import { Main as HttpExample } from '../http/main.jsx';
+
+import { HTTPExample } from '../http/main.jsx';
 import { TodoMVC } from '../todo/js/components.jsx';
 
-export function Main (dom, { styles, components: { Example } }) {
+export function Main (dom, { state, actions, styles, components: { Example } }) {
   return (
     <section>
       <ul className={styles.sidebar}>
-        <li><a href='/todos'>Todos</a></li>
-        <li><a href='/http'>HTTP</a></li>
+        <li><button className={styles.button} onClick={_.partial(actions.changeRoute, '/todos')}>Todos</button></li>
+        <li><button className={styles.button} onClick={_.partial(actions.changeRoute, '/http')}>HTTP</button></li>
       </ul>
-      <Example url='/todos' />
+      <Example url={state.activeRoute} />
     </section>
   );
 }
 
 Main.components = {
   Example: router({
-    Todo: [TodoMVC, '/todos'],
-    Http: [HttpExample, '/http'],
+    Todo: [TodoMVC, '/todos/:url*'],
+    Http: [HTTPExample, '/http'],
   })
+};
+
+Main.actions = {
+  initializeState (state) {
+    return state.set('activeRoute', '/todos/something');
+  },
+  changeRoute (state, url) {
+    return state.set('activeRoute', url);
+  }
 };
 
 Main.styles = css => css`
   .sidebar {
     float: left;
-    margin-right: 2rem;
+    padding: 0.5rem;
+    padding-right: 2rem;
   }
 
   .sidebar > li {
     display: block;
+  }
+
+  .button {
     line-height: 1.2;
+    margin: 0.5rem 0;
   }
 `;
