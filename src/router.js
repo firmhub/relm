@@ -54,6 +54,13 @@ export function routeMapper (definitions) {
   };
 }
 
+/**
+ * Main router function; takes a set of route definitions and
+ * returns a relm component which utilizies those routes
+ * Example of a definition: {
+ *   SomeRoute: [Component, '/some/:named/:path*']
+ * }
+ */
 export function router (routeDefinitions) {
   if (process.env.NODE_ENV !== 'production') {
     const Path = t.refinement(t.String, startsWith('/'), 'Path');

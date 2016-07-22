@@ -1,4 +1,3 @@
-import 'babel-register';
 import test from 'ava';
 
 import { routeParser } from '../src/router';

@@ -73,11 +73,8 @@
     "path-to-regexp": "^1.5.3"
   },
   "ava": {
-    "files": [
-      "test/*.js"
-    ],
-    "source": [
-      "src/**/*.{js,jsx}"
-    ]
+    "require": ["babel-register"],
+    "files": ["test/*.js"],
+    "source": ["src/**/*.{js,jsx}"]
   }
 }

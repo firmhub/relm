@@ -6,3 +6,4 @@ npm-debug.log
 /inferno.js
 /react.js
 /morphdom.js
+/examples/popquiz/data.js
