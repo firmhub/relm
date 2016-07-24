@@ -1,24 +1,18 @@
 /* eslint-env browser */
-import _ from 'lodash';
 import { relmApp } from '../../src/packages/inferno';
 
-import * as UI from './components/ui';
-import Flashcard from './components/Flashcard';
+import Quiz from './components/Quiz';
 
 import * as Crypto from './services/crypto';
 import encryptedData from 'raw!./data.txt'; // eslint-disable-line import/no-unresolved
 
-const debug = true;
+const debug = false;
 
 function App (h, { actions, state, components: x }) {
-  return (
-    <x.Window>
-      {state.isUnlocked ? (
-        <x.Quiz />
-      ) : (
-        <x.Password onSubmit={login} />
-      )}
-    </x.Window>
+  return state.isUnlocked ? (
+    <x.Quiz />
+  ) : (
+    <x.Password onSubmit={login} />
   );
 
   function login (e) {
@@ -30,7 +24,6 @@ function App (h, { actions, state, components: x }) {
 App.components = {
   Quiz,
   Password,
-  Window: UI.Window,
 };
 
 App.actions = {
@@ -74,19 +67,13 @@ App.actions = {
 
 export function Password (h, { styles, props, state, actions, components: x }) {
   return (
-    <x.Window>
-      <form {...props} className={styles.form}>
-        <input value={state.value || ''} onInput={actions.passwordInput} />
-        <button type='submit'>Login</button>
-        <div>{state.errorMessage}</div>
-      </form>
-    </x.Window>
+    <form {...props} className={styles.form}>
+      <input value={state.value || ''} onInput={actions.passwordInput} />
+      <button type='submit'>Login</button>
+      <div>{state.errorMessage}</div>
+    </form>
   );
 }
-
-Password.components = {
-  Window: UI.Window,
-};
 
 Password.actions = {
   passwordInput (state, e) {
@@ -99,68 +86,6 @@ Password.styles = (css) => css`
 
   }
 `;
-
-function Quiz (h, { actions, state, components: x }) {
-  const question = state.question;
-  if (!question) return null;
-
-  return (
-    <div>
-      <x.Navigation topics={state.topics} />
-      <x.Flashcard
-        question={question.q}
-        answer={question.a}
-        options={state.options}
-        onCorrect={actions.correctAnswer}
-        onIncorrect={actions.incorrectAnswer}
-      />
-    </div>
-  );
-}
-
-Quiz.components = {
-  Navigation,
-  Flashcard,
-};
-
-Quiz.actions = {
-  initializeState (state) {
-    return state.set('question', null);
-  },
-
-  updateTopics (state, topics) {
-    const randomTopic = _.sample(topics);
-    const question = _.sample(randomTopic.questions);
-    const options = _.shuffle(question.o);
-    return state.merge({ topics, question, options });
-  },
-
-  correctAnswer () {
-
-  },
-
-  incorrectAnswer () {
-
-  }
-};
-
-
-function Navigation (h, { props, styles, components: { Nav } }) {
-  return (
-    <Nav>
-      <h5 className={styles.Nav.title}>Topics</h5>
-      {_.map(props.topics, (it) => (
-        <a className={[styles.Nav.item, styles.Nav.active]}>
-          <span className='icon icon-home'></span>{it.label}
-        </a>
-      ))}
-    </Nav>
-  );
-}
-
-Navigation.components = {
-  Nav: UI.Nav
-};
 
 
 // Start the application

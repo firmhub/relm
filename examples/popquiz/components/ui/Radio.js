@@ -1,12 +1,19 @@
 export default function Radio (h, { props, styles }) {
   const id = `${props.name}_${props.value}`;
+  const classes = [
+    styles.container,
+    props.className,
+    { /*[styles.checked]: props.checked,*/ [styles.disabled]: props.disabled }
+  ];
+
   return (
-    <li className={[styles.container, { checked: props.checked }, props.className]}>
+    <li className={classes}>
       <input
         className={styles.radio}
         type='radio'
         id={id}
         name={props.name}
+        disabled={props.disabled}
         value={props.value}
         checked={props.checked}
         onChange={props.onChange}
@@ -27,6 +34,7 @@ Radio.styles = css => css`
   .radio {
     margin-left: 1rem;
     margin-right: -2.5rem;
+    cursor: inherit;
   }
 
   .label {
@@ -36,5 +44,6 @@ Radio.styles = css => css`
     word-break: break-all;
     padding: 0.5rem 1rem 0.5rem 3.5rem;
     transition: all 0.4s;
+    cursor: inherit;
   }
 `;
