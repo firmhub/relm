@@ -47,10 +47,20 @@ function createStore (rootComponent, opts) {
 export function createApp (createElement, rootComponent, opts = {}) {
   const store = opts.store || createStore(rootComponent, opts);
 
-  // We want to insert all the necessary css in one shot
-  // So this array will function as an accumulator; parseComponent will
-  // push all generated csjs styles into this
-  const generatedCSS = [];
+  // Asynchronously dispatch all actions
+  // const pendingActions = [];
+  // let timer;
+  // function drain () {
+  //   while (pendingActions.length) {
+  //     store.dispatch(pendingActions.shift());
+  //   }
+  //   clearTimeout(timer);
+  //   timer = null;
+  // }
+  // dispatch (action) {
+  //   pendingActions.push(action);
+  //   if (!timer) timer = setTimeout(drain);
+  // },
 
   const config = {
     createElement,
@@ -64,10 +74,6 @@ export function createApp (createElement, rootComponent, opts = {}) {
     path: [],
     getState: store.getState
   });
-
-  // Insert all the css
-  const stylesToString = (str, style) => (str += csjs.getCss(style));
-  insertCSS(generatedCSS.reduce(stylesToString, ''));
 
   result.subscribe = store.subscribe;
   result.dispatch = store.dispatch;
