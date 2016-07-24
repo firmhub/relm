@@ -10,7 +10,7 @@ function makeActionCreators (source, components, path, dispatch) {
 
     actions[actionName] = _.startsWith(actionName, '$')
       // Async actions are given the actions in arguments
-      ? (...args) => dispatch({ type, args: [actions, ...args] })
+      ? (...args) => dispatch({ type, actions, args })
       // Sync actions
       : (...args) => dispatch({ type, args });
 

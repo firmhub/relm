@@ -79,6 +79,16 @@ export function createApp (createElement, rootComponent, opts = {}) {
   result.dispatch = store.dispatch;
   result.getState = store.getState;
 
+  function makeActionCreators (actions, __, actionName) {
+    actions[actionName] = _.startsWith(actionName, '$')
+      ? (...args) => store.dispatch({ type: [actionName], actions, args })
+      : (...args) => store.dispatch({ type: [actionName], args });
+
+    return actions;
+  }
+
+  result.actions = _.reduce(rootComponent.actions, makeActionCreators, {});
+
   return result;
 }
 
