@@ -21,18 +21,22 @@ const logger = store => next => action => {
 
 const usedStyles = {};
 
+function substitueStyle (x) {
+  if (typeof x !== 'string') return x;
+  if (usedStyles.hasOwnProperty(x)) return usedStyles[x];
+  return x;
+}
+
 function createCSS (pieces, ...substitutions) {
-  const styles = csjs(pieces, ...substitutions.map(x => {
-    if (typeof x !== 'string') return x;
-    if (!usedStyles.hasOwnProperty(x)) return x;
-    return usedStyles[x];
-  }));
+  const styles = csjs(pieces, ...substitutions.map(substitueStyle));
 
   insertCSS(csjs.getCss(styles));
 
-  _.assign(usedStyles, styles);
-
-  return _.mapValues(styles, x => x.toString());
+  return _.mapValues(styles, x => {
+    const generatedName = x.toString();
+    usedStyles[generatedName] = x;
+    return generatedName;
+  });
 }
 
 function createStore (rootComponent, opts) {
