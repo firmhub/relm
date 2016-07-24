@@ -8,3 +8,4 @@ import Nav            from './Nav';           export { Nav };
 import Checkbox       from './Checkbox';      export { Checkbox };
 import Radio          from './Radio';         export { Radio };
 import Input          from './Input';         export { Input };
+import Button         from './Button';        export { Button };

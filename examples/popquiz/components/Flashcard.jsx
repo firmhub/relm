@@ -1,7 +1,7 @@
 /* eslint-disable no-use-before-define */
 import * as UI from './ui';
 
-export default function Flashcard (h, { props, styles, components: x }) {
+export default function Flashcard (h, { props, styles, state, actions, components: x }) {
   return (
     <section className={styles.card}>
       <header className={styles.question}>
@@ -11,25 +11,34 @@ export default function Flashcard (h, { props, styles, components: x }) {
         {props.options.map((opt, i) => (
           <x.Option
             className={styles.option}
-            checked={opt.isCorrect}
             name='answer'
-            label={opt.label}
+            label={opt}
             value={i}
+            checked={state.selection === opt}
+            onChange={() => actions.setSelection(opt)}
           />
         ))}
       </ul>
       <footer className={styles.footer}>
-        {props.options[0].reason}
+        <div style={{ marginBottom: '1rem' }}>{props.answer}</div>
+        <x.Button className={{ [styles.Button.primary]: Boolean(state.selection) }}>Check</x.Button>
       </footer>
     </section>
   );
 }
 
 Flashcard.components = {
-  Option: UI.Radio
+  Option: UI.Radio,
+  Button: UI.Button,
 };
 
-Flashcard.styless = css => css`
+Flashcard.actions = {
+  setSelection (state, value) {
+    return state.set('selection', value);
+  }
+};
+
+Flashcard.styles = css => css`
   .card {
     position: relative;
     margin: 4rem 2rem;
@@ -39,6 +48,7 @@ Flashcard.styless = css => css`
   }
 
   .card:before {
+    pointer-events: none;
     content: '';
     position: absolute;
     right: 0;
@@ -71,6 +81,10 @@ Flashcard.styless = css => css`
 
   .option {
     font-size: 1.2em;
+  }
+
+  .option:hover {
+    background-color: #ededed;
   }
 
   .option > label {

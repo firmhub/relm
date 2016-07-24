@@ -21,8 +21,12 @@ Radio.styles = css => css`
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 0.5rem;
     border-bottom: 1px solid #ededed;
+  }
+
+  .radio {
+    margin-left: 1rem;
+    margin-right: -2.5rem;
   }
 
   .label {
@@ -30,7 +34,7 @@ Radio.styles = css => css`
     color: #4d4d4d;
     white-space: pre-line;
     word-break: break-all;
-    margin-left: 1em;
+    padding: 0.5rem 1rem 0.5rem 3.5rem;
     transition: all 0.4s;
   }
 `;

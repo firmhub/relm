@@ -8,7 +8,7 @@ import Flashcard from './components/Flashcard';
 import * as Crypto from './services/crypto';
 import encryptedData from 'raw!./data.txt'; // eslint-disable-line import/no-unresolved
 
-const preventDefaultThen = fn => e => { e.preventDefault(); fn(); };
+const debug = true;
 
 function App (h, { actions, state, components: x }) {
   return (
@@ -16,10 +16,15 @@ function App (h, { actions, state, components: x }) {
       {state.isUnlocked ? (
         <x.Quiz />
       ) : (
-        <x.Password onSubmit={preventDefaultThen(actions.decryptData)} />
+        <x.Password onSubmit={login} />
       )}
     </x.Window>
   );
+
+  function login (e) {
+    e.preventDefault();
+    actions.$decryptData(state.Password.value);
+  }
 }
 
 App.components = {
@@ -30,31 +35,40 @@ App.components = {
 
 App.actions = {
   initializeState (state) {
-    return state.merge({ data: [], isUnlocked: false });
+    return state.merge({ isUnlocked: false, encrypted: encryptedData });
   },
 
-  decryptData (state, pass = state.Password.value) {
-    let str = '';
+  successfulLogin (state) {
+    return state.set('isUnlocked', true);
+  },
+
+  failedLogin (state) {
+    return state.set('Password.errorMessage', 'Invalid password');
+  },
+
+  $decryptData (task, pass) {
+    let topics;
     try {
-      str = Crypto.password(pass).decrypt(encryptedData);
+      // Parse the data
+      topics = JSON.parse(Crypto.password(pass).decrypt(task.getState().encrypted));
     } catch (ex) {
-      return state.set('Password.errorMessage', 'Invalid password');
+      task.actions.failedLogin(ex.message);
+      return task.done();
     }
 
-    const questions = JSON.parse(str);
-
+    // On successfull parse, save the password in local storage
     localStorage.setItem('savedPass', pass);
 
-    const topics = _.reduce(questions, (obj, question) => {
-      _.each(question.tags, tag => {
-        obj[tag] = obj[tag] || [];
-        obj[tag].push(tag);
-      });
+    // Unlock the app
+    task.actions.successfulLogin();
 
-      return obj;
-    }, {});
+    // Update quiz state
+    task.dispatch({
+      type: ['Quiz', 'updateTopics'],
+      args: [topics]
+    });
 
-    return state.set('isUnlocked', true).merge('Quiz', { questions, topics });
+    return task.done();
   },
 };
 
@@ -87,30 +101,40 @@ Password.styles = (css) => css`
 `;
 
 function Quiz (h, { actions, state, components: x }) {
+  const question = state.question;
+  if (!question) return null;
+
   return (
-    <x.PaneGroup>
-      <x.Pane className='sidebar' size='small'>
-        <x.Navigation topics={state.topics} />
-      </x.Pane>
-      <x.Pane>
-        <x.Flashcard
-          {...state.questions[0]}
-          onCorrect={actions.correctAnswer}
-          onIncorrect={actions.incorrectAnswer}
-        />
-      </x.Pane>
-    </x.PaneGroup>
+    <div>
+      <x.Navigation topics={state.topics} />
+      <x.Flashcard
+        question={question.q}
+        answer={question.a}
+        options={state.options}
+        onCorrect={actions.correctAnswer}
+        onIncorrect={actions.incorrectAnswer}
+      />
+    </div>
   );
 }
 
 Quiz.components = {
-  PaneGroup: UI.PaneGroup,
-  Pane: UI.Pane,
   Navigation,
   Flashcard,
 };
 
 Quiz.actions = {
+  initializeState (state) {
+    return state.set('question', null);
+  },
+
+  updateTopics (state, topics) {
+    const randomTopic = _.sample(topics);
+    const question = _.sample(randomTopic.questions);
+    const options = _.shuffle(question.o);
+    return state.merge({ topics, question, options });
+  },
+
   correctAnswer () {
 
   },
@@ -125,9 +149,9 @@ function Navigation (h, { props, styles, components: { Nav } }) {
   return (
     <Nav>
       <h5 className={styles.Nav.title}>Topics</h5>
-      {_.map(props.topics, (it, tag) => (
+      {_.map(props.topics, (it) => (
         <a className={[styles.Nav.item, styles.Nav.active]}>
-          <span className='icon icon-home'></span>{tag}
+          <span className='icon icon-home'></span>{it.label}
         </a>
       ))}
     </Nav>
@@ -140,7 +164,7 @@ Navigation.components = {
 
 
 // Start the application
-const app = window.app = relmApp(document.querySelector('#main'), App);
+const app = window.app = relmApp(document.querySelector('#main'), App, { debug });
 
 const savedPass = localStorage.getItem('savedPass');
-if (savedPass) app.dispatch({ type: ['decryptData'], args: [savedPass] });
+if (savedPass) app.actions.$decryptData(savedPass);
