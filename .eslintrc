@@ -11,6 +11,7 @@
     "new-cap": 0,
     "prefer-arrow-callback": 0,
     "no-underscore-dangle": 0,
+    "no-use-before-define": [2, { "functions": false }],
     "no-param-reassign": 0,
     "prefer-rest-params": 0,
     "spaced-comment": 0,
@@ -18,11 +19,11 @@
     "react/prop-types": 0,
     "react/jsx-no-bind": 0,
     "react/prefer-stateless-function": 0,
-    "jsx-quotes": [2, "prefer-single"]
+    "jsx-quotes": [1, "prefer-single"]
   },
   "settings": {
     "react": {
-      "pragma": "dom"
+      "pragma": "h"
     }
   },
   "globals": {
