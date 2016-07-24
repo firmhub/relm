@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { deepCheckComponent } from './types';
 
 function makeActionCreators (source, components, path, dispatch) {
   return _.reduce(source, (actions, __, actionName) => {
@@ -17,9 +18,9 @@ function makeActionCreators (source, components, path, dispatch) {
   }, {});
 }
 
-function processStyles (styles, childStyles, css, theme) {
-  if (!_.isFunction(styles)) return {};
-  return styles(css, { theme, components: childStyles });
+function processStyles (styles, components, css, theme = {}) {
+  const result = _.isFunction(styles) ? styles(css, { theme, components }) : {};
+  return _.defaults(result, components);
 }
 
 const parse = {
@@ -59,7 +60,7 @@ const parse = {
 
     function view (props, ...children) {
       return render({
-        props: _.assign({ className: '' }, _.omit(props, 'styles')),
+        props: _.omit(props, 'styles'),
         children,
         actions,
         styles: _.assign(styles, (props || {}).styles),
@@ -94,7 +95,7 @@ const parse = {
         // eslint-disable-next-line no-use-before-define
         const { view } = parse.normalComponent(component, config, {
           displayName: `${displayName}[${index}]`,
-          getState () { return _.get(getState(), index); },
+          getState: () => _.get(getState(), index),
           path: path.concat(index)
         });
 
@@ -107,5 +108,6 @@ const parse = {
 };
 
 export function parseComponent (component, config, opts) {
+  deepCheckComponent(component);
   return parse.normalComponent(component, config, opts);
 }

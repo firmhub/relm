@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import { deepCheckComponent } from './types';
 import { makeImmutable, unwrapImmutable, update } from './update';
 
 const normalReducerFactory = (components, actions, init) => (state = init(), event = {}) => {
@@ -58,6 +59,8 @@ const listReducerFactory = (components, actions, init) => (list = [], event = {}
 };
 
 export function makeReducer (component) {
+  deepCheckComponent(component);
+
   const isListComponent = _.isArray(component);
   const source = isListComponent ? _.head(component) : component;
 
@@ -73,11 +76,10 @@ export function makeReducer (component) {
     const childState = _.mapValues(components, childReducer => childReducer());
     if (!actions.initializeState) return childState;
 
-    const clone = makeImmutable(childState);
-    const initialState = actions.initializeState(clone);
+    const state = makeImmutable(childState);
+    const initialState = actions.initializeState(state);
     return unwrapImmutable(initialState);
   };
 
-  const factory = isListComponent ? listReducerFactory : normalReducerFactory;
-  return factory(components, actions, init);
+  return (isListComponent ? listReducerFactory : normalReducerFactory)(components, actions, init);
 }
