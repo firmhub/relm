@@ -28,21 +28,23 @@ function isAttributesObject (attrs) {
 }
 
 export function extendHyperscript (createElement) {
-  return function hyperscript (tag, ...args) {
+  return function hyperscript (tag, attrs, ...children) {
     // Sub-components
-    if (tag instanceof Function) return tag(...args);
+    if (tag instanceof Function) {
+      if (isAttributesObject(attrs)) attrs.className = classNames(attrs.className);
+      return tag(attrs, ...children);
+    }
 
     // Hyperscript extension (div.class-name#someid[attr=value])
     const parsed = parseTag(tag);
-    const attrs = args[0];
 
     if (isAttributesObject(attrs)) {
       Object.assign(parsed.attrs, attrs);
       parsed.attrs.className = classNames(attrs.className, parsed.classes);
-      parsed.children = args.slice(1);
+      parsed.children = children;
     } else {
       parsed.attrs.className = classNames(parsed.classes);
-      parsed.children = args;
+      parsed.children = [attrs].concat(children);
     }
 
     return createElement(parsed.tag, parsed.attrs, ...parsed.children);
