@@ -1,20 +1,53 @@
 import _ from 'lodash';
 import * as UI from './ui';
+import Flashcard from './Flashcard';
 
-function shuffleTopics (topics) {
-  const randomTopic = _.sample(topics);
-  const question = _.sample(randomTopic.questions);
-  const options = _.shuffle(question.o);
-  return { topics, question, options };
+// Takes a set of topics and finds a random question
+// to display (omitting any skipped topics)
+//
+// topics: dict(ID, Topic) -> skippedTopics: dict(ID, Bool) -> state: Obj
+function shuffleTopics (topics, skippedTopics = {}) {
+  // Get a random topic and question
+  const topic = _.chain(topics).keys().reject(id => skippedTopics[id]).sample().value();  // Str
+  const questions = _.get(topics, [topic, 'questions']);      // dict(Num, Obj)
+  const shuffled = _.shuffle(questions);
+  const weakest = _.find(shuffled, q => (q.confidence || 0) < 150) || _.first(shuffled);
+
+  // Shuffle the question's options
+  const question = _.findKey(questions, x => x === weakest);  // Str
+  const options = _.shuffle(questions[question].o);
+
+  // Set the resulting properties on state
+  return { topics, topic, question, options, selection: null };
+}
+
+function getQuestion (state) {
+  return _.get(state, ['topics', state.topic, 'questions', state.question]);
+}
+
+function incrementStats (obj, attempt) {
+  if (attempt.correct) obj.correct = (obj.correct || 0) + 1;
+  obj.total = (obj.total || 0) + 1;
+  return obj;
 }
 
 export default function Quiz (h, { actions, state, components: x }) {
-  const question = state.question;
+  const question = getQuestion(state);
   if (!question) return null;
+
+  const topicStats = _.reduce(state.attempts, (agg, attempt) => {
+    agg[attempt.topic] = incrementStats(agg[attempt.topic] || {}, attempt);
+    return agg;
+  });
 
   return (
     <div style={{ padding: '2rem' }}>
-      <x.Navigation topics={state.topics} />
+      <x.Navigation
+        topics={state.topics}
+        stats={topicStats}
+        skippedTopics={state.skippedTopics}
+        onToggle={actions.toggleTopic}
+      />
       <x.Flashcard
         style={{ margin: '2rem 0' }}
         question={question.q}
@@ -22,7 +55,7 @@ export default function Quiz (h, { actions, state, components: x }) {
         answer={_.first(question.o)}
         options={state.options}
         selection={state.selection}
-        onChange={actions.checkAnswer}
+        onChange={actions.updateSelection}
         onNext={actions.nextQuestion}
       />
     </div>
@@ -37,161 +70,97 @@ Quiz.components = {
 
 Quiz.actions = {
   initializeState (state) {
-    return state.set('question', null);
+    return state.merge({ question: null, skippedTopics: {}, attempts: [] });
+  },
+
+  toggleTopic (state, topicId) {
+    // When a topic is being hidden, first check that it is not the last visibe one
+    if (!state.skippedTopics[topicId]) {
+      const remaining = _.omitBy(state.topics, (it, id) => state.skippedTopics[id]);
+      if (_.size(remaining) < 2) return state;
+    }
+
+    // Toggle the topic then shuffle the remaining ones
+    const update = state.set(['skippedTopics', topicId], !state.skippedTopics[topicId]);
+    return update.merge(shuffleTopics(update.topics, update.skippedTopics));
   },
 
   updateTopics (state, topics) {
-    return state.merge(shuffleTopics(topics)).set('isChecked', false);
+    const shuffled = shuffleTopics(topics, state.skippedTopics);
+    return state.merge(shuffled);
   },
 
-  checkAnswer (state, value) {
-    return state.set('selection', value);
+  updateSelection (state, value) {
+    // A selection was made, so update the question's confidence based on answer
+    const question = getQuestion(state);
+    const answerIsCorrect = value === _.first(question.o);
+    const change = (question.confidence || 0) + (answerIsCorrect ? 100 : -50);
+    const confidence = _.max([-100, _.min([change, 200])]);
+    const path = ['topics', state.topic, 'questions', state.question, 'confidence'];
+
+    // Save the selection and the confidence
+    return state.set('selection', value).set(path, confidence);
   },
 
   nextQuestion (state) {
-    return state.merge(shuffleTopics(state.topics)).set('selection', null);
+    const shuffled = shuffleTopics(state.topics, state.skippedTopics);
+    return state.merge(shuffled);
   }
 };
 
-
-function Flashcard (h, { props, styles, components: x }) {
-  const showAnswer = Boolean(props.selection);
-
+function Navigation (h, { props, styles }) {
   return (
-    <section className={styles.card} style={props.style}>
-      <header className={styles.question}>
-        {props.question}
-      </header>
-      <ul className={styles.options}>
-        {props.options.map(optionView)}
-      </ul>
-      {!showAnswer ? null : (
-        <footer className={styles.footer}>
-          <div style={{ marginBottom: '1rem', fontSize: '1.1em' }}>
-            <strong>{props.selection === props.answer ? 'Correct! ' : 'Wrong! '}</strong>
-            {props.reason}
-          </div>
-          <x.Button className={styles.Button.primary} onClick={props.onNext}>
-            Next question
-          </x.Button>
-        </footer>
-      )}
-    </section>
+    <nav style={{ lineHeight: 2.5, textAlign: 'center' }}>
+      {_.map(props.topics, topicView)}
+    </nav>
   );
 
-  function optionView (opt, i) {
-    const isSelected = opt === props.selection;
-    const isGood = showAnswer && opt === props.answer;
-    const isBad = !isGood && isSelected;
-    const variant = isGood ? 'good' : (isBad ? 'bad' : 'normal'); // eslint-disable-line no-nested-ternary
+  function topicView (topic, id) {
+    const classes = {
+      [styles.tag]: true,
+      [styles.active]: !props.skippedTopics[id]
+    };
+
+    // console.log(_.map(topic.questions, q => q.confidence || 0));
+
+    const confidence = _.chain(topic.questions)
+      .map(q => q.confidence || 0)
+      .mean()
+      .floor()
+      .value();
 
     return (
-      <x.Option
-        styles={{ container: styles[variant], disabled: styles.disabled }}
-        name='answer'
-        label={opt}
-        disabled={showAnswer}
-        checked={isSelected}
-        value={i}
-        onChange={() => props.onChange(opt)}
-      />
+      <a className={classes} onClick={() => props.onToggle(id)}>
+        <span className={styles.count}>{confidence}</span>
+        <span className={styles.label}>{topic.label}</span>
+      </a>
     );
   }
 }
 
-Flashcard.components = {
-  Option: UI.Radio,
-  Button: UI.Button,
-};
-
-Flashcard.styles = (css, { components: { Option } }) => css`
-  .card {
-    position: relative;
-    background: #fff;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2)
-    , 0 25px 50px 0 rgba(0, 0, 0, 0.1);
+Navigation.styles = (css) => css`
+  .tag {
+    background-color: #eeeeee;
+    border-radius: 16px;
+    padding: 4px 1em 4px 0;
+    transition: background-color 0.4s;
+    white-space: nowrap;
+    display: inline-block;
+    line-height: 1;
+    margin-right: 1rem;
   }
 
-  .card:before {
-    pointer-events: none;
-    content: '';
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: 50px;
-    overflow: hidden;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2)
-    , 0 8px 0 -3px #f6f6f6
-    , 0 9px 1px -3px rgba(0, 0, 0, 0.2)
-    , 0 16px 0 -6px #f6f6f6
-    , 0 17px 2px -6px rgba(0, 0, 0, 0.2);
+  .tag.active {
+    background-color: #90caf9;
   }
 
-  .question {
-    font-size: 1.4em;
-    line-height: 1.4;
-    padding: 1.5rem;
-    color: inherit;
-    box-sizing: border-box;
-    border-bottom: 1px solid #ededed;
-    font-smoothing: antialiased;
+  .label {
+    margin-left: 0.5em;
   }
 
-  .options {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  .normal extends ${Option.container} {
-    font-size: 1.2em;
-  }
-
-  .normal:not(.disabled):hover {
-    background-color: #ededed;
-    cursor: pointer;
-  }
-  .bad extends .normal {
-    background-color: #FFCFCF;
-    cursor: default;
-  }
-
-  .good extends .normal {
-    background-color: #D4FCD2;
-    cursor: default;
-  }
-
-  .disabled > input {
-    visibility: hidden;
-  }
-
-  .normal > label {
-    line-height: 2;
-  }
-
-  .footer {
-    color: #777;
-    padding: 10px 15px;
-    text-align: center;
-    border-top: 1px solid #e6e6e6;
+  .count {
+    background-color: #ffe0b2;
+    border-radius: 16px;
+    padding: 3px 8px;
   }
 `;
-
-
-function Navigation (h, { props, styles, components: { Nav } }) {
-  return (
-    <Nav>
-      <h5 className={styles.Nav.title}>Topics</h5>
-      {_.map(props.topics, (it) => (
-        <a className={[styles.Nav.item, styles.Nav.active]}>
-          <span className='icon icon-home'></span>{it.label}
-        </a>
-      ))}
-    </Nav>
-  );
-}
-
-Navigation.components = {
-  Nav: UI.Nav
-};

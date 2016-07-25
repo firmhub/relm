@@ -7,6 +7,10 @@ import * as Crypto from './services/crypto';
 import encryptedData from 'raw!./data.txt'; // eslint-disable-line import/no-unresolved
 
 const debug = false;
+const theme = {
+  grayColor: '#fc605b'
+};
+
 
 function App (h, { actions, state, components: x }) {
   return state.isUnlocked ? (
@@ -65,7 +69,7 @@ App.actions = {
   },
 };
 
-export function Password (h, { styles, props, state, actions, components: x }) {
+export function Password (h, { styles, props, state, actions }) {
   return (
     <form {...props} className={styles.form}>
       <input value={state.value || ''} onInput={actions.passwordInput} />
@@ -89,7 +93,7 @@ Password.styles = (css) => css`
 
 
 // Start the application
-const app = window.app = relmApp(document.querySelector('#main'), App, { debug });
+const app = window.app = relmApp(document.querySelector('#main'), App, { debug, theme });
 
 const savedPass = localStorage.getItem('savedPass');
 if (savedPass) app.actions.$decryptData(savedPass);

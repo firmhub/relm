@@ -44,9 +44,8 @@ update.commands = {
     return value;
   },
 
-  $push (elements, arr) {
-    if (elements.length > 0) return arr.concat(elements);
-    return arr;
+  $concat (elements, arr) {
+    return arr.concat(elements);
   },
 
   $splice (splices, arr) {
@@ -98,6 +97,13 @@ Immutable.prototype = {
     return makeImmutable(update(this, arguments.length === 1
       ? { $set: a }
       : _.set({}, a, { $set: b })
+    ));
+  },
+
+  concat (a, b) {
+    return makeImmutable(update(this, arguments.length === 1
+      ? { $concat: a }
+      : _.set({}, a, { $concat: b })
     ));
   },
 

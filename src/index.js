@@ -70,6 +70,7 @@ export function createApp (createElement, rootComponent, opts = {}) {
     createElement,
     createCSS,
     dispatch: store.dispatch,
+    theme: opts.theme || {},
   };
 
   // Setup the component heirarchy
