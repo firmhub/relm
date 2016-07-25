@@ -13,6 +13,7 @@
     "no-underscore-dangle": 0,
     "no-use-before-define": [2, { "functions": false }],
     "no-param-reassign": 0,
+    "newline-per-chained-call": 0,
     "prefer-rest-params": 0,
     "spaced-comment": 0,
     "space-before-function-paren": 0,
