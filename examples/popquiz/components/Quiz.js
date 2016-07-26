@@ -1,54 +1,17 @@
 import _ from 'lodash';
-import * as UI from './ui';
 import Flashcard from './Flashcard';
 
-// Takes a set of topics and finds a random question
-// to display (omitting any skipped topics)
-//
-// topics: dict(ID, Topic) -> skippedTopics: dict(ID, Bool) -> state: Obj
-function shuffleTopics (topics, skippedTopics = {}) {
-  // Get a random topic and question
-  const topic = _.chain(topics).keys().reject(id => skippedTopics[id]).sample().value();  // Str
-  const questions = _.get(topics, [topic, 'questions']);      // dict(Num, Obj)
-  const shuffled = _.shuffle(questions);
-  const weakest = _.find(shuffled, q => (q.confidence || 0) < 150) || _.first(shuffled);
-
-  // Shuffle the question's options
-  const question = _.findKey(questions, x => x === weakest);  // Str
-  const options = _.shuffle(questions[question].o);
-
-  // Set the resulting properties on state
-  return { topics, topic, question, options, selection: null };
-}
-
-function getQuestion (state) {
-  return _.get(state, ['topics', state.topic, 'questions', state.question]);
-}
-
-function incrementStats (obj, attempt) {
-  if (attempt.correct) obj.correct = (obj.correct || 0) + 1;
-  obj.total = (obj.total || 0) + 1;
-  return obj;
-}
-
-export default function Quiz (h, { actions, state, components: x }) {
+export default function Quiz (h, { styles, actions, state, components: { TopicToggle, Card } }) {
   const question = getQuestion(state);
   if (!question) return null;
 
-  const topicStats = _.reduce(state.attempts, (agg, attempt) => {
-    agg[attempt.topic] = incrementStats(agg[attempt.topic] || {}, attempt);
-    return agg;
-  });
+  const scores = _.reduce(state.stats, summarizeStats, {});
+  const toggles = _.map(state.topics, topicToToggleButton);
 
   return (
     <div style={{ padding: '2rem' }}>
-      <x.Navigation
-        topics={state.topics}
-        stats={topicStats}
-        skippedTopics={state.skippedTopics}
-        onToggle={actions.toggleTopic}
-      />
-      <x.Flashcard
+      <nav style={{ lineHeight: 2.5, textAlign: 'center' }}>{toggles}</nav>
+      <Card
         style={{ margin: '2rem 0' }}
         question={question.q}
         reason={question.r}
@@ -60,18 +23,32 @@ export default function Quiz (h, { actions, state, components: x }) {
       />
     </div>
   );
+
+  function topicToToggleButton (topic, key) {
+    const totalMarks = _.size(topic.questions);
+    const percentage = (scores[key] / totalMarks) * 100;
+    return (
+      <TopicToggle
+        className={{ [styles.TopicToggle.active]: !state.skippedTopics[key] }}
+        count={Math.floor(percentage)}
+        label={topic.label}
+        onToggle={() => actions.toggleTopic(key)}
+      />
+    );
+  }
 }
 
 Quiz.components = {
-  Navigation,
-  Flashcard,
-  Pane: UI.Pane,
+  TopicToggle: Toggle,
+  Card: Flashcard,
 };
 
 Quiz.actions = {
   initializeState (state) {
-    return state.merge({ question: null, skippedTopics: {}, attempts: [] });
+    return state.merge({ question: null, skippedTopics: {}, stats: [] });
   },
+
+  nextQuestion,
 
   toggleTopic (state, topicId) {
     // When a topic is being hidden, first check that it is not the last visibe one
@@ -80,65 +57,62 @@ Quiz.actions = {
       if (_.size(remaining) < 2) return state;
     }
 
-    // Toggle the topic then shuffle the remaining ones
     const update = state.set(['skippedTopics', topicId], !state.skippedTopics[topicId]);
-    return update.merge(shuffleTopics(update.topics, update.skippedTopics));
+    return nextQuestion(update);
   },
 
   updateTopics (state, topics) {
-    const shuffled = shuffleTopics(topics, state.skippedTopics);
-    return state.merge(shuffled);
+    // Build initial stats objects
+    const stats = _.reduce(topics, reduceTopicToStats, []);
+
+    // Reducer for all topics which builds the stats array
+    function reduceTopicToStats (arr, topic, topicName) {
+      const topicStats = _.map(topic.questions, mapQuestionToStat(topicName));
+      return arr.concat(topicStats);
+    }
+
+    // Iteratee for each question which return the initial stat object
+    function mapQuestionToStat (topicName) {
+      return (__, questionName) => ({
+        topic: topicName,
+        question: questionName,
+        score: 0
+      });
+    }
+
+    return nextQuestion(state.update({
+      topics: { $set: topics },
+      stats: { $set: stats },
+    }));
   },
 
   updateSelection (state, value) {
-    // A selection was made, so update the question's confidence based on answer
     const question = getQuestion(state);
-    const answerIsCorrect = value === _.first(question.o);
-    const change = (question.confidence || 0) + (answerIsCorrect ? 100 : -50);
-    const confidence = _.max([-100, _.min([change, 200])]);
-    const path = ['topics', state.topic, 'questions', state.question, 'confidence'];
+    const isCorrect = _.first(question.o) === value;
 
-    // Save the selection and the confidence
-    return state.set('selection', value).set(path, confidence);
+    const stats = reduceStats(state.stats, {
+      question: state.question,
+      topic: state.topic,
+      score: isCorrect ? 1 : -1
+    });
+
+    return state.update({
+      selection: { $set: value },
+      stats: { $set: stats }
+    });
   },
-
-  nextQuestion (state) {
-    const shuffled = shuffleTopics(state.topics, state.skippedTopics);
-    return state.merge(shuffled);
-  }
 };
 
-function Navigation (h, { props, styles }) {
+function Toggle (h, { props, styles }) {
   return (
-    <nav style={{ lineHeight: 2.5, textAlign: 'center' }}>
-      {_.map(props.topics, topicView)}
-    </nav>
+    <a className={[styles.tag, props.className]} onClick={props.onToggle}>
+      <span className={styles.count}>{props.count}</span>
+      <span className={styles.label}>{props.label}</span>
+    </a>
   );
-
-  function topicView (topic, id) {
-    const classes = {
-      [styles.tag]: true,
-      [styles.active]: !props.skippedTopics[id]
-    };
-
-    // console.log(_.map(topic.questions, q => q.confidence || 0));
-
-    const confidence = _.chain(topic.questions)
-      .map(q => q.confidence || 0)
-      .mean()
-      .floor()
-      .value();
-
-    return (
-      <a className={classes} onClick={() => props.onToggle(id)}>
-        <span className={styles.count}>{confidence}</span>
-        <span className={styles.label}>{topic.label}</span>
-      </a>
-    );
-  }
 }
 
-Navigation.styles = (css) => css`
+Toggle.styles = (css) => css`
   .tag {
     background-color: #eeeeee;
     border-radius: 16px;
@@ -150,7 +124,7 @@ Navigation.styles = (css) => css`
     margin-right: 1rem;
   }
 
-  .tag.active {
+  .active {
     background-color: #90caf9;
   }
 
@@ -164,3 +138,87 @@ Navigation.styles = (css) => css`
     padding: 3px 8px;
   }
 `;
+
+
+/*
+ *
+ * Internals
+ *
+ */
+
+function getQuestion (state) {
+  return _.get(state, ['topics', state.topic, 'questions', state.question]);
+}
+
+// NOTE: selectQuestion assumes that an entry exists for each
+// topic+question in the stats array. On init, call this function
+// with each topic+question+score of 0
+function reduceStats (stats = [], { topic, question, score }) {
+  // Remove old value, if any
+  const clone = _.clone(stats);
+  const prevIndex = _.findIndex(clone, it => it.topic === topic && it.question === question);
+  const [prev] = clone.splice(prevIndex, 1);
+
+  // const decay = Date.now() - prev.time;
+  // const decay = score > 0 ? 0.75 : 1;
+  const decay = 1;
+
+  const value = {
+    topic,
+    question,
+    score: Math.floor((prev.score * decay) + score),
+    time: Date.now()
+  };
+
+  // Add new value
+  const nextIndex = _.sortedLastIndexBy(clone, value, it => it.score);
+  clone.splice(nextIndex, 0, value);
+
+  return clone;
+}
+
+function summarizeStats (obj, { topic, score }) {
+  obj[topic] = (obj[topic] || 0) + score;
+  return obj;
+}
+
+
+function weakestStatByTopic (stats = [], currentQuestion) {
+  return topic => _.find(stats, x => x.topic === topic && x.question !== currentQuestion);
+}
+
+function skipTopics (skippedTopics = {}) {
+  return (topics) => _.omitBy(topics, (t, k) => skippedTopics[k]);
+}
+
+function weakestTopic (state) {
+  const getWeakest = _.flow(
+    skipTopics(state.skippedTopics),    // => Obj
+    _.keys,                             // => [Str]
+    _.sample,                           // => Str
+    weakestStatByTopic(state.stats, state.question)     // => Obj
+  );
+
+  return getWeakest(state.topics);
+}
+
+function nextQuestion (state) {
+  const weakest = weakestTopic(state);
+  const question = _.get(state, ['topics', weakest.topic, 'questions', weakest.question]);
+
+  return state.merge({
+    topic: weakest.topic,
+    question: weakest.question,
+    options: _.shuffle(question.o),
+    selection: null
+  });
+}
+
+/* export for testing */
+export const __internals__ = {
+  reduceStats,
+  summarizeStats,
+  skipTopics,
+  weakestStatByTopic,
+  weakestTopic,
+};
