@@ -30,17 +30,15 @@ function common (tx) {
     },
     externals: [
       /^babel.+$/,
-    ],
-    plugins: [
-      new webpack.optimize.DedupePlugin(),
-      new webpack.optimize.OccurrenceOrderPlugin()
     ]
   });
 }
 
 function production (tx) {
   return tx(common(function productionTx (config) {
-    config.plugins.push(...[
+    config.plugins = [
+      new webpack.optimize.DedupePlugin(),
+      new webpack.optimize.OccurrenceOrderPlugin(),
       new webpack.DefinePlugin({
         'process.env': {
           NODE_ENV: JSON.stringify('production')
@@ -49,7 +47,7 @@ function production (tx) {
       new webpack.optimize.UglifyJsPlugin({
         compress: { warnings: false, screw_ie8: true }
       })
-    ]);
+    ];
 
     return config;
   }));
