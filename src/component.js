@@ -81,7 +81,7 @@ function listComponent ([component], config, opts) {
 }
 
 function parseChildComponents (components, config, getState, path) {
-  return _.reduce(components, (obj, it, componentName) => {
+  return _.reduce(components, (target, it, componentName) => {
     const isListComponent = _.isArray(it);
     const parser = isListComponent ? listComponent : normalComponent;
 
@@ -91,14 +91,14 @@ function parseChildComponents (components, config, getState, path) {
       path: path.concat(componentName)
     });
 
-    Object.defineProperty(obj.components, componentName, {
+    Object.defineProperty(target.components, componentName, {
       [isListComponent ? 'get' : 'value']: isListComponent ? result.getter : result.view,
       enumerable: true
     });
 
-    obj.styles[componentName] = result.styles;
+    target.styles[componentName] = result.styles;
 
-    return obj;
+    return target;
   }, {
     components: {},
     styles: {}

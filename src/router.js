@@ -8,8 +8,13 @@ import { Component } from './types';
 /**
  * Creates a single route parser given a path (ex /some/:named/:path*)
  * The return exec method returns an object of all named parameters
+ *
+ * Returned exec() method takes a url string and returns an object with route params
+ *
+ * @param {Regex} path
+ * @returns {Object} with exec() method to match against strings
  */
-export function routeParser (path) {
+function routeParser (path) {
   const keys = [];
   const re = pathToRegexp(path, keys);
 
@@ -34,8 +39,10 @@ export function routeParser (path) {
  * Example of a definition: {
  *   SomeRoute: [Component, '/some/:named/:path*']
  * }
+ * @param {Object} definitions
+ * @returns {Function} parser
  */
-export function routeMapper (definitions) {
+function routeMapper (definitions) {
   const parsers = _.map(definitions, function definitionsToParser (def, name) {
     const parser = routeParser(def[1]);
     return function exec (str) {
@@ -60,8 +67,10 @@ export function routeMapper (definitions) {
  * Example of a definition: {
  *   SomeRoute: [Component, '/some/:named/:path*']
  * }
+ * @param {Object} routeDefinitions
+ * @returns {Object} component
  */
-export function router (routeDefinitions) {
+export default function router (routeDefinitions) {
   if (process.env.NODE_ENV !== 'production') {
     const Path = t.refinement(t.String, startsWith('/'), 'Path');
 
@@ -99,4 +108,7 @@ export function router (routeDefinitions) {
   return Router;
 }
 
-export default router;
+export const internals = {
+  routeParser,
+  routeMapper,
+};
