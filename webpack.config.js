@@ -3,9 +3,11 @@ const path = require('path');
 const fs = require('fs');
 const webpack = require('webpack');
 
-const TARGET = process.env.TARGET || 'dev';
-if (TARGET === 'dev') module.exports = entries(common);
-if (TARGET === 'prod') module.exports = entries(production);
+if (process.env.NODE_ENV === 'production') {
+  module.exports = entries(production);
+} else {
+  module.exports = entries(common);
+}
 
 function common (tx) {
   return tx({

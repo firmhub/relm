@@ -14,7 +14,7 @@
     "dev:routes": "webpack-dev-server examples/routes/app.js --output-filename=app.dist.js --inline --content-base=examples/routes",
     "dev:todo": "webpack-dev-server examples/todo/js/app.js --output-public-path=/js/ --output-filename=app.dist.js --inline --content-base=examples/todo",
     "watch": "webpack --watch",
-    "build": "env TARGET=prod webpack --progress",
+    "build": "env NODE_ENV=production webpack --progress",
     "prepublish": "npm run build"
   },
   "keywords": [
