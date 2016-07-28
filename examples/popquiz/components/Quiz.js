@@ -48,7 +48,7 @@ Quiz.actions = {
     return state.merge({ question: null, skippedTopics: {}, stats: [] });
   },
 
-  nextQuestion,
+  nextQuestion: selectNextQuestion,
 
   toggleTopic (state, topicId) {
     // When a topic is being hidden, first check that it is not the last visibe one
@@ -58,12 +58,17 @@ Quiz.actions = {
     }
 
     const update = state.set(['skippedTopics', topicId], !state.skippedTopics[topicId]);
-    return nextQuestion(update);
+    return selectNextQuestion(update);
   },
 
   updateTopics (state, topics) {
     // Build initial stats objects
     const stats = _.reduce(topics, reduceTopicToStats, []);
+
+    return selectNextQuestion(state.update({
+      topics: { $set: topics },
+      stats: { $set: stats },
+    }));
 
     // Reducer for all topics which builds the stats array
     function reduceTopicToStats (arr, topic, topicName) {
@@ -79,11 +84,6 @@ Quiz.actions = {
         score: 0
       });
     }
-
-    return nextQuestion(state.update({
-      topics: { $set: topics },
-      stats: { $set: stats },
-    }));
   },
 
   updateSelection (state, value) {
@@ -159,14 +159,10 @@ function reduceStats (stats = [], { topic, question, score }) {
   const prevIndex = _.findIndex(clone, it => it.topic === topic && it.question === question);
   const [prev] = clone.splice(prevIndex, 1);
 
-  // const decay = Date.now() - prev.time;
-  // const decay = score > 0 ? 0.75 : 1;
-  const decay = 1;
-
   const value = {
     topic,
     question,
-    score: Math.floor((prev.score * decay) + score),
+    score: Math.max(-1, prev.score + score),
     time: Date.now()
   };
 
@@ -182,28 +178,38 @@ function summarizeStats (obj, { topic, score }) {
   return obj;
 }
 
+function weakestStatByTopic (stats = []) {
+  return topic => {
+    // Separate topic stats into two arrays 'bad or never answer' and 'good'
+    const { good, bad } = _.reduce(stats, (partition, x) => {
+      if (x.topic !== topic) return partition;
+      if (x.score < 1) partition.bad.push(x);
+      else partition.good.push(x);
+      return partition;
+    }, { good: [], bad: [] });
 
-function weakestStatByTopic (stats = [], currentQuestion) {
-  return topic => _.find(stats, x => x.topic === topic && x.question !== currentQuestion);
+    if (bad.length) return _.sample(bad);
+    return _.first(good);
+  };
 }
 
 function skipTopics (skippedTopics = {}) {
   return (topics) => _.omitBy(topics, (t, k) => skippedTopics[k]);
 }
 
-function weakestTopic (state) {
-  const getWeakest = _.flow(
+function getWeakestTopic (state) {
+  const findWeakest = _.flow(
     skipTopics(state.skippedTopics),    // => Obj
     _.keys,                             // => [Str]
     _.sample,                           // => Str
-    weakestStatByTopic(state.stats, state.question)     // => Obj
+    weakestStatByTopic(state.stats)     // => Obj
   );
 
-  return getWeakest(state.topics);
+  return findWeakest(state.topics);
 }
 
-function nextQuestion (state) {
-  const weakest = weakestTopic(state);
+function selectNextQuestion (state) {
+  const weakest = getWeakestTopic(state);
   const question = _.get(state, ['topics', weakest.topic, 'questions', weakest.question]);
 
   return state.merge({
@@ -220,5 +226,5 @@ export const __internals__ = {
   summarizeStats,
   skipTopics,
   weakestStatByTopic,
-  weakestTopic,
+  getWeakestTopic,
 };
