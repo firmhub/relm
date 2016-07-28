@@ -1,8 +1,10 @@
 {
   "presets": [
-    "es2015"
+    "es2015",
   ],
   "plugins": [
-    "lodash"
+    "lodash",
+    "syntax-jsx",
+    ["transform-react-jsx", { "pragma": "h" }]
   ]
 }

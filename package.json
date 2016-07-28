@@ -13,11 +13,8 @@
     "dev:http": "webpack-dev-server examples/http/app.js --output-filename=app.dist.js --inline --content-base=examples/http",
     "dev:routes": "webpack-dev-server examples/routes/app.js --output-filename=app.dist.js --inline --content-base=examples/routes",
     "dev:todo": "webpack-dev-server examples/todo/js/app.js --output-public-path=/js/ --output-filename=app.dist.js --inline --content-base=examples/todo",
-    "build:quiz": "webpack examples/popquiz/app.js --output-filename=examples/popquiz/app.dist.js --config=webpack.prod.js",
-    "build:inferno": "webpack src/packages/inferno.js inferno.js --output-library=inferno",
-    "build:react": "webpack src/packages/react.js react.js --output-library=react",
-    "build:morphdom": "webpack src/packages/morphdom.js morphdom.js --output-library=morphdom",
-    "build": "./parallel.sh 'build:inferno -- --config=webpack.prod.js' 'build:react -- --config=webpack.prod.js' 'build:morphdom -- --config=webpack.prod.js'",
+    "watch": "webpack --watch",
+    "build": "env TARGET=prod webpack --progress",
     "prepublish": "npm run build"
   },
   "keywords": [
