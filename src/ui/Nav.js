@@ -26,7 +26,7 @@ Nav.styles = (css, { theme }) => css`
   }
 
   .item .icon {
-    width: 19px; // Prevents a one pixel cutoff
+    width: 19px; /* Prevents a one pixel cutoff */
     height: 18px;
     float: left;
     color: #737475;
@@ -41,6 +41,6 @@ Nav.styles = (css, { theme }) => css`
     padding: 10px 10px 2px;
     font-size: 12px;
     font-weight: 500;
-    color: lighten(${theme.grayColor}, 20%);
+    color: ${theme.grayColor};
   }
 `;
