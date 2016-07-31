@@ -1,7 +1,30 @@
+/* eslint-disable */
+
+module.exports = {
+  presets: [
+  ],
+  plugins: [
+    [require('babel-plugin-syntax-jsx')],
+    [require('babel-plugin-transform-react-jsx'), { pragma: 'h' }],
+  ],
+  env: {
+    production: {
+      plugins: [
+        [csjs, {
+          plugins: [
+            ['autoprefixer', { browsers: ['last 2 versions'] }],
+            ['postcss-csso']
+          ]
+        }]
+      ]
+    }
+  }
+};
+
 const postcss = require('postcss');
 const safe = require('postcss-safe-parser');
 
-module.exports = function({types: t}) {
+function csjs ({ types: t }) {
   return {
     visitor: {
       TaggedTemplateExpression: function(path, state) {

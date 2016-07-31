@@ -10,15 +10,6 @@ import { parseComponent } from './component';
 import { makeImmutable, unwrapImmutable } from './update';
 import { extendHyperscript } from './hyperscript';
 
-const logger = store => next => action => {
-  console.group(action.type);
-  console.info('dispatching', action);
-  const result = next(action);
-  console.log('next state', store.getState());
-  console.groupEnd(action.type);
-  return result;
-};
-
 const usedStyles = {};
 
 function substitueStyle (x) {
@@ -40,16 +31,18 @@ function createCSS (pieces, ...substitutions) {
 }
 
 function createStore (rootComponent, opts) {
-  const reducer = makeReducer(rootComponent);
+  let reducer = makeReducer(rootComponent);
+  if (opts.customizeReducer) reducer = opts.customizeReducer(reducer);
+
+  let middleware = asyncMiddleware(rootComponent);
+  if (opts.customizeMiddleware) middleware = opts.customizeMiddleware(middleware);
+
   const initialState = _.merge(reducer() || {}, opts.initialState || {});
-  return redux.createStore(reducer, initialState, redux.applyMiddleware(
-    ...(opts.debug ? [logger] : []),
-    asyncMiddleware(rootComponent)
-  ));
+  return redux.createStore(reducer, initialState, middleware);
 }
 
 export function createApp (createElement, rootComponent, opts = {}) {
-  const store = opts.store || createStore(rootComponent, opts);
+  const store = createStore(rootComponent, opts);
 
   // Asynchronously dispatch all actions
   // const pendingActions = [];
@@ -73,11 +66,13 @@ export function createApp (createElement, rootComponent, opts = {}) {
     theme: opts.theme || {},
   };
 
+  const rootKey = opts.rootKey;
+
   // Setup the component heirarchy
   const result = parseComponent(rootComponent, config, {
-    displayName: rootComponent.displayName || rootComponent.name || 'app',
     path: [],
-    getState: store.getState
+    displayName: rootComponent.displayName || rootComponent.name || 'app',
+    getState: !opts.rootKey ? store.getState : () => _.get(store.getState(), rootKey)
   });
 
   result.subscribe = store.subscribe;

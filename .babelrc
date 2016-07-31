@@ -1,16 +1,9 @@
 {
   "presets": [
     "es2015-webpack",
+    "./preset"
   ],
   "plugins": [
-    "lodash",
-    "syntax-jsx",
-    ["transform-react-jsx", { "pragma": "h" }],
-    ["./src/csjs-postcss.js", {
-      "plugins": [
-        ["autoprefixer", {"browsers": ["last 2 versions"]}],
-        ["postcss-csso"]
-      ]
-    }]
+    "lodash"
   ]
 }
