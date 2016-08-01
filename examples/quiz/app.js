@@ -6,12 +6,6 @@ import Quiz from './components/Quiz';
 import * as Crypto from './services/crypto';
 import encryptedData from 'raw!./data.txt'; // eslint-disable-line import/no-unresolved
 
-const debug = false;
-const theme = {
-  grayColor: '#fc605b'
-};
-
-
 function App (h, { actions, state, components: x }) {
   return state.isUnlocked ? (
     <x.Quiz />
@@ -93,7 +87,11 @@ Password.styles = (css) => css`
 
 
 // Start the application
-const app = window.app = relmApp(document.querySelector('#main'), App, { debug, theme });
+const app = window.app = relmApp(document.querySelector('#main'), App, {
+  theme: {
+    grayColor: '#fc605b'
+  }
+});
 
 const savedPass = localStorage.getItem('savedPass');
 if (savedPass) app.actions.$decryptData(savedPass);

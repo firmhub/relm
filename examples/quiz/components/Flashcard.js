@@ -1,4 +1,4 @@
-import * as UI from './ui';
+import * as UI from '../../../src/ui';
 
 export default function Flashcard (h, { props, styles, components: x }) {
   const showAnswer = Boolean(props.selection);
