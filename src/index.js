@@ -1,101 +1,81 @@
-/* eslint-disable no-console */
 import _ from 'lodash';
-import * as redux from 'redux';
-import csjs from 'csjs';
-import insertCSS from 'insert-css';
+import { deepCheckComponent } from './types';
 
-import { makeReducer } from './reducer';
-import { asyncMiddleware } from './middleware';
-import { parseComponent } from './component';
-import { makeImmutable, unwrapImmutable } from './update';
-import { extendHyperscript } from './hyperscript';
+import ReduxPlugin from './plugins/ReduxPlugin';
+import OverridesPlugin from './plugins/OverridesPlugin';
+import TasksPlugin from './plugins/TasksPlugin';
+import StylesPlugin from './plugins/StylesPlugin';
+import ViewPlugin from './plugins/ViewPlugin';
 
-const usedStyles = {};
+function parser (plugins = []) {
+  return function parse (component, source, path, root) {
+    // Parse child components
+    const components = _.mapValues(source.components || {}, (it, key) => {
+      const child = _.isArray(it) ? _.head(it) : it;
+      return parse({}, child, path.concat(key), root);
+    });
 
-function substitueStyle (x) {
-  if (typeof x !== 'string') return x;
-  if (usedStyles.hasOwnProperty(x)) return usedStyles[x];
-  return x;
-}
+    // Assign some basic props to the component
+    const displayName = source.displayName || source.name;
+    Object.assign(component, { components, path, displayName });
 
-function createCSS (pieces, ...substitutions) {
-  const styles = csjs(pieces, ...substitutions.map(substitueStyle));
+    // Run the component through the plugins
+    _.each(plugins, plugin => plugin.apply(component, source, root));
 
-  insertCSS(csjs.getCss(styles));
-
-  return _.mapValues(styles, x => {
-    const generatedName = x.toString();
-    usedStyles[generatedName] = x;
-    return generatedName;
-  });
-}
-
-function createStore (rootComponent, opts) {
-  let reducer = makeReducer(rootComponent);
-  if (opts.customizeReducer) reducer = opts.customizeReducer(reducer);
-
-  let middleware = asyncMiddleware(rootComponent);
-  if (opts.customizeMiddleware) middleware = opts.customizeMiddleware(middleware);
-
-  const initialState = _.merge(reducer() || {}, opts.initialState || {});
-  return redux.createStore(reducer, initialState, middleware);
-}
-
-export function createApp (createElement, rootComponent, opts = {}) {
-  const store = createStore(rootComponent, opts);
-
-  // Asynchronously dispatch all actions
-  // const pendingActions = [];
-  // let timer;
-  // function drain () {
-  //   while (pendingActions.length) {
-  //     store.dispatch(pendingActions.shift());
-  //   }
-  //   clearTimeout(timer);
-  //   timer = null;
-  // }
-  // dispatch (action) {
-  //   pendingActions.push(action);
-  //   if (!timer) timer = setTimeout(drain);
-  // },
-
-  const config = {
-    createElement,
-    createCSS,
-    dispatch: store.dispatch,
-    theme: opts.theme || {},
+    return component;
   };
-
-  const rootKey = opts.rootKey;
-
-  // Setup the component heirarchy
-  const result = parseComponent(rootComponent, config, {
-    path: [],
-    displayName: rootComponent.displayName || rootComponent.name || 'app',
-    getState: !opts.rootKey ? store.getState : () => _.get(store.getState(), rootKey)
-  });
-
-  result.subscribe = store.subscribe;
-  result.dispatch = store.dispatch;
-  result.getState = store.getState;
-
-  function makeActionCreators (actions, __, actionName) {
-    actions[actionName] = _.startsWith(actionName, '$')
-      ? (...args) => store.dispatch({ type: [actionName], actions, args })
-      : (...args) => store.dispatch({ type: [actionName], args });
-
-    return actions;
-  }
-
-  result.actions = _.reduce(rootComponent.actions, makeActionCreators, {});
-
-  return result;
 }
 
-export {
-  makeReducer,
-  parseComponent,
-  makeImmutable,
-  unwrapImmutable,
-  extendHyperscript,
+export default function relm ({ component, plugins = [], path = [] }) {
+  deepCheckComponent(component);
+  const rootComponent = {};
+  const parse = parser(plugins);
+
+  return parse(rootComponent, component, path, rootComponent);
+}
+
+_.assign(relm, {
+  ReduxPlugin,
+  OverridesPlugin,
+  TasksPlugin,
+  StylesPlugin,
+  ViewPlugin,
+});
+
+export const internals = {
+  parser,
 };
+
+/* Inferno
+
+import relm from 'relm';
+import css from 'relm/css';
+
+function createElement (tag, props, ...children) {
+  const attrs = Object.keys(props || {}).reduce(transformAttributes.bind(props), {});
+  return InfernoCreateElement(tag, attrs, ...children);
+}
+
+export function relmApp (component, opts = {}) {
+  const app = relm({
+    root: component,
+    plugins: [
+      new relm.InitPlugin(),
+      new relm.UpdatePlugin(),
+      new relm.OverridesPlugin(),
+      new relm.StylesPlugin(css),
+      new relm.ViewPlugin(createElement)
+    ]
+  });
+
+  app.subscribe(function redraw () {
+    Inferno.render(app.view(), el);
+  });
+
+  Inferno.render(app.view(), el);
+
+  return app;
+}
+
+*/
+
