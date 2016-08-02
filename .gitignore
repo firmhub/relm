@@ -5,6 +5,6 @@ npm-debug.log
 /inferno.js
 /react.js
 /morphdom.js
-/examples/quiz/data.ini
+/examples/quiz/questions.js
 /ui
 /.vscode

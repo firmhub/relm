@@ -5,9 +5,10 @@ const webpack = require('webpack');
 
 if (process.env.NODE_ENV === 'production') {
   module.exports = [
-    production(uiComponentsEntry),
-    production(uiIndexEntry),
-    production(packagesEntry),
+    // production(uiComponentsEntry),
+    // production(uiIndexEntry),
+    // production(packagesEntry),
+    production(examplesEntry),
   ];
 } else {
   module.exports = development(examplesEntry);
@@ -142,7 +143,7 @@ function examplesEntry (config) {
   };
 
   config.output = {
-    filename: './[name]/app.js',
+    filename: './[name]/app.dist.js',
     path: path.resolve(__dirname, './examples'),
   };
 

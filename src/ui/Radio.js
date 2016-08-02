@@ -41,7 +41,7 @@ Radio.styles = css => css`
     flex: 1;
     color: #4d4d4d;
     white-space: pre-line;
-    word-break: break-all;
+    word-break: break-word;
     padding: 0.5rem 1rem 0.5rem 3.5rem;
     transition: all 0.4s;
     cursor: inherit;
