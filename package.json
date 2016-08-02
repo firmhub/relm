@@ -9,11 +9,8 @@
   },
   "scripts": {
     "test": "ava",
-    "dev:quiz": "babel-node ./examples/popquiz/data.js; webpack-dev-server examples/popquiz/app.js --output-filename=app.dist.js --inline --content-base=examples/popquiz",
-    "dev:http": "webpack-dev-server examples/http/app.js --output-filename=app.dist.js --inline --content-base=examples/http",
-    "dev:routes": "webpack-dev-server examples/routes/app.js --output-filename=app.dist.js --inline --content-base=examples/routes",
-    "dev:todo": "webpack-dev-server examples/todo/js/app.js --output-public-path=/js/ --output-filename=app.dist.js --inline --content-base=examples/todo",
-    "watch": "webpack --watch",
+    "dev:quiz": "babel-node --presets es2015 ./examples/quiz/data.js; webpack-dev-server",
+    "dev": "webpack-dev-server",
     "build": "env NODE_ENV=production webpack --progress",
     "prepublish": "npm run build"
   },
@@ -66,6 +63,7 @@
     "react": "^15.2.1",
     "react-dom": "^15.2.1",
     "redux": "^3.5.2",
+    "redux-logger": "^2.6.1",
     "sheet-router": "^3.1.1",
     "tcomb": "^3.2.8",
     "webpack": "^2",

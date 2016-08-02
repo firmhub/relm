@@ -5,7 +5,7 @@ const Actions = t.dict(t.String, t.Function, 'Actions');
 const Overrides = t.dict(t.String, t.Object, 'Overrides');
 
 function shallowCheck (it) {
-  if (!t.Function.is(it)) return `Component should be a function; got ${typeof it}`;
+  if (!t.Function.is(it)) return `Component should be a function; got ${JSON.stringify(it)}`;
   if (!t.maybe(t.Object).is(it.components)) return 'components property should be an object';
   if (!t.maybe(t.Function).is(it.styles)) return 'styles should be a function';
   if (!t.maybe(Actions).is(it.actions)) return 'actions should be an object with functions only';

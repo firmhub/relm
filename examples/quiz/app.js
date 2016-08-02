@@ -85,11 +85,16 @@ Password.styles = (css) => css`
   }
 `;
 
+import { applyMiddleware } from 'redux';
+import createLogger from 'redux-logger';
 
 // Start the application
 const app = window.app = relmApp(document.querySelector('#main'), App, {
   theme: {
     grayColor: '#fc605b'
+  },
+  customizeMiddleware (middleware) {
+    return applyMiddleware(middleware, createLogger());
   }
 });
 
