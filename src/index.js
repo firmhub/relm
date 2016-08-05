@@ -1,6 +1,9 @@
 import _ from 'lodash';
 import { deepCheckComponent } from './types';
 
+import router from './router';
+import list from './list';
+
 import ReduxPlugin from './plugins/ReduxPlugin';
 import OverridesPlugin from './plugins/OverridesPlugin';
 import TasksPlugin from './plugins/TasksPlugin';
@@ -41,6 +44,11 @@ _.assign(relm, {
   StylesPlugin,
   ViewPlugin,
 });
+
+export {
+  list,
+  router,
+};
 
 export const internals = {
   parser,

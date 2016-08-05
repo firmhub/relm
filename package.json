@@ -9,7 +9,6 @@
   },
   "scripts": {
     "test": "ava",
-    "dev:quiz": "babel-node --presets es2015 ./examples/quiz/data.js; webpack-dev-server",
     "dev": "webpack-dev-server",
     "build": "webpack --progress",
     "prepublish": "npm run build"
@@ -69,7 +68,8 @@
     "webpack": "^2",
     "webpack-dev-server": "^2",
     "xhr": "^2.2.1",
-    "yo-yo": "^1.2.2"
+    "yo-yo": "^1.2.2",
+    "t7": "^0.3"
   },
   "dependencies": {
     "path-to-regexp": "^1.5.3"

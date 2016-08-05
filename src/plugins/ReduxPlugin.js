@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { makeImmutable, unwrapImmutable } from '../immutable';
 
 export default class ReduxPlugin {
-  apply (component, source) {
+  apply (component, source, root) {
     const actions = _.omitBy(source.actions, (x, key) => _.startsWith(key, '$'));
 
     component.init = function init () {
@@ -36,6 +36,12 @@ export default class ReduxPlugin {
 
       return state;
     };
+
+    Object.defineProperty(component, 'state', {
+      get () {
+        return _.get(root.getState(), component.path) || component.init();
+      }
+    });
   }
 }
 
