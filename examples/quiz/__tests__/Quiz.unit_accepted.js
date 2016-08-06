@@ -1,0 +1,47 @@
+exports[`Loading state`] = `
+null
+`;
+
+exports[`Normal state`] = `
+<div
+  style={
+    Object {
+      "padding": "2rem"
+    }
+  }>
+  <nav
+    style={
+      Object {
+        "lineHeight": 2.5,
+        "textAlign": "center"
+      }
+    }>
+    <TopicToggle
+      className={
+        Object {
+          "active-toggle-button-class": true
+        }
+      }
+      count="0"
+      label="My topic"
+      onToggle="[Function onToggle]" />
+    <TopicToggle
+      className={
+        Object {
+          "active-toggle-button-class": false
+        }
+      }
+      count="0"
+      label="Other topic"
+      onToggle="[Function onToggle]" />
+  </nav>
+  <Card
+    style={
+      Object {
+        "margin": "2rem 0"
+      }
+    } />
+</div>
+`;
+
+

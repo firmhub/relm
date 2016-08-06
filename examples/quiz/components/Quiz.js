@@ -32,7 +32,7 @@ export default function Quiz (h, { styles, actions, state, components: { TopicTo
     return (
       <TopicToggle
         className={{ [styles.TopicToggle.active]: !state.skippedTopics[key] }}
-        count={Math.floor(percentage)}
+        count={Math.floor(percentage) || 0}
         label={topic.label}
         onToggle={() => actions.toggleTopic(key)}
       />
