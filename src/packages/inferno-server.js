@@ -60,14 +60,20 @@ function getAccepted (filename, forceReload) {
 
 function writeAccepted (filename, title, result) {
   const accepted = getAccepted(filename);
+
   accepted[title] = result;
 
-  fs.writeFileSync(filename, _.reduce(accepted, serializeAcceptedResults, '\n'));
-  getAccepted(filename, true);
+  fs.writeFileSync(filename, _.chain(accepted)
+    .keys()
+    .sort()
+    .reverse()
+    .reduce(function serializeAcceptedResults (str, key) {
+      return `exports[\`${fmt.escape(key)}\`] = \`${fmt.escape(accepted[key])}\`;\n\n${str}`;
+    }, '\n')
+    .value()
+  );
 
-  function serializeAcceptedResults (str, contents, key) {
-    return `exports[\`${fmt.escape(key)}\`] = \`${fmt.escape(contents)}\`; \n\n ${str}`;
-  }
+  getAccepted(filename, true);
 }
 
 export function renderAcceptanceTest (component, config) {
@@ -78,11 +84,11 @@ export function renderAcceptanceTest (component, config) {
   return function test (t) {
     if (!accepted[t.title]) {
       writeAccepted(filename, t.title, actual);
-      console.log(`Saved new accepted result ${t.title} \n\n ${actual}`);
+      console.log(`Saved new accepted result: ${t.title}\n\n${actual}`);
       t.pass();
     } else {
       const expected = fmt.deserialize(accepted[t.title]);
-      const diff = fmt.diff(actual, fmt.deserialize(expected));
+      const diff = fmt.diff(fmt.deserialize(expected), actual);
       if (diff) t.fail(`Fragment did not match accepted result: ${t.title} \n\n ${diff} \n\n`);
     }
   };

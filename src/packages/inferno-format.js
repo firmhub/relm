@@ -42,8 +42,21 @@ function printElement(element, print, indent) {
 
   let result = '<' + tag;
 
-  if (element.attrs) {
-    result += printProps(element.attrs, print, indent);
+  // Convert inferno element to a props object
+  const props = _.chain(element)
+    .pick('style', 'className')
+    .assign(element.attrs)
+    .omitBy(x => x === undefined || x === null)
+    .value();
+
+  const hasProps = _.size(props);
+
+  if (hasProps) {
+    result += printProps(props, print, indent);
+  }
+
+  if (element.events || element.hooks) {
+    console.log('TODO: Update inferno-format for events and hooks', element);
   }
 
   if (element.children) {
@@ -96,7 +109,7 @@ function getPrefix (change) {
 function formatChangedLines (change) {
   const lines = change.value.split('\n').filter(str => _.trim(str));
   const color = getColor(change);
-  return lines.map(line => `${getPrefix(change)} ${color(line)}\n`).join('');
+  return lines.map(line => `${color(getPrefix(change))} ${color(line)}\n`).join('');
 }
 
 function formatChangedCharacters (change) {
