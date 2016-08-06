@@ -4,12 +4,6 @@ import { deepCheckComponent } from './types';
 import router from './router';
 import list from './list';
 
-import ReduxPlugin from './plugins/ReduxPlugin';
-import OverridesPlugin from './plugins/OverridesPlugin';
-import TasksPlugin from './plugins/TasksPlugin';
-import StylesPlugin from './plugins/StylesPlugin';
-import ViewPlugin from './plugins/ViewPlugin';
-
 function parser (plugins = []) {
   return function parse (component, source, path, root) {
     // Parse child components
@@ -36,14 +30,6 @@ export default function relm ({ component, plugins = [], path = [] }) {
 
   return parse(rootComponent, component, path, rootComponent);
 }
-
-_.assign(relm, {
-  ReduxPlugin,
-  OverridesPlugin,
-  TasksPlugin,
-  StylesPlugin,
-  ViewPlugin,
-});
 
 export {
   list,

@@ -7,8 +7,12 @@ export default class StylesPlugin {
   }
 
   apply (component, source) {
-    const childStyles = _.mapValues(component.components, x => x.styles || {});
+    if (!this.tag) {
+      component.styles = {};
+      return;
+    }
 
+    const childStyles = _.mapValues(component.components, x => x.styles || {});
     if (!_.isFunction(source.styles)) {
       component.styles = childStyles;
     } else {

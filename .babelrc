@@ -1,9 +1,14 @@
 {
-  "presets": [
-    "es2015-webpack",
-    "./preset"
-  ],
-  "plugins": [
-    "lodash"
-  ]
+  "env": {
+    "production": {
+      "presets": ["es2015-webpack", "./preset"],
+      "plugins": ["lodash"]
+    },
+    "development": {
+      "presets": ["es2015-webpack", "./preset"]
+    },
+    "testing": {
+      "presets": ["es2015", "./preset"]
+    }
+  }
 }

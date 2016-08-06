@@ -145,6 +145,8 @@ function examplesEntry (config) {
   config.output = {
     filename: './[name]/app.dist.js',
     path: path.resolve(__dirname, './examples'),
+    library: '[name]',
+    libraryTarget: 'umd'
   };
 
   return config;

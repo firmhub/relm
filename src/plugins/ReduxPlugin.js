@@ -1,50 +1,32 @@
 import _ from 'lodash';
-import { makeImmutable, unwrapImmutable } from '../immutable';
+import * as redux from 'redux';
 
 export default class ReduxPlugin {
+  constructor ({ customizeReducer, customizeMiddleware }) {
+    this.customizeReducer = customizeReducer || _.identity;
+    this.customizeMiddleware = customizeMiddleware || (x => redux.applyMiddleware(x));
+  }
+
   apply (component, source, root) {
-    const actions = _.omitBy(source.actions, (x, key) => _.startsWith(key, '$'));
+    if (component === root) {
+      const { init, update, middleware } = component;
+      const reducer = this.customizeReducer((state = init(), action = {}) => update(state, action));
+      const initialState = _.merge(reducer() || {}, this.initialState || {});
 
-    component.init = function init () {
-      const state = _.mapValues(component.components, invokeInit);
-      if (!actions.initializeState) return state;
-      return unwrapImmutable(actions.initializeState(makeImmutable(state)));
-    };
+      const store = redux.createStore(reducer, initialState, this.customizeMiddleware(middleware));
 
-    component.update = function update (state = component.init(), action = {}) {
-      if (!_.isArray(action.type)) return state;
-      if (action.type.length < component.path.length) return state;
+      component.dispatch = store.dispatch;
+      component.getState = store.getState;
+      component.subscribe = store.subscribe;
 
-      // Get the path from this component and down
-      const path = action.type.slice(component.path.length);
+      Object.defineProperty(component, 'state', { get: store.getState });
+    } else {
+      Object.defineProperty(component, 'state', { get: getComponentState });
+    }
 
-      // Child component action
-      const head = _.head(path);
-      const child = component.components[head];
-      if (child) {
-        const childState = child.update(makeImmutable(state[head]), action);
-        if (childState === state[head]) return state;
-        return _.assign({}, state, { [head]: unwrapImmutable(childState) });
-      }
-
-      // Looking for a deeper action but no child component
-      if (path.length > 1) throw new Error(`Invalid action ${action.type.join('.')}`);
-
-      // Own action
-      const fn = actions[head];
-      if (fn) return unwrapImmutable(fn(makeImmutable(state), ...action.args));
-
-      return state;
-    };
-
-    Object.defineProperty(component, 'state', {
-      get () {
-        return _.get(root.getState(), component.path) || component.init();
-      }
-    });
+    function getComponentState () {
+      return _.get(root.getState(), component.path) || component.init();
+    }
   }
 }
 
-function invokeInit (it) {
-  return it.init();
-}

@@ -8,80 +8,39 @@ export default class ViewPlugin {
 
   apply (component, source, root) {
     const name = source.displayName || source.name;
-    component.view = this.normalComponent(component, name, source, root);
-  }
-
-  normalComponent (it, name, source, root) {
     const render = source.bind(null, this.tag);
 
-    const getState = !it.path.length
+    const getState = !component.path.length
       ? () => root.getState()
-      : () => _.get(root.getState(), it.path) || it.init();
+      : () => _.get(root.getState(), component.path) || component.init();
 
-    const views = _.mapValues(it.components, (child, key) => {
-      const isListComponent = _.isArray(source.components[key]);
-      if (isListComponent) return this.listComponent(child, key, _.head(source.components[key]), root);
-      return this.normalComponent(child, key, source.components[key], root);
+    const views = _.mapValues(component.components, (child, key) => {
+      child.view.displayName = key;
+      return child.view;
     });
 
-    it.actions = _.mapValues(source.actions, (__, actionName) => {
-      const type = it.path.concat(actionName);
+    component.actions = _.mapValues(source.actions, (__, actionName) => {
+      const type = component.path.concat(actionName);
       return (...args) => root.dispatch({ type, args });
     });
 
     function view (props, ...children) {
       const styles = props && props.styles
-        ? _.defaults(props.styles, it.styles)
-        : it.styles;
+        ? _.defaults(props.styles, component.styles)
+        : component.styles;
 
       return render({
         props: _.omit(props, 'styles'),
         children,
         components: views,
-        actions: it.actions,
+        actions: component.actions,
         state: getState(),
         styles,
       });
     }
 
     view.displayName = name;
-
-    return view;
-  }
-
-  listComponent (it, name, source, root) {
-    const render = source.bind(null, this.tag);
-
-    const views = _.mapValues(it.components, (child, key) => {
-      const isListComponent = _.isArray(source.components[key]);
-      return isListComponent ? this.listComponent(child, key) : this.normalComponent(child, key);
-    });
-
-    it.actions = key => _.mapValues(source.actions, (__, actionName) => {
-      const type = it.path.concat(actionName, key);
-      return (...args) => root.dispatch({ type, args });
-    });
-
-    function view (props, ...children) {
-      if (!props.key) throw new Error('List components should be render with a key');
-      const state = _.get(root.getState(), it.path) || [];
-      const styles = props && props.styles
-        ? _.defaults(props.styles, it.styles)
-        : it.styles;
-
-      return render({
-        props: _.omit(props, 'styles'),
-        children,
-        components: views,
-        actions: it.actions(props.key),
-        state: state[props.key] || it.init(),
-        styles,
-      });
-    }
-
-    view.displayName = name;
-
-    return view;
+    component.view = view;
   }
 }
 

@@ -2,7 +2,6 @@ import * as UI from '../../../src/ui';
 
 export default function Flashcard (h, { props, styles, components: x }) {
   const showAnswer = Boolean(props.selection);
-
   return (
     <section className={styles.card} style={props.style}>
       <header className={styles.question}>

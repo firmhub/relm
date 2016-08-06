@@ -1,13 +1,13 @@
 /* eslint-env browser */
+import { relmApp } from '../../src/packages/inferno';
 import { applyMiddleware } from 'redux';
 import createLogger from 'redux-logger';
 
-import { relmApp } from '../../src/packages/inferno';
 import Quiz from './components/Quiz';
 import data from './questions.js';
 
 // Start the application
-const app = window.app = relmApp(document.querySelector('#main'), Quiz, {
+const app = relmApp(Quiz, document.querySelector('#main'), {
   theme: {
     grayColor: '#fc605b'
   },
@@ -16,7 +16,6 @@ const app = window.app = relmApp(document.querySelector('#main'), Quiz, {
   }
 });
 
-app.dispatch({
-  type: ['updateTopics'],
-  args: [data]
-});
+app.actions.updateTopics(data);
+
+export default app;

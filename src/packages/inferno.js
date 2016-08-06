@@ -1,63 +1,28 @@
-import Inferno from 'inferno-dom';
-import InfernoCreateElement from 'inferno-create-element';
-import * as redux from 'redux';
-import _ from 'lodash';
-
+/* eslint-env browser */
+import InfernoDOM from 'inferno-dom';
 import relm from '../';
-import { createCSS } from '../csjs';
+import * as plugins from '../plugins';
 
-function transformAttributes (attrs, k) {
-  const v = this[k];
+export function relmApp (component, el, opts) {
+  const { customizeReducer, customizeMiddleware, theme } = opts || {};
 
-  // Remove nil attributes
-  if (v === null || v === void 0) return attrs;
-
-  switch (k) {
-    case 'onLoad': attrs.onAttached = v; break;
-    case 'onUnload': attrs.onWillDetach = v; break;
-    default: attrs[k] = v;
-  }
-
-  return attrs;
-}
-
-function createElement (tag, props, ...children) {
-  const attrs = Object.keys(props || {}).reduce(_.bind(transformAttributes, props), {});
-  return InfernoCreateElement(tag, attrs, ...children);
-}
-
-export function relmApp (el, component, opts = {}) {
   const app = relm({
     component,
     plugins: [
-      new relm.ReduxPlugin(),
-      new relm.OverridesPlugin(),
-      new relm.TasksPlugin(),
-      new relm.StylesPlugin(createCSS, opts.theme),
-      new relm.ViewPlugin(createElement),
+      new plugins.StatePlugin(),
+      new plugins.TasksPlugin(),
+      new plugins.ReduxPlugin({ customizeReducer, customizeMiddleware }),
+      new plugins.CSJSPlugin(theme),
+      new plugins.InfernoPlugin(),
     ]
   });
 
-  // Create the store
-  const customizeReducer = opts.customizeReducer || _.identity;
-  const customizeMiddleware = opts.customizeMiddleware || _.identity;
-  const reducer = customizeReducer((state = app.init(), action = {}) => app.update(state, action));
-  const middleware = customizeMiddleware(app.middleware);
-  const initialState = _.merge(reducer() || {}, opts.initialState || {});
-  const store = redux.createStore(reducer, initialState, middleware);
-
-  app.dispatch = store.dispatch;
-  app.getState = store.getState;
-  app.subscribe = store.subscribe;
-
   // Create the view
   function redraw () {
-    Inferno.render(app.view(), el);
+    InfernoDOM.render(app.view(), el);
   }
 
-  app.subscribe(() => {
-    setTimeout(redraw);
-  });
+  app.subscribe(requestAnimationFrame.bind(null, redraw));
 
   if (app.actions.initializeState) {
     app.actions.initializeState();
@@ -68,3 +33,7 @@ export function relmApp (el, component, opts = {}) {
 
   return app;
 }
+
+InfernoDOM.relmApp = relmApp;
+
+export default InfernoDOM;
