@@ -1,7 +1,6 @@
 /* eslint-env browser */
 import _ from 'lodash';
 import fs from 'fs';
-import path from 'path';
 import { renderToString } from 'inferno-server';
 
 import relm from '../';
@@ -11,6 +10,16 @@ import * as fmt from './inferno-format';
 
 export { createElement, renderToString };
 
+/*
+ * Create app that can be rendered server side
+ * -------------------------------------------
+ * Differences from normal relm app
+ * 1) No state changes are expected - just render with an initial state
+ *    a) no reducer or middleware customization
+ *    b) No tasks
+ * 2) No styles for now - TODO: generate serverside css
+ */
+
 export function createApp (component, opts) {
   const { initialState, theme } = opts || {};
 
@@ -18,7 +27,6 @@ export function createApp (component, opts) {
     component,
     plugins: [
       new plugins.StatePlugin(),
-      new plugins.TasksPlugin(),
       new plugins.ReduxPlugin({ initialState }),
       new plugins.StylesPlugin(null, theme),
       new plugins.InfernoPlugin(),
@@ -32,30 +40,71 @@ export function createApp (component, opts) {
   return app;
 }
 
-function componentToDummyElement (component, key) {
-  return (...args) => createElement(key, ...args);
-}
-
+/*
+ * Shallow rendering a component
+ */
 export function shallowRender (component, config = {}) {
   config.components = _.mapValues(component.components, componentToDummyElement);
   return component(createElement, config);
+
+  // Maps components to a dummy inferno element; the tag of the dummy is
+  // a function so that `./inferno-format` module can distinguish it from
+  // other elements that are genuine inferno elements
+  function componentToDummyElement (__component__, key) {
+    return (attrs, ...children) => ({ tag: () => key, attrs, children });
+  }
 }
 
-const acceptedCache = {};
+/*
+ * Testing helper - shallow renders a component and compares the result to
+ * accepted result from file. The .accept() modifier can be used to accept
+ * a test result
+ */
+export function renderAcceptanceTest (component, config) {
+  const actual = fmt.serialize(shallowRender(component, config));
+  const filename = getFilename(module.parent.filename);
+  const accepted = getAccepted(filename);
+
+  return function test (t) {
+    const title = getTitle(t);
+
+    // New test
+    if (!accepted[title]) {
+      writeAccepted(filename, title, actual);
+      console.log(`Saved new result: ${title}\n${filename}\n\n${actual}`);
+      return t.pass();
+    }
+
+    const expected = fmt.deserialize(accepted[title]);
+    const diff = fmt.diff(fmt.deserialize(expected), actual);
+
+    if (!diff) return t.pass();
+
+    // Diff but difference is accepted
+    if (/#accept(\s|$)/.test(t.title)) {
+      writeAccepted(filename, title, actual);
+      return t.pass(`Accepted: ${title}: \n\n ${actual}`);
+    }
+
+    // Mismatch
+    return t.fail(`Fragment did not match accepted result: ${title} \n\n ${diff} \n\n`);
+  };
+}
 
 function getFilename (target) {
-  return path.resolve(path.dirname(target), `_accepted_${path.basename(target)}`);
+  return target.replace(/(.js)?$/, '_accepted.js');
 }
 
-function getAccepted (filename, forceReload) {
-  if (forceReload || !acceptedCache[filename]) {
-    try {
-      acceptedCache[filename] = require(filename);  // eslint-disable-line global-require
-    } catch (ex) {
-      acceptedCache[filename] = {};
-    }
+function getTitle (t) {
+  return t.title.replace(/(#|@)\w+?(\s|$)/g, ' ').trim();
+}
+
+function getAccepted (filename) {
+  try {
+    return require(filename);  // eslint-disable-line global-require
+  } catch (ex) {
+    return {};
   }
-  return acceptedCache[filename];
 }
 
 function writeAccepted (filename, title, result) {
@@ -75,37 +124,3 @@ function writeAccepted (filename, title, result) {
 
   getAccepted(filename, true);
 }
-
-export function renderAcceptanceTest (component, config) {
-  const actual = fmt.serialize(shallowRender(component, config));
-  const filename = getFilename(module.parent.filename);
-  const accepted = getAccepted(filename);
-
-  return function test (t) {
-    if (!accepted[t.title]) {
-      writeAccepted(filename, t.title, actual);
-      console.log(`Saved new accepted result: ${t.title}\n\n${actual}`);
-      t.pass();
-    } else {
-      const expected = fmt.deserialize(accepted[t.title]);
-      const diff = fmt.diff(fmt.deserialize(expected), actual);
-      if (diff) t.fail(`Fragment did not match accepted result: ${t.title} \n\n ${diff} \n\n`);
-    }
-  };
-}
-
-renderAcceptanceTest.accept = function acceptFragment (component, config) {
-  return function test (t) {
-    const actual = fmt.serialize(shallowRender(component, config));
-    const filename = getFilename(module.parent.filename);
-    const accepted = getAccepted(filename);
-
-    if (accepted[t.title]) {
-      const expected = fmt.deserialize(accepted[t.title]);
-      if (actual === expected) t.fail('No difference between actual and expected; don\'t use .accept()');
-    }
-
-    writeAccepted(filename, t.title, actual);
-    t.pass(`Accepted: ${t.title}: \n\n ${actual}`);
-  };
-};
