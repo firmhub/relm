@@ -8,8 +8,8 @@
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
-    "test": "ava",
-    "test:unit": "env BABEL_ENV=testing ava **/__tests__/**/*.unit.js !**/__tests__/_accepted**",
+    "test": "env BABEL_ENV=testing ava",
+    "test:unit": "env BABEL_ENV=testing ava **/*.test.js !**/*_accepted.*",
     "dev": "webpack-dev-server",
     "build": "webpack --progress",
     "prepublish": "npm run build"
@@ -85,7 +85,13 @@
       "babel-register"
     ],
     "source": [
-      "src/**/*.{js,jsx}"
+      "src/**/*.{js,jsx}",
+      "examples/**/*.{js,jsx}"
+    ],
+    "files": [
+      "**/__tests__/*.js",
+      "**/*.test.js",
+      "!**/*_accepted.*"
     ]
   }
 }

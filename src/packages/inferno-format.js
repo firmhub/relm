@@ -36,27 +36,21 @@ function printElement(element, print, indent) {
   }
 
   let tag = element.tag;
-  if (typeof tag === 'function') {
-    tag = element.tag().tag;
-  }
+  if (typeof tag === 'function') tag = element.tag();   // Dummy element
 
   let result = '<' + tag;
 
   // Convert inferno element to a props object
   const props = _.chain(element)
     .pick('style', 'className')
-    .assign(element.attrs)
-    .omitBy(x => x === undefined || x === null)
+    .assign(element.attrs, element.events, element.hooks)
+    .omitBy(x => x === undefined || x === null || x === '')
     .value();
 
   const hasProps = _.size(props);
 
   if (hasProps) {
     result += printProps(props, print, indent);
-  }
-
-  if (element.events || element.hooks) {
-    console.log('TODO: Update inferno-format for events and hooks', element);
   }
 
   if (element.children) {
