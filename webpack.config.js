@@ -4,9 +4,19 @@ const fs = require('fs');
 const webpack = require('webpack');
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = entries(production);
+  module.exports = [
+    // production(uiComponentsEntry),
+    // production(uiIndexEntry),
+    // production(packagesEntry),
+    production(examplesEntry),
+  ];
 } else {
-  module.exports = entries(common);
+  module.exports = development(examplesEntry);
+
+  module.exports.devServer = {
+    contentBase: 'examples/',
+    inline: true,
+  };
 }
 
 function common (tx) {
@@ -34,6 +44,14 @@ function common (tx) {
   });
 }
 
+function development (tx) {
+  return tx(common(function devTx (config) {
+    config.devTool = 'eval';
+
+    return config;
+  }));
+}
+
 function production (tx) {
   return tx(common(function productionTx (config) {
     config.plugins = [
@@ -53,76 +71,83 @@ function production (tx) {
   }));
 }
 
+function uiComponentsEntry (config) {
+  config.name = 'ui:components';
 
-function entries (mode) {
-  return [
-    mode(config => {
-      config.name = 'ui:components';
+  config.entry = _.reduce(fs.readdirSync('./src/ui'), (object, filename) => {
+  // Skip index - it is compiled seprately below
+    if (filename === 'index.js') return object;
 
-      config.entry = _.reduce(fs.readdirSync('./src/ui'), (object, filename) => {
-      // Skip index - it is compiled seprately below
-        if (filename === 'index.js') return object;
+  // Normal components
+    const name = filename.replace('.js', '');
+    object[name] = `./src/ui/${filename}`;
+    return object;
+  }, {});
 
-      // Normal components
-        const name = filename.replace('.js', '');
-        object[name] = `./src/ui/${filename}`;
-        return object;
-      }, {});
+  config.output = {
+    filename: '[name].js',
+    path: path.resolve('./ui'),
+    sourceMapFilename: '[name].map',
+    libraryTarget: 'commonjs2',
+  };
 
-      config.output = {
-        filename: '[name].js',
-        path: path.resolve('./ui'),
-        sourceMapFilename: '[name].map',
-        libraryTarget: 'commonjs2',
-      };
+  return config;
+}
 
-      return config;
-    }),
+function uiIndexEntry (config) {
+  // index coannot be complied with the rest of the components due to internal dependencies
+  config.name = 'ui:index';
 
-    mode(config => {
-    // index coannot be complied with the rest of the components due to internal dependencies
-      config.name = 'ui:index';
+  config.entry = {
+    index: './src/ui/index.js'
+  };
 
-      config.entry = {
-        index: './src/ui/index.js'
-      };
+  // Everythink is external for the index; just do a simple transpilation
+  config.externals.push((ctx, req, cb) => cb(null, `commonjs ${req}`));
 
-    // All local files are externals - keeps index from depending on other components
-      config.externals.push(function makeComponentsExternal (context, request, callback) {
-        if (request.startsWith('./')) {
-          callback(null, `commonjs ${request}`);
-        } else {
-          callback();
-        }
-      });
+  config.output = {
+    filename: '[name].js',
+    path: path.resolve('./ui'),
+    sourceMapFilename: '[name].map',
+    libraryTarget: 'commonjs2',
+  };
 
-      config.output = {
-        filename: '[name].js',
-        path: path.resolve('./ui'),
-        sourceMapFilename: '[name].map',
-        libraryTarget: 'commonjs2',
-      };
+  return config;
+}
 
-      return config;
-    }),
+function packagesEntry (config) {
+  config.name = 'packages';
 
-    mode(config => {
-      config.name = 'packages';
+  config.entry = {
+    inferno: './src/packages/inferno.js',
+    morphdom: './src/packages/morphdom.js',
+    react: './src/packages/react.js',
+  };
 
-      config.entry = {
-        inferno: './src/packages/inferno.js',
-        morphdom: './src/packages/morphdom.js',
-        react: './src/packages/react.js',
-      };
+  config.output = {
+    filename: '[name].js',
+    path: __dirname,
+    library: '[name]',
+    libraryTarget: 'umd',
+  };
 
-      config.output = {
-        filename: '[name].js',
-        path: __dirname,
-        library: '[name]',
-        libraryTarget: 'umd',
-      };
+  return config;
+}
 
-      return config;
-    })
-  ];
+function examplesEntry (config) {
+  config.name = 'example';
+
+  config.entry = {
+    // todo: './examples/todo/app.js',
+    quiz: './examples/quiz/app.js',
+  };
+
+  config.output = {
+    filename: './[name]/app.dist.js',
+    path: path.resolve(__dirname, './examples'),
+    library: '[name]',
+    libraryTarget: 'umd'
+  };
+
+  return config;
 }

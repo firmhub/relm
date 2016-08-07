@@ -1,37 +1,39 @@
-import Inferno from 'inferno-dom';
-import InfernoCreateElement from 'inferno-create-element';
+/* eslint-env browser */
+import InfernoDOM from 'inferno-dom';
+import relm from '../';
+import * as plugins from '../plugins';
 
-import { createApp, extendHyperscript } from '../index';
+export function relmApp (component, el, opts) {
+  const { customizeReducer, customizeMiddleware, theme } = opts || {};
 
-function transformAttributes (attrs, k) {
-  const v = this[k];
-
-  // Remove nil attributes
-  if (v === null || v === void 0) return attrs;
-
-  switch (k) {
-    case 'onLoad': attrs.onAttached = v; break;
-    case 'onUnload': attrs.onWillDetach = v; break;
-    default: attrs[k] = v;
-  }
-
-  return attrs;
-}
-
-function createElement (tag, props, ...children) {
-  const attrs = Object.keys(props || {}).reduce(transformAttributes.bind(props), {});
-  return InfernoCreateElement(tag, attrs, ...children);
-}
-
-export function relmApp (el, component, opts = {}) {
-  const h = extendHyperscript(createElement);
-  const app = createApp(h, component, opts);
-
-  app.subscribe(function redraw () {
-    Inferno.render(app.view(), el);
+  const app = relm({
+    component,
+    plugins: [
+      new plugins.StatePlugin(),
+      new plugins.TasksPlugin(),
+      new plugins.ReduxPlugin({ customizeReducer, customizeMiddleware }),
+      new plugins.CSJSPlugin(theme),
+      new plugins.InfernoPlugin(),
+    ]
   });
 
-  Inferno.render(app.view(), el);
+  // Create the view
+  function redraw () {
+    InfernoDOM.render(app.view(), el);
+  }
+
+  app.subscribe(requestAnimationFrame.bind(null, redraw));
+
+  if (app.actions.initializeState) {
+    app.actions.initializeState();
+  }
+
+  // First render
+  redraw();
 
   return app;
 }
+
+InfernoDOM.relmApp = relmApp;
+
+export default InfernoDOM;

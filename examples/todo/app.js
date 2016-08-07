@@ -1,6 +1,6 @@
 /* eslint-env browser */
-import { relmApp } from '../../../src/packages/inferno';
-import { TodoMVC } from './components.jsx';
+import { relmApp } from '../../src/packages/inferno';
+import { TodoMVC } from './js/components.jsx';
 
 const targetEl = document.querySelector('#main');
 //

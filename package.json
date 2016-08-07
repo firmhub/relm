@@ -8,13 +8,10 @@
     "url": "git+https://github.com/motorcode/relm.git"
   },
   "scripts": {
-    "test": "ava",
-    "dev:quiz": "babel-node ./examples/popquiz/data.js; webpack-dev-server examples/popquiz/app.js --output-filename=app.dist.js --inline --content-base=examples/popquiz",
-    "dev:http": "webpack-dev-server examples/http/app.js --output-filename=app.dist.js --inline --content-base=examples/http",
-    "dev:routes": "webpack-dev-server examples/routes/app.js --output-filename=app.dist.js --inline --content-base=examples/routes",
-    "dev:todo": "webpack-dev-server examples/todo/js/app.js --output-public-path=/js/ --output-filename=app.dist.js --inline --content-base=examples/todo",
-    "watch": "webpack --watch",
-    "build": "env NODE_ENV=production webpack --progress",
+    "test": "env BABEL_ENV=testing ava",
+    "test:unit": "env BABEL_ENV=testing ava **/*.test.js !**/*_accepted.*",
+    "dev": "webpack-dev-server",
+    "build": "webpack --progress",
     "prepublish": "npm run build"
   },
   "keywords": [
@@ -47,26 +44,33 @@
     "babel-register": "^6.9.0",
     "classnames": "^2.2.5",
     "csjs": "^1.0.5",
+    "diff": "^2.2.3",
     "eslint": "^2.13.1",
     "eslint-config-airbnb": "^9.0.1",
     "eslint-plugin-import": "^1.10.0",
     "eslint-plugin-jsx-a11y": "^1.5.3",
     "eslint-plugin-react": "^5.2.2",
+    "html-normalizer": "^6.0.0",
     "inferno-create-element": "^0.7.16",
     "inferno-dom": "^0.7.16",
+    "inferno-server": "^0.7.25",
     "ini": "^1.3.4",
     "insert-css": "^1.0.0",
     "json-loader": "^0.5.4",
     "lodash": "^4.13.1",
     "mithril": "^0.2.5",
+    "mkdirp": "^0.5.1",
     "postcss": "^5.1.1",
     "postcss-csso": "^1.1.2",
     "postcss-safe-parser": "^1.0.7",
+    "pretty-format": "^3.5.2",
     "raw-loader": "^0.5.1",
     "react": "^15.2.1",
     "react-dom": "^15.2.1",
     "redux": "^3.5.2",
+    "redux-logger": "^2.6.1",
     "sheet-router": "^3.1.1",
+    "t7": "^0.3",
     "tcomb": "^3.2.8",
     "webpack": "^2",
     "webpack-dev-server": "^2",
@@ -80,11 +84,14 @@
     "require": [
       "babel-register"
     ],
-    "files": [
-      "test/*.js"
-    ],
     "source": [
-      "src/**/*.{js,jsx}"
+      "src/**/*.{js,jsx}",
+      "examples/**/*.{js,jsx}"
+    ],
+    "files": [
+      "**/__tests__/*.js",
+      "**/*.test.js",
+      "!**/*_accepted.*"
     ]
   }
 }

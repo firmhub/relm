@@ -1,5 +1,23 @@
 import _ from 'lodash';
 
+export default class TasksPlugin {
+  apply (component, source, root) {
+    if (component === root) {
+      component.middleware = (store) => (next) => (action) => {
+        if (!_.isArray(action.type)) return next(action);
+        if (!isAsyncAction(_.last(action.type))) return next(action);
+        const path = _.initial(action.type);
+        const task = {
+          dispatch: store.dispatch,
+          getState: !path.length ? store.getState : () => _.get(store.getState(), path),
+          actions: component.actions
+        };
+        return handleAsyncAction(task, source, action.type, action.args);
+      };
+    }
+  }
+}
+
 function isAsyncAction (name) {
   return _.startsWith(name, '$');
 }
@@ -46,16 +64,7 @@ function handleAsyncAction (task, component, type, args = []) {
   throw new Error(`Unable to find action ${head}`);
 }
 
-export function asyncMiddleware (rootComponent) {
-  return (store) => (next) => (action) => {
-    if (!_.isArray(action.type)) return next(action);
-    if (!isAsyncAction(_.last(action.type))) return next(action);
-    const path = _.initial(action.type);
-    const task = {
-      dispatch: store.dispatch,
-      getState: !path.length ? store.getState : () => _.get(store.getState(), path),
-      actions: action.actions
-    };
-    return handleAsyncAction(task, rootComponent, action.type, action.args);
-  };
-}
+export const internals = {
+  handleWith,
+  handleAsyncAction,
+};

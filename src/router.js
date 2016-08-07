@@ -1,5 +1,4 @@
 import _ from 'lodash';
-import { startsWith } from 'lodash/fp';
 import t from 'tcomb';
 import pathToRegexp from 'path-to-regexp';
 
@@ -72,7 +71,7 @@ function routeMapper (definitions) {
  */
 export default function router (routeDefinitions) {
   if (process.env.NODE_ENV !== 'production') {
-    const Path = t.refinement(t.String, startsWith('/'), 'Path');
+    const Path = t.refinement(t.String, x => _.startsWith('/', x), 'Path');
 
     const RouteWithoutOptions = t.tuple([Component, Path], '-');
     const RouteWithOptions = t.tuple([Component, Path, t.Boolean], '-');

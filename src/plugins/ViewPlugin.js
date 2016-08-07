@@ -1,7 +1,51 @@
-
 import classNames from 'classnames';
+import _ from 'lodash';
 
-export function parseTag (tag) {
+export default class ViewPlugin {
+  constructor (tag) {
+    this.tag = tag;
+  }
+
+  apply (component, source, root) {
+    const name = source.displayName || source.name;
+    const render = source.bind(null, this.tag);
+
+    const getState = !component.path.length
+      ? () => root.getState()
+      : () => _.get(root.getState(), component.path) || component.init();
+
+    const views = _.mapValues(component.components, (child, key) => {
+      child.view.displayName = key;
+      return child.view;
+    });
+
+    component.actions = _.mapValues(source.actions, (__, actionName) => {
+      const type = component.path.concat(actionName);
+      return (...args) => root.dispatch({ type, args });
+    });
+
+    function view (props, ...children) {
+      const styles = props && props.styles
+        ? _.defaults(props.styles, component.styles)
+        : component.styles;
+
+      return render({
+        props: _.omit(props, 'styles'),
+        children,
+        components: views,
+        actions: component.actions,
+        state: getState(),
+        styles,
+      });
+    }
+
+    view.displayName = name;
+    component.view = view;
+  }
+}
+
+
+function parseTag (tag) {
   const cell = { attrs: {}, classes: [] };
   const parser = /(?:(^|#|\.)([^#\.\[\]]+))|(\[.+?\])/g;
   let match;
@@ -50,3 +94,8 @@ export function extendHyperscript (createElement) {
     return createElement(parsed.tag, parsed.attrs, ...parsed.children);
   };
 }
+
+export const internals = {
+  parseTag,
+  isAttributesObject,
+};

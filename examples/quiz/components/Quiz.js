@@ -8,6 +8,8 @@ export default function Quiz (h, { styles, actions, state, components: { TopicTo
   const scores = _.reduce(state.stats, summarizeStats, {});
   const toggles = _.map(state.topics, topicToToggleButton);
 
+  if (!state.topic) return null;
+
   return (
     <div style={{ padding: '2rem' }}>
       <nav style={{ lineHeight: 2.5, textAlign: 'center' }}>{toggles}</nav>
@@ -30,7 +32,7 @@ export default function Quiz (h, { styles, actions, state, components: { TopicTo
     return (
       <TopicToggle
         className={{ [styles.TopicToggle.active]: !state.skippedTopics[key] }}
-        count={Math.floor(percentage)}
+        count={Math.floor(percentage) || 0}
         label={topic.label}
         onToggle={() => actions.toggleTopic(key)}
       />
@@ -221,7 +223,7 @@ function selectNextQuestion (state) {
 }
 
 /* export for testing */
-export const __internals__ = {
+export const internals = {
   reduceStats,
   summarizeStats,
   skipTopics,
