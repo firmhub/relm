@@ -19,11 +19,6 @@ export default class ViewPlugin {
       return child.view;
     });
 
-    component.actions = _.mapValues(source.actions, (__, actionName) => {
-      const type = component.path.concat(actionName);
-      return (...args) => root.dispatch({ type, args });
-    });
-
     function view (props, ...children) {
       const styles = props && props.styles
         ? _.defaults(props.styles, component.styles)

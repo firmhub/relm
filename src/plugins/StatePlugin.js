@@ -42,6 +42,11 @@ export default class StatePlugin {
 
       return state;
     });
+
+    component.actions = _.mapValues(source.actions, (__, actionName) => {
+      const type = component.path.concat(actionName);
+      return (...args) => root.dispatch({ type, args });
+    });
   }
 }
 
