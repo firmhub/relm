@@ -3,7 +3,7 @@ import _ from 'lodash';
 
 export default class ViewPlugin {
   constructor (tag) {
-    this.tag = extendHyperscript(tag);
+    this.tag = tag;
   }
 
   apply (component, source, root) {
@@ -71,7 +71,7 @@ function isAttributesObject (attrs) {
   return attrs && typeof attrs === 'object' && !Array.isArray(attrs) && !attrs.children;
 }
 
-function extendHyperscript (createElement) {
+export function extendHyperscript (createElement) {
   return function hyperscript (tag, attrs, ...children) {
     // Sub-components
     if (tag instanceof Function) {
@@ -98,5 +98,4 @@ function extendHyperscript (createElement) {
 export const internals = {
   parseTag,
   isAttributesObject,
-  extendHyperscript,
 };

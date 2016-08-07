@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import InfernoCreateElement from 'inferno-create-element';
-import ViewPlugin from './ViewPlugin';
+import ViewPlugin, { extendHyperscript } from './ViewPlugin';
 
 function transformAttributes (attrs, k) {
   const v = this[k];
@@ -17,10 +17,10 @@ function transformAttributes (attrs, k) {
   return attrs;
 }
 
-export function createElement (tag, props, ...children) {
+export const createElement = extendHyperscript(function infernoEl (tag, props, ...children) {
   const attrs = Object.keys(props || {}).reduce(_.bind(transformAttributes, props), {});
   return InfernoCreateElement(tag, attrs, ...children);
-}
+});
 
 export default function InfernoPlugin () {
   return new ViewPlugin(createElement);
