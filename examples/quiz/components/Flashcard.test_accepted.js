@@ -1,7 +1,7 @@
 exports[`Correct option selected`] = `
 <section>
   <header
-    className="Question-class">
+    className="Question-class ">
     Some question?
   </header>
   <ul>
@@ -41,6 +41,7 @@ exports[`Correct option selected`] = `
         }
       }>
       <strong>
+        
         Correct! 
       </strong>
       
@@ -56,7 +57,7 @@ exports[`Correct option selected`] = `
 exports[`Incorrect option selected`] = `
 <section>
   <header
-    className="Question-class">
+    className="Question-class ">
     Some question?
   </header>
   <ul>
@@ -96,6 +97,7 @@ exports[`Incorrect option selected`] = `
         }
       }>
       <strong>
+        
         Wrong! 
       </strong>
       
@@ -111,7 +113,7 @@ exports[`Incorrect option selected`] = `
 exports[`No option selected`] = `
 <section>
   <header
-    className="Question-class">
+    className="Question-class ">
     Some question?
   </header>
   <ul>

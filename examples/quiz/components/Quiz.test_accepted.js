@@ -17,20 +17,11 @@ exports[`Normal state`] = `
       }
     }>
     <TopicToggle
-      className={
-        Object {
-          "active-toggle-button-class": true
-        }
-      }
+      className="active-toggle-button-class"
       count="0"
       label="My topic"
       onToggle="[Function onToggle]" />
     <TopicToggle
-      className={
-        Object {
-          "active-toggle-button-class": false
-        }
-      }
       count="0"
       label="Other topic"
       onToggle="[Function onToggle]" />
