@@ -1,6 +1,6 @@
 import * as UI from '../../../src/ui';
 
-export default function Flashcard (h, { props, styles, components: x }) {
+export default function Flashcard (h, { props, styles, components: { Button, Option } }) {
   const showAnswer = Boolean(props.selection);
   return (
     <section className={styles.card} style={props.style}>
@@ -16,9 +16,9 @@ export default function Flashcard (h, { props, styles, components: x }) {
             <strong>{props.selection === props.answer ? 'Correct! ' : 'Wrong! '}</strong>
             {props.reason}
           </div>
-          <x.Button className={styles.Button.primary} onClick={props.onNext}>
+          <Button className={styles.Button.primary} onClick={props.onNext}>
             Next question
-          </x.Button>
+          </Button>
         </footer>
       )}
     </section>
@@ -31,7 +31,7 @@ export default function Flashcard (h, { props, styles, components: x }) {
     const variant = isGood ? 'good' : (isBad ? 'bad' : 'normal'); // eslint-disable-line no-nested-ternary
 
     return (
-      <x.Option
+      <Option
         styles={{ container: styles[variant], disabled: styles.disabled }}
         name='answer'
         label={opt}
