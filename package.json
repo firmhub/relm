@@ -9,8 +9,8 @@
   },
   "scripts": {
     "test": "env BABEL_ENV=testing ava",
-    "test:unit": "env BABEL_ENV=testing ava **/*.test.js !**/*_accepted.*",
-    "dev": "webpack-dev-server",
+    "dev": "./parallel.sh 'watch' 'test -- -w'",
+    "watch": "webpack-dev-server",
     "build": "webpack --progress",
     "prepublish": "npm run build"
   },
