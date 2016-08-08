@@ -20,7 +20,7 @@ export default class ReduxPlugin {
       component.subscribe = store.subscribe;
 
       Object.defineProperty(component, 'state', {
-        get: store.getState
+        get: () => store.getState() || component.init()
       });
     } else {
       Object.defineProperty(component, 'state', {

@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { makeImmutable, unwrapImmutable } from '../immutable';
 
 export default class StatePlugin {
-  apply (component, source) {
+  apply (component, source, root) {
     const components = component.components;
 
     const handlers = _.reduce(source.actions, function convertChildActions (obj, action, name) {
