@@ -5,16 +5,18 @@ export default function Quiz (h, { styles, actions, state, components: { TopicTo
   const question = getQuestion(state);
   if (!question) return null;
 
-  const scores = _.reduce(state.stats, summarizeStats, {});
+  const stats = _.reduce(state.stats, summarizeStats, {});
   const toggles = _.map(state.topics, topicToToggleButton);
 
   if (!state.topic) return null;
 
   return (
     <div style={{ padding: '2rem' }}>
-      <nav style={{ lineHeight: 2.5, textAlign: 'center' }}>{toggles}</nav>
+      <h1 style={{ textAlign: 'center', color: '#c2c2c2', fontSize: '1.6em' }}>
+        {_.get(state.topics, [state.topic, 'label'], '')}
+      </h1>
       <Card
-        style={{ margin: '2rem 0' }}
+        style={{ margin: '1rem 0 3rem' }}
         question={question.q}
         reason={question.r}
         answer={_.first(question.o)}
@@ -23,17 +25,18 @@ export default function Quiz (h, { styles, actions, state, components: { TopicTo
         onChange={actions.updateSelection}
         onNext={actions.nextQuestion}
       />
+      <nav style={{ lineHeight: 2.5, textAlign: 'center' }}>{toggles}</nav>
     </div>
   );
 
   function topicToToggleButton (topic, key) {
-    const totalMarks = _.size(topic.questions);
-    const percentage = (scores[key] / totalMarks) * 100;
+    const num = _.size(topic.questions);
+    const stat = stats[key];
     return (
       <TopicToggle
         className={{ [styles.TopicToggle.active]: !state.skippedTopics[key] }}
-        count={Math.floor(percentage) || 0}
-        label={topic.label}
+        count={`${stat.score || 0} / ${stat.attempts || 0}`}
+        label={`${topic.label} (${num})`}
         onToggle={() => actions.toggleTopic(key)}
       />
     );
@@ -83,7 +86,8 @@ Quiz.actions = {
       return (__, questionName) => ({
         topic: topicName,
         question: questionName,
-        score: 0
+        score: 0,
+        attempt: 0,
       });
     }
   },
@@ -95,7 +99,7 @@ Quiz.actions = {
     const stats = reduceStats(state.stats, {
       question: state.question,
       topic: state.topic,
-      score: isCorrect ? 1 : -1
+      score: isCorrect ? 1 : -1,
     });
 
     return state.update({
@@ -115,6 +119,10 @@ function Toggle (h, { props, styles }) {
 }
 
 Toggle.styles = (css) => css`
+  .heading {
+    text-align: center;
+  }
+
   .tag {
     background-color: #eeeeee;
     border-radius: 16px;
@@ -141,7 +149,6 @@ Toggle.styles = (css) => css`
   }
 `;
 
-
 /*
  *
  * Internals
@@ -165,7 +172,8 @@ function reduceStats (stats = [], { topic, question, score }) {
     topic,
     question,
     score: Math.max(-1, prev.score + score),
-    time: Date.now()
+    time: Date.now(),
+    attempt: 1
   };
 
   // Add new value
@@ -175,8 +183,10 @@ function reduceStats (stats = [], { topic, question, score }) {
   return clone;
 }
 
-function summarizeStats (obj, { topic, score }) {
-  obj[topic] = (obj[topic] || 0) + score;
+function summarizeStats (obj, { topic, score, attempt }) {
+  const stat = obj[topic] = obj[topic] || { attempts: 0, score: 0 };
+  stat.score = stat.score + score;
+  stat.attempts = stat.attempts + (attempt || 0);
   return obj;
 }
 

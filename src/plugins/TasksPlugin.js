@@ -4,14 +4,22 @@ export default class TasksPlugin {
   apply (component, source, root) {
     if (component === root) {
       component.middleware = (store) => (next) => (action) => {
+        // Skip non-relm or non-async actions; async actions are ones where the
+        // action name (last item in type array) starts with a $ sign
         if (!_.isArray(action.type)) return next(action);
         if (!isAsyncAction(_.last(action.type))) return next(action);
+
+        // Get the path of the component
         const path = _.initial(action.type);
+        const actions = _.get(component.components, path.join('.components.'));
+
+        // Create the task api
         const task = {
           dispatch: store.dispatch,
           getState: !path.length ? store.getState : () => _.get(store.getState(), path),
-          actions: component.actions
+          actions
         };
+
         return handleAsyncAction(task, source, action.type, action.args);
       };
     }

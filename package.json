@@ -11,7 +11,7 @@
     "test": "env BABEL_ENV=testing ava",
     "dev": "./parallel.sh 'watch' 'test -- -w'",
     "watch": "webpack-dev-server",
-    "build": "webpack --progress",
+    "build": "env NODE_ENV=production webpack --progress",
     "prepublish": "npm run build"
   },
   "keywords": [
