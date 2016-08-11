@@ -139,6 +139,7 @@ function examplesEntry (config) {
 
   config.entry = {
     // todo: './examples/todo/app.js',
+    http: './examples/http/app.js',
     quiz: './examples/quiz/app.js',
   };
 

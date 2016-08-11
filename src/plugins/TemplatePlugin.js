@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import t7 from '../../../t7'; global.t7 = t7;
+import t7 from './TemplatePlugin-t7'; global.t7 = t7;
 import InfernoCreateElement from 'inferno-create-element';
 import { extendHyperscript } from './ViewPlugin';
 
@@ -31,8 +31,6 @@ export default class TemplatePlugin {
       child.view.displayName = key;
       return child.view;
     });
-
-    t7.setOutput(t7.Outputs.Universal);
 
     t7.module(tag => {
       _.each(views, (view, key) => tag.assign(key, view));
