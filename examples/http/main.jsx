@@ -1,7 +1,6 @@
-/* @jsx html */
 import xhr from 'xhr';
 
-export function HTTPExample (html, { state, actions, styles }) {
+export function HTTPExample (h, { state, actions, styles }) {
   const getRandomGif = () => actions.$getRandomGif(state.topic);
   return (
     <div>

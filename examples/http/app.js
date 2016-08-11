@@ -2,9 +2,7 @@
 import { relmApp } from '../../src/packages/inferno';
 import { HTTPExample } from './main.jsx';
 
-const targetEl = document.querySelector('#main');
-
 // Start the application
-window.app = relmApp(targetEl, HTTPExample, {
+window.app = relmApp(HTTPExample, document.querySelector('#main'), {
   debug: true,
 });

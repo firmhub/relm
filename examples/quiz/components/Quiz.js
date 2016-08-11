@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import Flashcard from './Flashcard';
 
-export default function Quiz (h, { styles, actions, state, components: { TopicToggle, Card } }) {
+export default function Quiz (h, { styles, actions, state }) {
   const question = getQuestion(state);
   if (!question) return null;
 
@@ -15,7 +15,7 @@ export default function Quiz (h, { styles, actions, state, components: { TopicTo
       <h1 style={{ textAlign: 'center', color: '#c2c2c2', fontSize: '1.6em' }}>
         {_.get(state.topics, [state.topic, 'label'], '')}
       </h1>
-      <Card
+      <h.Flashcard
         style={{ margin: '1rem 0 3rem' }}
         question={question.q}
         reason={question.r}
@@ -33,8 +33,8 @@ export default function Quiz (h, { styles, actions, state, components: { TopicTo
     const num = _.size(topic.questions);
     const stat = stats[key];
     return (
-      <TopicToggle
-        className={{ [styles.TopicToggle.active]: !state.skippedTopics[key] }}
+      <h.Toggle
+        className={{ [styles.Toggle.active]: !state.skippedTopics[key] }}
         count={`${stat.score || 0} / ${stat.attempts || 0}`}
         label={`${topic.label} (${num})`}
         onToggle={() => actions.toggleTopic(key)}
@@ -44,8 +44,8 @@ export default function Quiz (h, { styles, actions, state, components: { TopicTo
 }
 
 Quiz.components = {
-  TopicToggle: Toggle,
-  Card: Flashcard,
+  Toggle,
+  Flashcard,
 };
 
 Quiz.actions = {

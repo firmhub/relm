@@ -1,6 +1,6 @@
-import * as UI from '../../../src/ui';
+import { Button, Radio } from '../../../src/ui';
 
-export default function Flashcard (h, { props, styles, components: { Button, Option } }) {
+export default function Flashcard (h, { props, styles }) {
   const showAnswer = Boolean(props.selection);
   return (
     <section className={styles.card} style={props.style}>
@@ -16,9 +16,9 @@ export default function Flashcard (h, { props, styles, components: { Button, Opt
             <strong>{props.selection === props.answer ? 'Correct! ' : 'Wrong! '}</strong>
             {props.reason}
           </div>
-          <Button className={styles.Button.primary} onClick={props.onNext}>
+          <h.Button className={styles.Button.primary} onClick={props.onNext}>
             Next question
-          </Button>
+          </h.Button>
         </footer>
       )}
     </section>
@@ -31,7 +31,7 @@ export default function Flashcard (h, { props, styles, components: { Button, Opt
     const variant = isGood ? 'good' : (isBad ? 'bad' : 'normal'); // eslint-disable-line no-nested-ternary
 
     return (
-      <Option
+      <h.Option
         styles={{ container: styles[variant], disabled: styles.disabled }}
         name='answer'
         label={opt}
@@ -45,8 +45,8 @@ export default function Flashcard (h, { props, styles, components: { Button, Opt
 }
 
 Flashcard.components = {
-  Option: UI.Radio,
-  Button: UI.Button,
+  Button,
+  Option: Radio,
 };
 
 Flashcard.styles = (css, { components: { Option } }) => css`

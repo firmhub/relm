@@ -8,16 +8,23 @@ export default class ViewPlugin {
 
   apply (component, source, root) {
     const name = source.displayName || source.name;
-    const render = source.bind(null, this.tag);
+
+    const tag = function clone () {
+      return clone.__fn.apply(null, arguments);
+    };
+
+    tag.__fn = this.tag;
+
+    _.each(component.components, (child, key) => {
+      child.view.displayName = key;
+      tag[key] = child.view;
+    });
+
+    const render = source.bind(null, tag);
 
     const getState = !component.path.length
       ? () => root.getState()
       : () => _.get(root.getState(), component.path) || component.init();
-
-    const views = _.mapValues(component.components, (child, key) => {
-      child.view.displayName = key;
-      return child.view;
-    });
 
     function view (props, ...children) {
       const styles = props && props.styles
@@ -27,7 +34,6 @@ export default class ViewPlugin {
       return render({
         props: _.omit(props, 'styles'),
         children,
-        components: views,
         actions: component.actions,
         state: getState(),
         styles,
