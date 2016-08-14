@@ -6,27 +6,35 @@ export function HTTPExample (h, { state, actions, styles }) {
     <div>
       <input className={styles.topicInput} onChange={actions.changeTopic} value={state.topic} />
       <button className={styles.moreButton} onClick={getRandomGif}>More please</button>
-      {!state.url ? null : <img alt='Cat' src={state.url} />}
+      {!state.url ? null : <img alt='Cat' src={state.url} onload={actions.imageLoaded} />}
     </div>
   );
 }
 
 HTTPExample.actions = {
   initializeState: (state) => state.set('topic', 'random'),
-  fetchSuccess: (state, url) => state.set('url', url),
-  fetchFailure: (state) => state,  // Do nothing on failure - for now
   changeTopic: (state, e) => state.set('topic', e.target.value),
 
+  fetchSuccess: (state, url) => state.set('url', url).set('isLoading', true),
+  fetchFailure: (state) => state,  // Do nothing on failure - for now
+
+  imageLoaded: (state) => state.set('isLoading', false),
+
   // Async actions begin with a $ (dollar sign)
-  $getRandomGif (task, actions, topic) {
+  $getRandomGif (task, topic) {
     if (task.isRunning) return task.done();
+
+    if (task.getState().isLoading) {
+      console.log('GIF is already loading');
+      return task.done();
+    }
 
     const src = `http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${topic}`;
 
     // Async actions can trigger other actions as needed
     const request = xhr(src, { json: true }, function callback (err, response, body) {
-      if (err) actions.fetchFailure(err);
-      else actions.fetchSuccess(body.data.image_url);
+      if (err) task.actions.fetchFailure(err);
+      else task.actions.fetchSuccess(body.data.image_url);
     });
 
     // Async actions can return a cancel function for cleanup

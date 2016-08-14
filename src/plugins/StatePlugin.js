@@ -45,7 +45,18 @@ export default class StatePlugin {
 
     component.actions = _.mapValues(source.actions, (__, actionName) => {
       const type = component.path.concat(actionName);
-      return (...args) => root.dispatch({ type, args });
+
+      const fn = (...args) => root.dispatch({ type, args });
+      // const fn = _.startsWith(actionName, '$')
+      //   ? (...args) => root.dispatch({ type, args, component })
+      //   : (...args) => root.dispatch({ type, args });
+
+      Object.defineProperties(fn, {
+        name: { value: actionName },
+        displayName: { value: actionName }
+      });
+
+      return fn;
     });
   }
 }

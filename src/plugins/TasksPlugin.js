@@ -11,16 +11,25 @@ export default class TasksPlugin {
 
         // Get the path of the component
         const path = _.initial(action.type);
-        const actions = _.get(component.components, path.join('.components.'));
+
+        // Find the component
+        let targetComponent = root;
+        for (let i = 0, n = path.length; i < n; i++) {
+          const key = path[i];
+          const nextComponent = targetComponent.components[key];
+          if (!nextComponent) return null;
+          targetComponent = nextComponent;
+        }
 
         // Create the task api
         const task = {
           dispatch: store.dispatch,
           getState: !path.length ? store.getState : () => _.get(store.getState(), path),
-          actions
+          actions: targetComponent.actions,
+          queries: targetComponent.queries,
         };
 
-        return handleAsyncAction(task, source, action.type, action.args);
+        handleAsyncAction(task, source, action.type, action.args);
       };
     }
   }
