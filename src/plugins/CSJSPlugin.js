@@ -24,6 +24,6 @@ export function createCSS (pieces, ...substitutions) {
   });
 }
 
-export default function CSJSPlugin (theme = {}) {
+export default function CSJSPlugin ({ theme = {} } = {}) {
   return new StylesPlugin(createCSS, theme);
 }
