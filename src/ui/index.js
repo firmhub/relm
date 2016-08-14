@@ -1,6 +1,7 @@
 /* eslint-disable no-multi-spaces */
 
 import Window         from './Window';        export { Window };
+import Flexbox        from './Flexbox';       export { Flexbox };
 import Pane           from './Pane';          export { Pane };
 import PaneGroup      from './PaneGroup';     export { PaneGroup };
 import Nav            from './Nav';           export { Nav };
