@@ -7,41 +7,36 @@ export default class ViewPlugin {
   }
 
   apply (component, source, root) {
-    const name = source.displayName || source.name;
+    component.view = function view (props, ...children) {
+      const styles = props && props.styles ? _.defaults(props.styles, view.styles) : view.styles;
 
-    const tag = function clone () {
-      return clone.__fn.apply(null, arguments);
-    };
-
-    tag.__fn = this.tag;
-
-    _.each(component.components, (child, key) => {
-      child.view.displayName = key;
-      tag[key] = child.view;
-    });
-
-    const render = source.bind(null, tag);
-
-    const getState = !component.path.length
-      ? () => root.getState()
-      : () => _.get(root.getState(), component.path) || component.init();
-
-    function view (props, ...children) {
-      const styles = props && props.styles
-        ? _.defaults(props.styles, component.styles)
-        : component.styles;
-
-      return render({
+      return view.render({
         props: _.omit(props, 'styles'),
         children,
-        actions: component.actions,
-        state: getState(),
+        actions: view.actions,
+        state: view.getState(),
         styles,
+        components: view.components,
       });
-    }
+    };
 
-    view.displayName = name;
-    component.view = view;
+    // Closure elimination - assign necessary prosp to the view fn
+    _.assign(component.view, {
+      render: source.bind(null, this.tag),
+      displayName: source.displayName || source.name,
+      actions: component.actions,
+      styles: component.styles,
+      components: _.mapValues(component.components, getComponentView),
+      getState: !component.path.length
+        ? () => root.getState()
+        : () => _.get(root.getState(), component.path) || component.init()
+    });
+
+    function getComponentView (child, key) {
+      child.view.displayName = key;
+      tag[key] = child.view;  // For convenience also assign components to tag ex: <h.Component />
+      return child.view;
+    }
   }
 }
 
