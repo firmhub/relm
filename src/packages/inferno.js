@@ -1,7 +1,12 @@
 /* eslint-env browser */
 import InfernoDOM from 'inferno-dom';
 import relm from '../';
-import * as plugins from '../plugins';
+import StatePlugin from '../plugins/StatePlugin';
+import GraphQLPlugin from '../plugins/GraphQLPlugin';
+import TasksPlugin from '../plugins/TasksPlugin';
+import ReduxPlugin from '../plugins/ReduxPlugin';
+import CSJSPlugin from '../plugins/CSJSPlugin';
+import InfernoPlugin from '../plugins/InfernoPlugin';
 
 export function relmApp (component, el, opts) {
   const { customizeReducer, customizeMiddleware, theme } = opts || {};
@@ -9,11 +14,12 @@ export function relmApp (component, el, opts) {
   const app = relm({
     component,
     plugins: [
-      new plugins.StatePlugin(),
-      new plugins.TasksPlugin(),
-      new plugins.ReduxPlugin({ customizeReducer, customizeMiddleware }),
-      new plugins.CSJSPlugin(theme),
-      new plugins.InfernoPlugin(),
+      new StatePlugin(),
+      new GraphQLPlugin(),
+      new TasksPlugin(),
+      new ReduxPlugin({ customizeReducer, customizeMiddleware }),
+      new CSJSPlugin({ theme }),
+      new InfernoPlugin(),
     ]
   });
 
