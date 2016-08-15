@@ -8,6 +8,19 @@ import ReduxPlugin from '../plugins/ReduxPlugin';
 import CSJSPlugin from '../plugins/CSJSPlugin';
 import InfernoPlugin from '../plugins/InfernoPlugin';
 
+import ApolloClient, { createNetworkInterface } from 'apollo-client';
+let client;
+
+function createQuery (params) {
+  if (!client) {
+    client = new ApolloClient({
+      networkInterface: createNetworkInterface('http://graphql-swapi.parseapp.com/')
+    });
+  }
+
+  return client.query(params);
+}
+
 export function relmApp (component, el, opts) {
   const { customizeReducer, customizeMiddleware, theme } = opts || {};
 
@@ -15,7 +28,7 @@ export function relmApp (component, el, opts) {
     component,
     plugins: [
       new StatePlugin(),
-      new GraphQLPlugin(),
+      new GraphQLPlugin(createQuery),
       new TasksPlugin(),
       new ReduxPlugin({ customizeReducer, customizeMiddleware }),
       new CSJSPlugin({ theme }),

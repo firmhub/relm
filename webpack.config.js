@@ -139,7 +139,7 @@ function examplesEntry (config) {
 
   config.entry = {
     // todo: './examples/todo/app.js',
-    githunt: './examples/githunt/app.js',
+    starwars: './examples/starwars/app.js',
     http: './examples/http/app.js',
     quiz: './examples/quiz/app.js',
   };

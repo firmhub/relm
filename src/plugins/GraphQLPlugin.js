@@ -13,20 +13,19 @@ export default class GraphQLPlugin {
     if (!source.graphql) return;
 
     // Parse GQL
-    const result = source.graphql(tag, { components: component.fragments });
+    const { fragments, queries } = source.graphql(tag, { components: component.fragments });
 
     // Assign any newly defined fragments so parents can use them
-    _.assign(component.fragments, result.fragments);
+    _.assign(component.fragments, fragments);
 
     const createQuery = this.createQuery;
-    const fragments = _.values(result.fragments);
 
     // Make query creators
-    component.queries = _.mapValues(result.queries, (queryDefinition, name) => {
+    component.queries = _.mapValues(queries, (query, name) => {
       const queryCreator = function runQuery (variables = {}) {
         return createQuery({
           variables,
-          query: _.defaults({ definitions: fragments.concat(queryDefinition) }, result.doc)
+          query,
         });
       };
 
@@ -38,76 +37,99 @@ export default class GraphQLPlugin {
 }
 
 const Types = {
-  Fragement: 'FragmentDefinition',
+  Document: 'Document',
+  Fragment: 'FragmentDefinition',
   Operation: 'OperationDefinition',
   Spread: 'FragmentSpread',
 };
 
 function tag (literals, ...substitutions) {
   if (!literals.length) return '';
-  const result = { fragments: {}, queries: {} };
+  const fragments = {};
+  const subs = {};
+  const queries = {};
 
-  // Parse the incoming query and collect any substituted fragments
-  const collectAndJoin = queryStringReducer(result.fragments, literals);
-  const str = _.reduce(substitutions, collectAndJoin, '') + _.last(literals);
-  const doc = parse(str);
+  function joinString (str, sub, i) {
+    if (!isKind(Types.Fragment, sub)) {
+      throw new Error('GraphQL substitutions must be fragments');
+    }
 
-  if (!doc || doc.kind !== 'Document') {
+    if (!_.endsWith(literals[i], '...')) {
+      throw new Error('All substitutions must be preceeded by a spread "..." operator');
+    }
+
+    const fragmentName = sub.name.value;
+    subs[fragmentName] = sub;
+    return str + literals[i] + fragmentName;
+  }
+
+  const source = _.reduce(substitutions, joinString, '') + _.last(literals);
+  const doc = parse(source);
+
+  if (!doc || doc.kind !== Types.Document) {
     throw new Error('Not a valid GraphQL document.');
+  }
+
+  function buildQuery (queryNode) {
+    const definitions = [queryNode];
+    traverse(queryNode.selectionSet, function collectFragments (node) {
+      // Skip everything but spread operators
+      if (!isKind(Types.Spread, node)) return;
+
+      const nodeName = node && node.name && node.name.value;
+
+      // Some child fragment
+      if (_.has(subs, nodeName)) {
+        definitions.push(subs[nodeName]);
+        return;
+      }
+
+      // Self defined fragment - sub the hashed name
+      if (_.has(fragments, nodeName)) {
+        node.name.value = fragments[nodeName].name.value;
+        definitions.push(fragments[nodeName]);
+      }
+    });
+
+    return {
+      kind: Types.Document,
+      definitions
+    };
   }
 
   traverse(doc.definitions, function collectQueriesAndFragments (node) {
     const nodeName = node && node.name && node.name.value;
 
     // Hash the fragment names defined in this doc
-    if (isKind(Types.Fragement, node)) {
-      result.fragments[nodeName] = node;
+    if (isKind(Types.Fragment, node)) {
       node.name.value = `${nodeName}_hashed`;
-      return;
-    }
-
-    // Substitue hashed fragment names into query
-    if (isKind(Types.Spread, node) && _.has(result.fragments, nodeName)) {
-      node.name.value = result.fragments[nodeName].name.value;
-      return;
+      fragments[nodeName] = node;
+      return null;
     }
 
     // Collect queries in result object
     if (isKind(Types.Operation, node) && node.operation === 'query') {
-      console.log(node);
-      result.queries[nodeName] = node;
-      return;
+      queries[nodeName] = buildQuery(node);
+      return false;
     }
+
+    return null;
   });
 
-  result.doc = doc;
-  doc.definitions = [];
-
-  return result;
+  return {
+    queries,
+    fragments,
+  };
 }
 
 function isKind (kind, node) {
   return node && node.kind === kind;
 }
 
-function queryStringReducer (fragments, literals) {
-  return (str, sub, i) => {
-    // In case of fragments, collect them for later use
-    if (isKind(Types.Fragment, sub) && _.endsWith(str, '...')) {
-      const fragmentName = sub.name.value;
-      fragments[fragmentName] = sub;
-      return str + literals[i] + fragmentName;
-    }
-
-    // All other substitutions, just add to the string
-    // This is default graphql-tag behaviour
-    return str + literals[i] + sub;
-  };
-}
-
 function traverse (obj, f) {
   if (Array.isArray(obj)) obj.forEach(it => traverse(it, f));
-  f(obj);
+  const falseReturnedToStop = f(obj);
+  if (falseReturnedToStop === false) return;
   if (obj.selectionSet) obj.selectionSet.selections.forEach(it => traverse(it, f));
 }
 
