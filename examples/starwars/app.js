@@ -27,17 +27,21 @@ StarWars.styles = css => css`
 
 StarWars.actions = {
   $runQuery (task) {
+    if (task.isRunning) return task.done();
+
     task.queries.starWars()
-      .then(res => res.data.allFilms.films)
-      .then(x => console.log(x))
+      .then(respose => respose.data.allFilms.films)
+      .then(result => console.log(result))
       .catch(err => {
         if (err.graphQLErrors) {
           err.graphQLErrors.forEach(x => console.error(x.message));
         } else {
           console.error(err);
         }
-      });
-    return task.done();
+      })
+      .then(task.done);
+
+    return null;
   }
 };
 
