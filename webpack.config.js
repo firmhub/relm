@@ -46,7 +46,7 @@ function common (tx) {
 
 function development (tx) {
   return tx(common(function devTx (config) {
-    config.devTool = 'eval';
+    config.devtool = '#eval';
 
     return config;
   }));
@@ -139,6 +139,7 @@ function examplesEntry (config) {
 
   config.entry = {
     // todo: './examples/todo/app.js',
+    githunt: './examples/githunt/app.js',
     http: './examples/http/app.js',
     quiz: './examples/quiz/app.js',
   };
