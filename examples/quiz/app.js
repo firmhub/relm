@@ -4,18 +4,18 @@ import { applyMiddleware } from 'redux';
 import createLogger from 'redux-logger';
 
 import Quiz from './components/Quiz';
-import data from './questions.js';
 
-// Start the application
-const app = relmApp(Quiz, document.querySelector('#main'), {
-  theme: {
-    grayColor: '#fc605b'
-  },
-  customizeMiddleware (middleware) {
-    return applyMiddleware(middleware, createLogger());
-  }
-});
+export function start (data) {
+  const app = relmApp(Quiz, document.querySelector('#main'), {
+    theme: {
+      grayColor: '#fc605b'
+    },
+    customizeMiddleware (middleware) {
+      return applyMiddleware(middleware, createLogger());
+    }
+  });
 
-app.actions.updateTopics(data);
+  app.actions.updateTopics(data);
 
-export default app;
+  return app;
+}

@@ -19,13 +19,15 @@ export default class ReduxPlugin {
       component.getState = store.getState;
       component.subscribe = store.subscribe;
 
-      Object.defineProperty(component, 'state', { get: store.getState });
+      Object.defineProperty(component, 'state', {
+        get: () => store.getState() || component.init()
+      });
     } else {
-      Object.defineProperty(component, 'state', { get: getComponentState });
-    }
-
-    function getComponentState () {
-      return _.get(root.getState(), component.path) || component.init();
+      Object.defineProperty(component, 'state', {
+        get () {
+          return _.get(root.getState(), component.path) || component.init();
+        }
+      });
     }
   }
 }

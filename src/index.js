@@ -39,37 +39,3 @@ export {
 export const internals = {
   parser,
 };
-
-/* Inferno
-
-import relm from 'relm';
-import css from 'relm/css';
-
-function createElement (tag, props, ...children) {
-  const attrs = Object.keys(props || {}).reduce(transformAttributes.bind(props), {});
-  return InfernoCreateElement(tag, attrs, ...children);
-}
-
-export function relmApp (component, opts = {}) {
-  const app = relm({
-    root: component,
-    plugins: [
-      new relm.InitPlugin(),
-      new relm.UpdatePlugin(),
-      new relm.OverridesPlugin(),
-      new relm.StylesPlugin(css),
-      new relm.ViewPlugin(createElement)
-    ]
-  });
-
-  app.subscribe(function redraw () {
-    Inferno.render(app.view(), el);
-  });
-
-  Inferno.render(app.view(), el);
-
-  return app;
-}
-
-*/
-

@@ -9,9 +9,9 @@
   },
   "scripts": {
     "test": "env BABEL_ENV=testing ava",
-    "test:unit": "env BABEL_ENV=testing ava **/*.test.js !**/*_accepted.*",
-    "dev": "webpack-dev-server",
-    "build": "webpack --progress",
+    "dev": "./parallel.sh 'watch' 'test -- -w'",
+    "watch": "webpack-dev-server",
+    "build": "env NODE_ENV=production webpack --progress",
     "prepublish": "npm run build"
   },
   "keywords": [
@@ -31,6 +31,7 @@
   },
   "homepage": "https://github.com/a-s-o/relm#readme",
   "devDependencies": {
+    "apollo-client": "^0.4.11",
     "autoprefixer": "^6.3.7",
     "ava": "^0.15.2",
     "babel-cli": "^6.10.1",
@@ -50,6 +51,7 @@
     "eslint-plugin-import": "^1.10.0",
     "eslint-plugin-jsx-a11y": "^1.5.3",
     "eslint-plugin-react": "^5.2.2",
+    "graphql-tag": "^0.1.11",
     "html-normalizer": "^6.0.0",
     "inferno-create-element": "^0.7.16",
     "inferno-dom": "^0.7.16",

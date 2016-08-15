@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { makeImmutable, unwrapImmutable } from '../immutable';
 
 export default class StatePlugin {
-  apply (component, source) {
+  apply (component, source, root) {
     const components = component.components;
 
     const handlers = _.reduce(source.actions, function convertChildActions (obj, action, name) {
@@ -41,6 +41,22 @@ export default class StatePlugin {
       }
 
       return state;
+    });
+
+    component.actions = _.mapValues(source.actions, (__, actionName) => {
+      const type = component.path.concat(actionName);
+
+      const fn = (...args) => root.dispatch({ type, args });
+      // const fn = _.startsWith(actionName, '$')
+      //   ? (...args) => root.dispatch({ type, args, component })
+      //   : (...args) => root.dispatch({ type, args });
+
+      Object.defineProperties(fn, {
+        name: { value: actionName },
+        displayName: { value: actionName }
+      });
+
+      return fn;
     });
   }
 }
