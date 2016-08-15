@@ -20,9 +20,12 @@ export default class ViewPlugin {
       });
     };
 
+    // Clone the tag function so we can assign components to it (i.e. h.Component syntax)
+    const tag = this.tag.bind(null);
+
     // Closure elimination - assign necessary prosp to the view fn
     _.assign(component.view, {
-      render: source.bind(null, this.tag),
+      render: source.bind(null, tag),
       displayName: source.displayName || source.name,
       actions: component.actions,
       styles: component.styles,
