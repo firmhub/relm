@@ -12,6 +12,7 @@ const mockStyles = {
 };
 
 test('No option selected', renderAcceptanceTest(Flashcard, {
+  styles: mockStyles,
   state: {},
   props: {
     question: 'Some question?',
@@ -20,10 +21,10 @@ test('No option selected', renderAcceptanceTest(Flashcard, {
       'False'
     ],
   },
-  styles: mockStyles,
 }));
 
 test('Correct option selected', renderAcceptanceTest(Flashcard, {
+  styles: mockStyles,
   state: {},
   props: {
     question: 'Some question?',
@@ -34,10 +35,10 @@ test('Correct option selected', renderAcceptanceTest(Flashcard, {
       'False'
     ],
   },
-  styles: mockStyles,
 }));
 
 test('Incorrect option selected', renderAcceptanceTest(Flashcard, {
+  styles: mockStyles,
   state: {},
   props: {
     question: 'Some question?',
@@ -48,5 +49,4 @@ test('Incorrect option selected', renderAcceptanceTest(Flashcard, {
       'False'
     ],
   },
-  styles: mockStyles,
 }));
