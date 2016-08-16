@@ -1,4 +1,3 @@
-import classNames from 'classnames';
 import _ from 'lodash';
 
 export default class ViewPlugin {
@@ -8,22 +7,21 @@ export default class ViewPlugin {
 
   apply (component, source, root) {
     component.view = function view (props, ...children) {
-      const styles = props && props.styles ? _.defaults(props.styles, view.styles) : view.styles;
-
       return view.render({
-        props: _.omit(props, 'styles'),
+        props,
         children,
         actions: view.actions,
         state: view.getState(),
-        styles,
+        styles: view.styles,
         components: view.components,
       });
     };
 
     const components = {};
+    const styles = component.styles;
 
     // Clone the tag function so we can assign components to it (i.e. h.Component syntax)
-    const h = extendHyperscript(this.createElement, components);
+    const h = extendHyperscript(this.createElement, { components, styles });
     Object.defineProperty(h, 'createElement', { value: this.createElement });
 
     // Optimization - assign components to h and components object in one pass
@@ -37,7 +35,7 @@ export default class ViewPlugin {
       render: source.bind(null, h),
       displayName: source.displayName || source.name,
       actions: component.actions,
-      styles: component.styles,
+      styles,
       components,
       getState: !component.path.length
         ? () => root.getState()
@@ -46,17 +44,26 @@ export default class ViewPlugin {
   }
 }
 
-export function extendHyperscript (createElement, components = {}) {
+export function extendHyperscript (createElement, config = {}) {
+  const components = config.components || {};
+  const styles = config.styles || {};
+
+  function joinWithStyle (str, className) {
+    return `${str} ${_.has(styles, className) ? styles[className] : className}`;
+  }
+
   return function hyperscript () {
     let selector = arguments[0];
     const attrs = {};
     const children = [];
 
     // Attributes (second hyperscript arg) are optional
-    if (_.isArray(arguments[1])) {
+    if (_.isPlainObject(arguments[1])) {
+      _.assign(attrs, arguments[1]);
+    } else if (_.isArray(arguments[1])) {
       children.push(...arguments[1]);
     } else {
-      _.assign(attrs, arguments[1]);
+      children.push(arguments[1]);
     }
 
     // Filter and flatten children
@@ -94,9 +101,7 @@ export function extendHyperscript (createElement, components = {}) {
     }
 
     // Join class names if not already joined
-    if (attrs.className && typeof className !== 'string') {
-      attrs.className = classNames(attrs.className);
-    }
+    attrs.className = joinClasses(joinWithStyle, attrs.className);
 
     // Sub components
     if (selector instanceof Function) {
@@ -132,6 +137,20 @@ function parseTag (selector) {
   }
 
   return { tag, attrs, classes };
+}
+
+function joinClasses (withStyle, ...args) {
+  return _.chain(args)
+    .flatten()
+    .map(function filterKeys (it) {
+      if (!_.isPlainObject(it)) return it;
+      return _.chain(it).pickBy(Boolean).keys().value();
+    })
+    .flatten()
+    .filter(Boolean)
+    .reduce(withStyle, '')
+    .trim()
+    .value();
 }
 
 export const internals = {

@@ -48,8 +48,9 @@ export function createApp (component, opts) {
  */
 export function shallowRender (component, config = {}) {
   const components = _.mapValues(component.components, componentToDummyElement);
+  const styles = config.styles;
 
-  const h = extendHyperscript(createElement, components);
+  const h = extendHyperscript(createElement, { components, styles });
   Object.assign(h, components);
   config.components = components;
 

@@ -1,46 +1,40 @@
 import { Button, Radio } from '../../../src/ui';
 
 export default function Flashcard (h, { props, styles }) {
-  const showAnswer = Boolean(props.selection);
-  return (
-    <section className={styles.card} style={props.style}>
-      <header className={styles.question}>
-        {props.question}
-      </header>
-      <ul className={styles.options}>
-        {props.options.map(optionView)}
-      </ul>
-      {!showAnswer ? null : (
-        <footer className={styles.footer}>
-          <div style={{ marginBottom: '1rem', fontSize: '1.1em' }}>
-            <strong>{props.selection === props.answer ? 'Correct! ' : 'Wrong! '}</strong>
-            {props.reason}
-          </div>
-          <h.Button className={styles.Button.primary} onClick={props.onNext}>
-            Next question
-          </h.Button>
-        </footer>
-      )}
-    </section>
-  );
+  return h('section.card', { style: props.style }, [
+    h('header.question', props.question),
+    h('ul.options', props.options.map(option)),
+    footer()
+  ]);
 
-  function optionView (opt, i) {
+  function footer () {
+    if (!props.selection) return null;
+
+    return h('footer.footer', [
+      h('div', { style: { marginBottom: '1rem', fontSize: '1.1em' } }, [
+        h('strong', props.selection === props.answer ? 'Correct! ' : 'Wrong! '),
+        props.reason
+      ]),
+      h('Button', { className: styles.Button.primary, onClick: props.onNext }, 'Next question')
+    ]);
+  }
+
+  function option (opt, i) {
+    const showAnswer = Boolean(props.selection);
     const isSelected = opt === props.selection;
     const isGood = showAnswer && opt === props.answer;
     const isBad = !isGood && isSelected;
     const variant = isGood ? 'good' : (isBad ? 'bad' : 'normal'); // eslint-disable-line no-nested-ternary
 
-    return (
-      <h.Option
-        styles={{ container: styles[variant], disabled: styles.disabled }}
-        name='answer'
-        label={opt}
-        disabled={showAnswer}
-        checked={isSelected}
-        value={i}
-        onChange={() => props.onChange(opt)}
-      />
-    );
+    return h('Option', {
+      className: styles[variant],
+      name: 'answer',
+      value: i,
+      label: opt,
+      disabled: showAnswer,
+      checked: isSelected,
+      onChange: () => props.onChange(opt)
+    });
   }
 }
 
@@ -97,6 +91,11 @@ Flashcard.styles = (css, { components: { Option } }) => css`
     background-color: #ededed;
     cursor: pointer;
   }
+
+  .normal[disabled] > input {
+    visibility: hidden;
+  }
+
   .bad extends .normal {
     background-color: #FFCFCF;
     cursor: default;
@@ -105,10 +104,6 @@ Flashcard.styles = (css, { components: { Option } }) => css`
   .good extends .normal {
     background-color: #D4FCD2;
     cursor: default;
-  }
-
-  .disabled > input {
-    visibility: hidden;
   }
 
   .normal > label {
