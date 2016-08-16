@@ -9,7 +9,7 @@ exports[`Correct option selected`] = `
     className="options">
     <Option
       checked="true"
-      className="Good-option-class"
+      className="Good-option-class Disabled-option-class"
       disabled="true"
       label="True"
       name="answer"
@@ -17,7 +17,7 @@ exports[`Correct option selected`] = `
       value="0" />
     <Option
       checked="false"
-      className="Normal-option-class"
+      className="Normal-option-class Disabled-option-class"
       disabled="true"
       label="False"
       name="answer"
@@ -56,7 +56,7 @@ exports[`Incorrect option selected`] = `
     className="options">
     <Option
       checked="false"
-      className="Good-option-class"
+      className="Good-option-class Disabled-option-class"
       disabled="true"
       label="True"
       name="answer"
@@ -64,7 +64,7 @@ exports[`Incorrect option selected`] = `
       value="0" />
     <Option
       checked="true"
-      className="Bad-option-class"
+      className="Bad-option-class Disabled-option-class"
       disabled="true"
       label="False"
       name="answer"

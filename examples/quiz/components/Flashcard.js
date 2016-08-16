@@ -22,12 +22,11 @@ export default function Flashcard (h, { props, styles }) {
   function option (opt, i) {
     const showAnswer = Boolean(props.selection);
     const isSelected = opt === props.selection;
-    const isGood = showAnswer && opt === props.answer;
-    const isBad = !isGood && isSelected;
-    const variant = isGood ? 'good' : (isBad ? 'bad' : 'normal'); // eslint-disable-line no-nested-ternary
+    const good = showAnswer && opt === props.answer && 'good';
+    const bad = !good && isSelected && 'bad';
 
     return h('Option', {
-      className: styles[variant],
+      className: { [good || bad || 'normal']: true, disabled: showAnswer },
       name: 'answer',
       value: i,
       label: opt,
@@ -83,17 +82,17 @@ Flashcard.styles = (css, { components: { Option } }) => css`
     list-style: none;
   }
 
-  .normal extends ${Option.container} {
+  .option extends ${Option.container} {
     font-size: 1.2em;
+  }
+
+  .disabled > input {
+    visibility: hidden;
   }
 
   .normal:not(.disabled):hover {
     background-color: #ededed;
     cursor: pointer;
-  }
-
-  .normal[disabled] > input {
-    visibility: hidden;
   }
 
   .bad extends .normal {
