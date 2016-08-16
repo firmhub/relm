@@ -1,26 +1,26 @@
 import { Button, Radio } from '../../../src/ui';
 
 export default function Flashcard (h, { props, styles }) {
-  return h('section.card', { style: props.style }, [
-    h('header.question', props.question),
-    h('ul.options', props.options.map(option)),
-    footer()
-  ]);
-
-  function footer () {
-    if (!props.selection) return null;
-
-    return h('footer.footer', [
-      h('div', { style: { marginBottom: '1rem', fontSize: '1.1em' } }, [
-        h('strong', props.selection === props.answer ? 'Correct! ' : 'Wrong! '),
-        props.reason
-      ]),
-      h('Button', { className: styles.Button.primary, onClick: props.onNext }, 'Next question')
-    ]);
-  }
+  const showAnswer = Boolean(props.selection);
+  return (
+    <section className='card' style={props.style}>
+      <header className='question'>{props.question}</header>
+      <ul className='options'>{props.options.map(option)}</ul>
+      {showAnswer && (
+        <footer className='footer'>
+          <div style={{ marginBottom: '1rem', fontSize: '1.1em' }}>
+            <strong>{props.selection === props.answer ? 'Correct! ' : 'Wrong! '}</strong>
+            {props.reason}
+          </div>
+          <h.Button className={styles.Button.primary} onClick={props.onNext}>
+            Next question
+          </h.Button>
+        </footer>
+      )}
+    </section>
+  );
 
   function option (opt, i) {
-    const showAnswer = Boolean(props.selection);
     const isSelected = opt === props.selection;
     const good = showAnswer && opt === props.answer && 'good';
     const bad = !good && isSelected && 'bad';
@@ -36,6 +36,15 @@ export default function Flashcard (h, { props, styles }) {
     });
   }
 }
+
+Flashcard.propTypes = t => ({
+  onChange: t.Function,
+  question: t.String,
+  options: t.Array,
+  answer: t.String.optional(),
+  selection: t.String.optional(),
+  style: t.Object.optional(),
+});
 
 Flashcard.components = {
   Button,

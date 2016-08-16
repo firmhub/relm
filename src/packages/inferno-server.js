@@ -60,8 +60,9 @@ export function shallowRender (component, config = {}) {
   // a function so that `./inferno-format` module can distinguish it from
   // other elements that are genuine inferno elements
   function componentToDummyElement (__component__, key) {
+    // Option 1 - display child component attributes as declared
     return (attrs, ...children) => ({ tag: () => key, attrs, children });
-    // Alternate - allow Inferno to transform attributes (ex: lowercase event handlers)
+    // Option 2 - allow Inferno to transform attributes (ex: lowercase event handlers)
     // return (attrs, ...children) => createElement(key, attrs, children);
   }
 }
@@ -89,7 +90,7 @@ export function renderAcceptanceTest (component, config) {
     const expected = fmt.deserialize(accepted[title]);
     const diff = fmt.diff(fmt.deserialize(expected), actual);
 
-    if (!diff) return t.pass();
+    if (!diff || !diff.trim()) return t.pass();
 
     // Diff but difference is accepted
     if (/#accept(\s|$)/.test(t.title)) {
