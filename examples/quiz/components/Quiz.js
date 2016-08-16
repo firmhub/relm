@@ -31,7 +31,7 @@ export default function Quiz (h, { styles, actions, state }) {
 
   function topicToToggleButton (topic, key) {
     const num = _.size(topic.questions);
-    const stat = stats[key];
+    const stat = stats[key] || {};
     return (
       <h.Toggle
         className={{ [styles.Toggle.active]: !state.skippedTopics[key] }}

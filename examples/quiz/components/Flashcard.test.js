@@ -1,5 +1,5 @@
 import test from 'ava';
-import Flashcard from '../components/Flashcard';
+import Flashcard from './Flashcard';
 import { renderAcceptanceTest } from '../../../src/packages/inferno-server';
 
 const mockStyles = {

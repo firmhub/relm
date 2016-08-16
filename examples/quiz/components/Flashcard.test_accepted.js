@@ -1,38 +1,31 @@
 exports[`Correct option selected`] = `
-<section>
+<section
+  className="card">
   <header
-    className="Question-class ">
+    className="Question-class">
     Some question?
   </header>
-  <ul>
+  <ul
+    className="options">
     <Option
       checked="true"
+      className="Good-option-class"
       disabled="true"
       label="True"
       name="answer"
       onChange="[Function onChange]"
-      styles={
-        Object {
-          "container": "Good-option-class",
-          "disabled": "Disabled-option-class"
-        }
-      }
       value="0" />
     <Option
       checked="false"
+      className="Normal-option-class"
       disabled="true"
       label="False"
       name="answer"
       onChange="[Function onChange]"
-      styles={
-        Object {
-          "container": "Normal-option-class",
-          "disabled": "Disabled-option-class"
-        }
-      }
       value="1" />
   </ul>
-  <footer>
+  <footer
+    className="footer">
     <div
       style={
         Object {
@@ -41,10 +34,8 @@ exports[`Correct option selected`] = `
         }
       }>
       <strong>
-        
         Correct! 
       </strong>
-      
     </div>
     <Button
       className="Next-question-button-class">
@@ -55,40 +46,33 @@ exports[`Correct option selected`] = `
 `;
 
 exports[`Incorrect option selected`] = `
-<section>
+<section
+  className="card">
   <header
-    className="Question-class ">
+    className="Question-class">
     Some question?
   </header>
-  <ul>
+  <ul
+    className="options">
     <Option
       checked="false"
+      className="Good-option-class"
       disabled="true"
       label="True"
       name="answer"
       onChange="[Function onChange]"
-      styles={
-        Object {
-          "container": "Good-option-class",
-          "disabled": "Disabled-option-class"
-        }
-      }
       value="0" />
     <Option
       checked="true"
+      className="Bad-option-class"
       disabled="true"
       label="False"
       name="answer"
       onChange="[Function onChange]"
-      styles={
-        Object {
-          "container": "Bad-option-class",
-          "disabled": "Disabled-option-class"
-        }
-      }
       value="1" />
   </ul>
-  <footer>
+  <footer
+    className="footer">
     <div
       style={
         Object {
@@ -97,10 +81,8 @@ exports[`Incorrect option selected`] = `
         }
       }>
       <strong>
-        
         Wrong! 
       </strong>
-      
     </div>
     <Button
       className="Next-question-button-class">
@@ -111,40 +93,31 @@ exports[`Incorrect option selected`] = `
 `;
 
 exports[`No option selected`] = `
-<section>
+<section
+  className="card">
   <header
-    className="Question-class ">
+    className="Question-class">
     Some question?
   </header>
-  <ul>
+  <ul
+    className="options">
     <Option
       checked="false"
+      className="Normal-option-class"
       disabled="false"
       label="True"
       name="answer"
       onChange="[Function onChange]"
-      styles={
-        Object {
-          "container": "Normal-option-class",
-          "disabled": "Disabled-option-class"
-        }
-      }
       value="0" />
     <Option
       checked="false"
+      className="Normal-option-class"
       disabled="false"
       label="False"
       name="answer"
       onChange="[Function onChange]"
-      styles={
-        Object {
-          "container": "Normal-option-class",
-          "disabled": "Disabled-option-class"
-        }
-      }
       value="1" />
   </ul>
-  
 </section>
 `;
 
