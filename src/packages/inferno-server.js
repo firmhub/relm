@@ -4,8 +4,11 @@ import fs from 'fs';
 import { renderToString } from 'inferno-server';
 
 import relm from '../';
-import * as plugins from '../plugins';
-import { createElement } from '../plugins/InfernoPlugin';
+import StatePlugin from '../plugins/StatePlugin';
+import ReduxPlugin from '../plugins/ReduxPlugin';
+import StylesPlugin from '../plugins/StylesPlugin';
+import InfernoPlugin, { createElement } from '../plugins/InfernoPlugin';
+import { extendHyperscript } from '../plugins/ViewPlugin';
 import * as fmt from './inferno-format';
 
 export { createElement, renderToString };
@@ -26,10 +29,10 @@ export function createApp (component, opts) {
   const app = relm({
     component,
     plugins: [
-      new plugins.StatePlugin(),
-      new plugins.ReduxPlugin({ initialState }),
-      new plugins.StylesPlugin(null, theme),
-      new plugins.InfernoPlugin(),
+      new StatePlugin(),
+      new ReduxPlugin({ initialState }),
+      new StylesPlugin(null, theme),
+      new InfernoPlugin(),
     ]
   });
 
@@ -44,14 +47,21 @@ export function createApp (component, opts) {
  * Shallow rendering a component
  */
 export function shallowRender (component, config = {}) {
-  config.components = _.mapValues(component.components, componentToDummyElement);
-  return component(createElement, config);
+  const components = _.mapValues(component.components, componentToDummyElement);
 
-  // Maps components to a dummy inferno element; the tag of the dummy is
+  const h = extendHyperscript(createElement, components);
+  Object.assign(h, components);
+  config.components = components;
+
+  return component(h, config);
+
+  // Maps components to a dummy inferno element -- the tag of the dummy is
   // a function so that `./inferno-format` module can distinguish it from
   // other elements that are genuine inferno elements
   function componentToDummyElement (__component__, key) {
     return (attrs, ...children) => ({ tag: () => key, attrs, children });
+    // Alternate - allow Inferno to transform attributes (ex: lowercase event handlers)
+    // return (attrs, ...children) => createElement(key, attrs, children);
   }
 }
 

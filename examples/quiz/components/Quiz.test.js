@@ -1,5 +1,5 @@
 import test from 'ava';
-import Quiz from '../components/Quiz';
+import Quiz from './Quiz';
 import { renderAcceptanceTest } from '../../../src/packages/inferno-server';
 
 const mockState = {
@@ -36,7 +36,7 @@ test('Normal state', renderAcceptanceTest(Quiz, {
   actions: {
   },
   styles: {
-    TopicToggle: {
+    Toggle: {
       active: 'active-toggle-button-class'
     }
   },

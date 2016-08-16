@@ -1,7 +1,7 @@
 exports[`Correct option selected`] = `
 <section>
   <header
-    className="Question-class ">
+    className="Question-class">
     Some question?
   </header>
   <ul>
@@ -41,10 +41,8 @@ exports[`Correct option selected`] = `
         }
       }>
       <strong>
-        
         Correct! 
       </strong>
-      
     </div>
     <Button
       className="Next-question-button-class">
@@ -57,7 +55,7 @@ exports[`Correct option selected`] = `
 exports[`Incorrect option selected`] = `
 <section>
   <header
-    className="Question-class ">
+    className="Question-class">
     Some question?
   </header>
   <ul>
@@ -97,10 +95,8 @@ exports[`Incorrect option selected`] = `
         }
       }>
       <strong>
-        
         Wrong! 
       </strong>
-      
     </div>
     <Button
       className="Next-question-button-class">
@@ -113,7 +109,7 @@ exports[`Incorrect option selected`] = `
 exports[`No option selected`] = `
 <section>
   <header
-    className="Question-class ">
+    className="Question-class">
     Some question?
   </header>
   <ul>
@@ -144,7 +140,6 @@ exports[`No option selected`] = `
       }
       value="1" />
   </ul>
-  
 </section>
 `;
 

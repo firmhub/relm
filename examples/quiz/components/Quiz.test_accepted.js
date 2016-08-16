@@ -9,6 +9,24 @@ exports[`Normal state`] = `
       "padding": "2rem"
     }
   }>
+  <h1
+    style={
+      Object {
+        "color": "#c2c2c2",
+        "fontSize": "1.6em",
+        "textAlign": "center"
+      }
+    }>
+    My topic
+  </h1>
+  <Flashcard
+    style={
+      Object {
+        "margin": "1rem 0 3rem"
+      }
+    }>
+    
+  </Flashcard>
   <nav
     style={
       Object {
@@ -16,22 +34,16 @@ exports[`Normal state`] = `
         "textAlign": "center"
       }
     }>
-    <TopicToggle
+    <Toggle
       className="active-toggle-button-class"
-      count="0"
-      label="My topic"
+      count="0 / 0"
+      label="My topic (2)"
       onToggle="[Function onToggle]" />
-    <TopicToggle
-      count="0"
-      label="Other topic"
+    <Toggle
+      count="0 / 0"
+      label="Other topic (2)"
       onToggle="[Function onToggle]" />
   </nav>
-  <Card
-    style={
-      Object {
-        "margin": "2rem 0"
-      }
-    } />
 </div>
 `;
 
