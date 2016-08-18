@@ -5,7 +5,7 @@
   "main": "relm.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/motorcode/relm.git"
+    "url": "git+https://github.com/hyperfinite/relm.git"
   },
   "keywords": [
     "frontend",
@@ -19,6 +19,10 @@
   "author": "Amandeep Singh Othi <a-s-o@users.noreply.github.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/a-s-o/relm/issues"
+    "url": "https://github.com/hyperfinite/relm/issues"
+  },
+  "homepage": "https://github.com/hyperfinite/relm#readme",
+  "dependencies": {
+    "lodash": "^4.13.1"
   }
 }
