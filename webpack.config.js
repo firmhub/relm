@@ -6,6 +6,7 @@ const webpack = require('webpack');
 if (process.env.NODE_ENV === 'production') {
   module.exports = [
     production(distEntries),
+    production(packageEntries),
   ];
 } else {
   module.exports = [
@@ -37,6 +38,7 @@ function common (tx) {
         loader: 'json'
       }]
     },
+    debug: true,
     externals: [
       /^babel.+$/,
     ]
@@ -45,13 +47,14 @@ function common (tx) {
 
 function development (tx) {
   return tx(common(function devTx (config) {
-    config.devtool = 'cheap-module-eval-source-map';
+    config.devtool = 'eval-source-map';
     return config;
   }));
 }
 
 function production (tx) {
   return tx(common(function productionTx (config) {
+    config.devtool = 'source-map';
     config.plugins = [
       new webpack.optimize.DedupePlugin(),
       new webpack.optimize.OccurrenceOrderPlugin(),
@@ -61,8 +64,6 @@ function production (tx) {
         sourceMap: true,
       })
     ];
-
-    config.devtool = 'cheap-module-source-map';
 
     return config;
   }));
@@ -91,6 +92,7 @@ function distEntries (config) {
     filename: '[name].js',
     path: path.resolve('./dist'),
     sourceMapFilename: '[name].map',
+    library: '[name]',
     libraryTarget: 'umd',
   };
 
@@ -100,13 +102,26 @@ function distEntries (config) {
       minChunks (module, count) {
         return module.resource && module.resource.indexOf('lodash') !== -1 && count > 1;
       }
-    }),
-    new webpack.SourceMapDevToolPlugin({
-      filename: '[name].map',
-      module: true,
-      columns: false,
     })
   );
+
+  return config;
+}
+
+function packageEntries (config) {
+  config.name = 'packages';
+
+  config.entry = {
+    inferno: './src/packages/inferno.js',
+  };
+
+  config.output = {
+    filename: 'relm-[name].js',
+    path: path.resolve('./dist'),
+    sourceMapFilename: 'relm-[name].map',
+    library: 'relm',
+    libraryTarget: 'umd',
+  };
 
   return config;
 }
