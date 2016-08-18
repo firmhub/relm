@@ -108,7 +108,7 @@ function libEntry (lib) {
 
   lib.entry = Object.assign.apply(Object, [
     {
-      relm: './src/relm.js',
+      core: './src/relm.js',
     },
     readDir('./src/plugins', '.js', function readPlugins (entries, filename) {
       entries[filename] = `./src/plugins/${filename}.js`;
@@ -133,24 +133,6 @@ function libEntry (lib) {
   };
 
   return lib;
-}
-
-function packageEntries (config) {
-  config.name = 'packages';
-
-  config.entry = {
-    inferno: './src/packages/inferno.js',
-  };
-
-  config.output = {
-    filename: 'relm-[name].js',
-    path: path.resolve('./dist'),
-    sourceMapFilename: 'relm-[name].map',
-    library: 'relm',
-    libraryTarget: 'umd',
-  };
-
-  return config;
 }
 
 function presetEntry (config) {
