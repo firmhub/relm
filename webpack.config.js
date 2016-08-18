@@ -18,8 +18,6 @@ if (process.env.NODE_ENV === 'production') {
   };
 }
 
-console.log(module.exports);
-
 function common (tx) {
   return tx({
     resolve: {
@@ -47,8 +45,7 @@ function common (tx) {
 
 function development (tx) {
   return tx(common(function devTx (config) {
-    config.debug = true;
-    config.devtool = 'source-map';
+    config.devtool = 'cheap-module-eval-source-map';
     return config;
   }));
 }
@@ -58,11 +55,14 @@ function production (tx) {
     config.plugins = [
       new webpack.optimize.DedupePlugin(),
       new webpack.optimize.OccurrenceOrderPlugin(),
-      new webpack.EnvironmentPlugin(['NODE_ENV']),
+      new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } }),
       new webpack.optimize.UglifyJsPlugin({
-        compress: { warnings: false, screw_ie8: true }
+        compress: { warnings: false, screw_ie8: true },
+        sourceMap: true,
       })
     ];
+
+    config.devtool = 'cheap-module-source-map';
 
     return config;
   }));
@@ -86,9 +86,6 @@ function distEntries (config) {
       return entries;
     }),
   ]);
-
-  config.debug = true;
-  config.devtool = 'source-map';
 
   config.output = {
     filename: '[name].js',

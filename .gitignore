@@ -4,6 +4,6 @@ npm-debug.log
 
 *.dist.js
 *.bundle.js
-/dist/**/*.js
+/dist
 
 /examples/quiz/quiz.html

@@ -12,7 +12,6 @@
     "dev": "./parallel.sh 'watch' 'test -- -w'",
     "watch": "webpack-dev-server",
     "build": "env NODE_ENV=production webpack --progress",
-    "prepublish": "npm run build"
   },
   "keywords": [
     "frontend",
@@ -31,7 +30,6 @@
   },
   "homepage": "https://github.com/a-s-o/relm#readme",
   "devDependencies": {
-    "apollo-client": "^0.4.11",
     "autoprefixer": "^6.3.7",
     "ava": "^0.15.2",
     "babel-cli": "^6.10.1",
@@ -76,6 +74,7 @@
     "tcomb": "^3.2.8",
     "webpack": "^2",
     "webpack-dev-server": "^2",
+    "webpack-validator": "^2.2.7",
     "xhr": "^2.2.1",
     "yo-yo": "^1.2.2"
   },
