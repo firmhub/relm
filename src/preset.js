@@ -1,4 +1,8 @@
 /* eslint-disable */
+const postcss = require('postcss');
+const safe = require('postcss-safe-parser');
+const autoprefixer = require('autoprefixer');
+const csso = require('postcss-csso');
 
 module.exports = {
   presets: [
@@ -12,17 +16,14 @@ module.exports = {
       plugins: [
         [csjs, {
           plugins: [
-            ['autoprefixer', { browsers: ['last 2 versions'] }],
-            ['postcss-csso']
+            [autoprefixer, { browsers: ['last 2 versions'] }],
+            [csso]
           ]
         }]
       ]
     }
   }
 };
-
-const postcss = require('postcss');
-const safe = require('postcss-safe-parser');
 
 function csjs ({ types: t }) {
   return {
@@ -40,9 +41,7 @@ function csjs ({ types: t }) {
           return acc + quasi.value.raw + expr;
         }, '');
 
-        const pluginsOpts = state.opts.plugins || [];
-
-        const plugins = pluginsOpts.map(handlePlugin);
+        const plugins = (state.opts.plugins || []).map(handlePlugin);
 
         const processed = postcss(plugins)
           .process(css, {parser: safe, from: this.file.opts.filename}).css;
@@ -61,9 +60,9 @@ function csjs ({ types: t }) {
 
 function handlePlugin(pluginArg) {
   if (Array.isArray(pluginArg)) {
-    return require(pluginArg[0]).apply(null, pluginArg.slice(1));
+    return pluginArg[0].apply(null, pluginArg.slice(1));
   } else if (typeof pluginArg === 'string') {
-    return require(pluginArg);
+    throw new Error('Import plugins directly; plugin path is not accepted to avoid dynamic requires');
   } else {
     return pluginArg;
   }
