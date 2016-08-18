@@ -3,13 +3,14 @@ const postcss = require('postcss');
 const safe = require('postcss-safe-parser');
 const autoprefixer = require('autoprefixer');
 const csso = require('postcss-csso');
+const jsxSyntax = require('babel-plugin-syntax-jsx');
+const jsxTransform = require('babel-plugin-transform-react-jsx');
 
 module.exports = {
-  presets: [
-  ],
+  presets: [],
   plugins: [
-    [require('babel-plugin-syntax-jsx')],
-    [require('babel-plugin-transform-react-jsx'), { pragma: 'h' }],
+    [jsxSyntax],
+    [jsxTransform, { pragma: 'h' }],
   ],
   env: {
     production: {
