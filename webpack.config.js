@@ -6,16 +6,19 @@ const webpack = require('webpack');
 if (process.env.NODE_ENV === 'production') {
   module.exports = [
     production(distEntries),
-    production(examplesEntries),
   ];
 } else {
-  module.exports = development(examplesEntries);
+  module.exports = [
+    development(examplesEntries)
+  ];
 
   module.exports.devServer = {
     contentBase: 'examples/',
     inline: true,
   };
 }
+
+console.log(module.exports);
 
 function common (tx) {
   return tx({
@@ -44,8 +47,8 @@ function common (tx) {
 
 function development (tx) {
   return tx(common(function devTx (config) {
-    config.devtool = '#eval';
-
+    config.debug = true;
+    config.devtool = 'source-map';
     return config;
   }));
 }
@@ -55,11 +58,7 @@ function production (tx) {
     config.plugins = [
       new webpack.optimize.DedupePlugin(),
       new webpack.optimize.OccurrenceOrderPlugin(),
-      new webpack.DefinePlugin({
-        'process.env': {
-          NODE_ENV: JSON.stringify('production')
-        }
-      }),
+      new webpack.EnvironmentPlugin(['NODE_ENV']),
       new webpack.optimize.UglifyJsPlugin({
         compress: { warnings: false, screw_ie8: true }
       })
@@ -71,13 +70,6 @@ function production (tx) {
 
 function distEntries (config) {
   config.name = 'dist';
-
-  function readDir (dir, ext, f) {
-    return _.reduce(fs.readdirSync(dir), function checkExtensionFirst (entries, filename) {
-      if (filename.indexOf(ext) === -1) return entries;
-      return f(entries, filename.replace(ext, ''));
-    }, {});
-  }
 
   config.entry = Object.assign.apply(Object, [
     {
@@ -95,6 +87,7 @@ function distEntries (config) {
     }),
   ]);
 
+  config.debug = true;
   config.devtool = 'source-map';
 
   config.output = {
@@ -106,11 +99,15 @@ function distEntries (config) {
 
   config.plugins.push(
     new webpack.optimize.CommonsChunkPlugin({
-      name: 'lodash',
-      filename: 'lodash.js',
+      name: 'relm',
       minChunks (module, count) {
         return module.resource && module.resource.indexOf('lodash') !== -1 && count > 1;
       }
+    }),
+    new webpack.SourceMapDevToolPlugin({
+      filename: '[name].map',
+      module: true,
+      columns: false,
     })
   );
 
@@ -135,4 +132,15 @@ function examplesEntries (config) {
   };
 
   return config;
+}
+
+/*
+ * Helpers
+ */
+
+function readDir (dir, ext, f) {
+  return _.reduce(fs.readdirSync(dir), function checkExtensionFirst (entries, filename) {
+    if (filename.indexOf(ext) === -1) return entries;
+    return f(entries, filename.replace(ext, ''));
+  }, {});
 }

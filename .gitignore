@@ -1,8 +1,9 @@
 node_modules/
-/dist
 npm-debug.log
-*.bundle.js
-/*.js
-/examples/quiz/quiz.html
-/ui
 /.vscode
+
+*.dist.js
+*.bundle.js
+/dist/**/*.js
+
+/examples/quiz/quiz.html
