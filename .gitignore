@@ -1,10 +1,8 @@
 node_modules/
+/dist
 npm-debug.log
 *.bundle.js
-*.dist.js
-/inferno.js
-/react.js
-/morphdom.js
+/*.js
 /examples/quiz/quiz.html
 /ui
 /.vscode
