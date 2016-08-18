@@ -1,58 +1,45 @@
 /* eslint-env browser */
 import InfernoDOM from 'inferno-dom';
-import relm from '../';
+import relm from '../relm';
 import StatePlugin from '../plugins/StatePlugin';
-import GraphQLPlugin from '../plugins/GraphQLPlugin';
 import TasksPlugin from '../plugins/TasksPlugin';
 import ReduxPlugin from '../plugins/ReduxPlugin';
 import CSJSPlugin from '../plugins/CSJSPlugin';
 import InfernoPlugin from '../plugins/InfernoPlugin';
 
-import ApolloClient, { createNetworkInterface } from 'apollo-client';
-let client;
+module.exports = function startApp (component, opts) {
+  const {
+    el,
+    theme,
+    customizePlugins,
+    customizeReducer,
+    customizeMiddleware,
+  } = opts || {};
 
-function createQuery (params) {
-  if (!client) {
-    client = new ApolloClient({
-      networkInterface: createNetworkInterface('http://graphql-swapi.parseapp.com/')
-    });
-  }
+  const identity = x => x;
 
-  return client.query(params);
-}
-
-export function relmApp (component, el, opts) {
-  const { customizeReducer, customizeMiddleware, theme } = opts || {};
-
-  const app = relm({
-    component,
-    plugins: [
+  const app = relm(component, {
+    plugins: (customizePlugins || identity)([
       new StatePlugin(),
-      new GraphQLPlugin(createQuery),
       new TasksPlugin(),
       new ReduxPlugin({ customizeReducer, customizeMiddleware }),
       new CSJSPlugin({ theme }),
       new InfernoPlugin(),
-    ]
+    ])
   });
-
-  // Create the view
-  function redraw () {
-    InfernoDOM.render(app.view(), el);
-  }
-
-  app.subscribe(requestAnimationFrame.bind(null, redraw));
 
   if (app.actions.initializeState) {
     app.actions.initializeState();
   }
 
-  // First render
-  redraw();
+  function redraw () {
+    InfernoDOM.render(app.view(), el);
+  }
+
+  if (el) {
+    app.subscribe(requestAnimationFrame.bind(null, redraw));
+    redraw();
+  }
 
   return app;
-}
-
-InfernoDOM.relmApp = relmApp;
-
-export default InfernoDOM;
+};

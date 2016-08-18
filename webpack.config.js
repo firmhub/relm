@@ -5,13 +5,13 @@ const webpack = require('webpack');
 
 if (process.env.NODE_ENV === 'production') {
   module.exports = [
-    // production(uiComponentsEntry),
-    // production(uiIndexEntry),
-    // production(packagesEntry),
-    production(examplesEntry),
+    production(distEntries),
+    production(packageEntries),
   ];
 } else {
-  module.exports = development(examplesEntry);
+  module.exports = [
+    development(examplesEntries)
+  ];
 
   module.exports.devServer = {
     contentBase: 'examples/',
@@ -38,6 +38,7 @@ function common (tx) {
         loader: 'json'
       }]
     },
+    debug: true,
     externals: [
       /^babel.+$/,
     ]
@@ -46,24 +47,21 @@ function common (tx) {
 
 function development (tx) {
   return tx(common(function devTx (config) {
-    config.devtool = '#eval';
-
+    config.devtool = 'eval-source-map';
     return config;
   }));
 }
 
 function production (tx) {
   return tx(common(function productionTx (config) {
+    config.devtool = 'source-map';
     config.plugins = [
       new webpack.optimize.DedupePlugin(),
       new webpack.optimize.OccurrenceOrderPlugin(),
-      new webpack.DefinePlugin({
-        'process.env': {
-          NODE_ENV: JSON.stringify('production')
-        }
-      }),
+      new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } }),
       new webpack.optimize.UglifyJsPlugin({
-        compress: { warnings: false, screw_ie8: true }
+        compress: { warnings: false, screw_ie8: true },
+        sourceMap: true,
       })
     ];
 
@@ -71,70 +69,64 @@ function production (tx) {
   }));
 }
 
-function uiComponentsEntry (config) {
-  config.name = 'ui:components';
+function distEntries (config) {
+  config.name = 'dist';
 
-  config.entry = _.reduce(fs.readdirSync('./src/ui'), (object, filename) => {
-  // Skip index - it is compiled seprately below
-    if (filename === 'index.js') return object;
-
-  // Normal components
-    const name = filename.replace('.js', '');
-    object[name] = `./src/ui/${filename}`;
-    return object;
-  }, {});
+  config.entry = Object.assign.apply(Object, [
+    {
+      relm: './src/relm.js',
+      list: './src/list.js',
+      router: './src/router.js',
+    },
+    readDir('./src/plugins', '.js', function readPlugins (entries, filename) {
+      entries[filename] = `./src/plugins/${filename}.js`;
+      return entries;
+    }),
+    readDir('./src/ui', '.js', function readPlugins (entries, filename) {
+      entries[`ui/${filename}`] = `./src/ui/${filename}.js`;
+      return entries;
+    }),
+  ]);
 
   config.output = {
     filename: '[name].js',
-    path: path.resolve('./ui'),
+    path: path.resolve('./dist'),
     sourceMapFilename: '[name].map',
-    libraryTarget: 'commonjs2',
+    library: '[name]',
+    libraryTarget: 'umd',
   };
+
+  config.plugins.push(
+    new webpack.optimize.CommonsChunkPlugin({
+      name: 'relm',
+      minChunks (module, count) {
+        return module.resource && module.resource.indexOf('lodash') !== -1 && count > 1;
+      }
+    })
+  );
 
   return config;
 }
 
-function uiIndexEntry (config) {
-  // index coannot be complied with the rest of the components due to internal dependencies
-  config.name = 'ui:index';
-
-  config.entry = {
-    index: './src/ui/index.js'
-  };
-
-  // Everythink is external for the index; just do a simple transpilation
-  config.externals.push((ctx, req, cb) => cb(null, `commonjs ${req}`));
-
-  config.output = {
-    filename: '[name].js',
-    path: path.resolve('./ui'),
-    sourceMapFilename: '[name].map',
-    libraryTarget: 'commonjs2',
-  };
-
-  return config;
-}
-
-function packagesEntry (config) {
+function packageEntries (config) {
   config.name = 'packages';
 
   config.entry = {
     inferno: './src/packages/inferno.js',
-    morphdom: './src/packages/morphdom.js',
-    react: './src/packages/react.js',
   };
 
   config.output = {
-    filename: '[name].js',
-    path: __dirname,
-    library: '[name]',
+    filename: 'relm-[name].js',
+    path: path.resolve('./dist'),
+    sourceMapFilename: 'relm-[name].map',
+    library: 'relm',
     libraryTarget: 'umd',
   };
 
   return config;
 }
 
-function examplesEntry (config) {
+function examplesEntries (config) {
   config.name = 'example';
 
   config.entry = {
@@ -152,4 +144,15 @@ function examplesEntry (config) {
   };
 
   return config;
+}
+
+/*
+ * Helpers
+ */
+
+function readDir (dir, ext, f) {
+  return _.reduce(fs.readdirSync(dir), function checkExtensionFirst (entries, filename) {
+    if (filename.indexOf(ext) === -1) return entries;
+    return f(entries, filename.replace(ext, ''));
+  }, {});
 }

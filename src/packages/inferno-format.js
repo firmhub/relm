@@ -118,7 +118,7 @@ export function diff (a, b) {
   let isChanged = false;
 
   const result = _.reduce(diffMethod(a, b), (str, change) => {
-    if (change.added || change.removed) isChanged = true;
+    if (change.value.trim() && (change.added || change.removed)) isChanged = true;
     return (str += formatMethod(change));
   }, '');
 

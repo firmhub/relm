@@ -1,0 +1,24 @@
+{
+  "name": "relm",
+  "version": "1.1.0",
+  "description": "Composable components",
+  "main": "relm.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/motorcode/relm.git"
+  },
+  "keywords": [
+    "frontend",
+    "component",
+    "framework",
+    "inferno",
+    "redux",
+    "elm",
+    "architecture"
+  ],
+  "author": "Amandeep Singh Othi <a-s-o@users.noreply.github.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/a-s-o/relm/issues"
+  }
+}

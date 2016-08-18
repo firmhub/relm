@@ -1,9 +1,6 @@
 import _ from 'lodash';
 import { deepCheckComponent } from './types';
 
-import router from './router';
-import list from './list';
-
 function parser (plugins = []) {
   return function parse (component, source, path, root) {
     // Parse child components
@@ -23,18 +20,13 @@ function parser (plugins = []) {
   };
 }
 
-export default function relm ({ component, plugins = [], path = [] }) {
+export default function relm (component, { plugins = [], path = [] }) {
   deepCheckComponent(component);
   const rootComponent = {};
   const parse = parser(plugins);
 
   return parse(rootComponent, component, path, rootComponent);
 }
-
-export {
-  list,
-  router,
-};
 
 export const internals = {
   parser,
