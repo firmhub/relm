@@ -139,18 +139,20 @@ function parseTag (selector) {
   return { tag, attrs, classes };
 }
 
+const gatherClasses = _.flow(
+  xs => _.flatten(xs),
+  xs => _.map(xs, function filterKeys (it) {
+    // This step is only required for objects
+    if (!_.isPlainObject(it)) return it;
+    // Only take keys which are truthy
+    return _.keys(_.pickBy(it, Boolean));
+  }),
+  xs => _.flatten(xs),
+  xs => _.filter(xs, Boolean)
+);
+
 function joinClasses (withStyle, ...args) {
-  return _.chain(args)
-    .flatten()
-    .map(function filterKeys (it) {
-      if (!_.isPlainObject(it)) return it;
-      return _.chain(it).pickBy(Boolean).keys().value();
-    })
-    .flatten()
-    .filter(Boolean)
-    .reduce(withStyle, '')
-    .trim()
-    .value();
+  return _.trim(_.reduce(gatherClasses(args), withStyle, ''));
 }
 
 export const internals = {
