@@ -3,7 +3,7 @@ import _ from 'lodash';
 import fs from 'fs';
 import { renderToString } from 'inferno-server';
 
-import relm from '../';
+import relm from '../relm';
 import StatePlugin from '../plugins/StatePlugin';
 import ReduxPlugin from '../plugins/ReduxPlugin';
 import StylesPlugin from '../plugins/StylesPlugin';

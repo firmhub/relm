@@ -5,12 +5,16 @@ const webpack = require('webpack');
 
 if (process.env.NODE_ENV === 'production') {
   module.exports = [
-    production(distEntries),
-    production(packageEntries),
+    development(presetEntry),
+    production(distEntry),
+    production(minEntry),
+    production(libEntry),
   ];
 } else {
   module.exports = [
-    development(examplesEntries)
+    development(distEntry),
+    // development(libEntry),
+    // development(examplesEntry),
   ];
 
   module.exports.devServer = {
@@ -54,29 +58,59 @@ function development (tx) {
 
 function production (tx) {
   return tx(common(function productionTx (config) {
-    config.devtool = 'source-map';
     config.plugins = [
       new webpack.optimize.DedupePlugin(),
       new webpack.optimize.OccurrenceOrderPlugin(),
-      new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } }),
-      new webpack.optimize.UglifyJsPlugin({
-        compress: { warnings: false, screw_ie8: true },
-        sourceMap: true,
-      })
+      new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } })
     ];
 
     return config;
   }));
 }
 
-function distEntries (config) {
-  config.name = 'dist';
+function distEntry (unminPackage) {
+  unminPackage.name = 'dist';
 
-  config.entry = Object.assign.apply(Object, [
+  unminPackage.entry = {
+    inferno: './src/packages/inferno.js',
+  };
+
+  unminPackage.output = {
+    filename: 'relm-[name].js',
+    path: path.resolve('./dist'),
+    library: 'relm',
+    libraryTarget: 'umd',
+  };
+
+  return unminPackage;
+}
+
+function minEntry (minPackage) {
+  distEntry(minPackage);
+
+  minPackage.name = 'min';
+  minPackage.devtool = 'source-map';
+
+  minPackage.plugins.push(
+    new webpack.optimize.UglifyJsPlugin({
+      compress: { warnings: false, screw_ie8: true },
+      sourceMap: true,
+    })
+  );
+
+  minPackage.output.filename = 'relm-[name].min.js';
+  minPackage.output.sourceMapFilename = 'relm-[name].min.map';
+
+  return minPackage;
+}
+
+function libEntry (lib) {
+  lib.name = 'lib';
+  // config.devtool = 'source-map';
+
+  lib.entry = Object.assign.apply(Object, [
     {
-      relm: './src/relm.js',
-      list: './src/list.js',
-      router: './src/router.js',
+      core: './src/relm.js',
     },
     readDir('./src/plugins', '.js', function readPlugins (entries, filename) {
       entries[filename] = `./src/plugins/${filename}.js`;
@@ -88,45 +122,41 @@ function distEntries (config) {
     }),
   ]);
 
-  config.output = {
+  lib.externals = [
+    /lodash/,
+  ];
+
+  lib.output = {
     filename: '[name].js',
-    path: path.resolve('./dist'),
-    sourceMapFilename: '[name].map',
+    path: path.resolve('./lib'),
+    // sourceMapFilename: '[name].map',
     library: '[name]',
     libraryTarget: 'umd',
   };
 
-  config.plugins.push(
-    new webpack.optimize.CommonsChunkPlugin({
-      name: 'relm',
-      minChunks (module, count) {
-        return module.resource && module.resource.indexOf('lodash') !== -1 && count > 1;
-      }
-    })
-  );
-
-  return config;
+  return lib;
 }
 
-function packageEntries (config) {
-  config.name = 'packages';
-
+function presetEntry (config) {
+  delete config.devtool;
+  config.target = 'node';
   config.entry = {
-    inferno: './src/packages/inferno.js',
+    preset: './src/preset.js',
   };
-
+  config.externals = [
+    // Every non-relative module is external
+    // abc -> require("abc")
+    // /^[a-z\-0-9]+$/,
+  ];
   config.output = {
-    filename: 'relm-[name].js',
-    path: path.resolve('./dist'),
-    sourceMapFilename: 'relm-[name].map',
-    library: 'relm',
-    libraryTarget: 'umd',
+    filename: '[name].js',
+    path: path.resolve('./lib'),
+    libraryTarget: 'commonjs2',
   };
-
   return config;
 }
 
-function examplesEntries (config) {
+function examplesEntry (config) {
   config.name = 'example';
 
   config.entry = {
