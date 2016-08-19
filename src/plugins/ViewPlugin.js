@@ -48,10 +48,6 @@ export function extendHyperscript (createElement, config = {}) {
   const components = config.components || {};
   const styles = config.styles || {};
 
-  function joinWithStyle (str, className) {
-    return `${str} ${_.has(styles, className) ? styles[className] : className}`;
-  }
-
   return function hyperscript () {
     let selector = arguments[0];
     const attrs = {};
@@ -101,7 +97,7 @@ export function extendHyperscript (createElement, config = {}) {
     }
 
     // Join class names if not already joined
-    attrs.className = joinClasses(joinWithStyle, attrs.className);
+    attrs.className = joinClasses(styles, attrs.className);
 
     // Sub components
     if (selector instanceof Function) {
@@ -139,23 +135,32 @@ function parseTag (selector) {
   return { tag, attrs, classes };
 }
 
-const gatherClasses = _.flow(
-  xs => _.flatten(xs),
-  xs => _.map(xs, function filterKeys (it) {
-    // This step is only required for objects
-    if (!_.isPlainObject(it)) return it;
-    // Only take keys which are truthy
-    return _.keys(_.pickBy(it, Boolean));
-  }),
-  xs => _.flatten(xs),
-  xs => _.filter(xs, Boolean)
-);
+function truthyKeys (it) {
+  return Object.keys(it).filter(x => it[x]);
+}
 
-function joinClasses (withStyle, ...args) {
-  return _.trim(_.reduce(gatherClasses(args), withStyle, ''));
+function classesToArray (source) {
+  if (!source) return [];
+
+  if (_.isArray(source)) {
+    return _.reduce(source, function cat (agg, it) {
+      agg.push.apply(agg, classesToArray(it));
+      return agg;
+    }, []);
+  }
+
+  if (typeof source === 'string') return source.split(' ');
+  if (typeof source === 'object') return truthyKeys(source);
+
+  return [];
+}
+
+function joinClasses (styles, source) {
+  return classesToArray(source).filter(Boolean).map(x => styles[x] || x).join(' ').trim();
 }
 
 export const internals = {
   parseTag,
   extendHyperscript,
+  joinClasses,
 };

@@ -7,12 +7,14 @@ if (process.env.NODE_ENV === 'production') {
   module.exports = [
     development(presetEntry),
     production(distEntry),
-    production(minEntries),
+    production(minEntry),
     production(libEntry),
   ];
 } else {
   module.exports = [
-    development(examplesEntries)
+    development(distEntry),
+    // development(libEntry),
+    // development(examplesEntry),
   ];
 
   module.exports.devServer = {
@@ -83,7 +85,7 @@ function distEntry (unminPackage) {
   return unminPackage;
 }
 
-function minEntries (minPackage) {
+function minEntry (minPackage) {
   distEntry(minPackage);
 
   minPackage.name = 'min';
@@ -154,7 +156,7 @@ function presetEntry (config) {
   return config;
 }
 
-function examplesEntries (config) {
+function examplesEntry (config) {
   config.name = 'example';
 
   config.entry = {
