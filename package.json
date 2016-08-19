@@ -11,7 +11,8 @@
     "test": "env BABEL_ENV=testing ava",
     "dev": "./parallel.sh 'watch' 'test -- -w'",
     "watch": "webpack-dev-server",
-    "git-add": "git add -f ./lib/*.js ./lib/ui/*.js ./dist/*.js ./dist/*.map",
+    "unstage": "git update-index --assume-unchanged ./lib/*.js ./lib/ui/*.js ./dist/*.js ./dist/*.map",
+    "stage": "git update-index --no-assume-unchanged ./lib/*.js ./lib/ui/*.js ./dist/*.js ./dist/*.map",
     "build": "env NODE_ENV=production webpack --progress"
   },
   "keywords": [

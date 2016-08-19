@@ -4,8 +4,5 @@ npm-debug.log
 
 *.dist.js
 *.bundle.js
-/dist/**/*.js
-/dist/**/*.map
-/lib/**/*.js
 
 /examples/quiz/quiz.html
