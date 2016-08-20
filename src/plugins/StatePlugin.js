@@ -27,7 +27,9 @@ export default class StatePlugin {
       if (isChildAction) {
         // No override; let the child component handle it
         if (!hasLocalHandler) {
-          return components[head].update(makeImmutable(state[head]), _.defaults({ type: tail }, action));
+          const childAction = _.defaults({ type: tail }, action);
+          const nextChildState = components[head].update(state[head], childAction);
+          return state.set(head, nextChildState);
         }
 
         // Action type is overriden, so use the override
