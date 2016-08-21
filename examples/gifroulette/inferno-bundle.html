@@ -129,25 +129,37 @@
 
   /* Higher order components */
 
+  function mapValues (obj, fn) {
+    return Object.keys(obj).reduce((out, k) => {
+      out[k] = fn(obj[k], k, obj);
+      return out;
+    }, {});
+  }
+
   function list (Component) {
     function List (h, { state, props, children }) {
-      const wrapped = h.Component;
       const key = props.key;
-
-      return wrapped.render({
-        state: state.list[props.key],
+      return h.Component.render({
+        state: state.list[key],
         props,
         children,
-        components: wrapped.components,
-        styles: wrapped.styles,
-        actions: wrapped.actions,
+        components: h.Component.components,
+        styles: h.Component.styles,
+        actions: mapValues(h.Component.actions, (action) => (...args) => action(key, ...args)),
       });
     }
+
+    List.displayName = `list<${Component.displayName || Component.name}>`;
 
     List.components = { Component };
 
     List.actions = {
-      initializeState: state => state.set('list', [])
+      initializeState (state) {
+        return state.set('list', []);
+      },
+      Component (state, next, key, ...args) {
+        return state.set(['list', key], next(state.list[key], ...args));
+      }
     };
 
     return List;
@@ -157,17 +169,25 @@
 
   window.app = relm(App, {
     el: document.querySelector('#app'),
-    customizeReducer (reducer) {
-      return function logBefore (state, action) {
-        console.log(action);
-        return reducer(state, action);
-      };
+    customizeStore (reducer, initialState, middlewares) {
+      function logBefore (state, action) {
+        if (!action) console.trace(action);
+        const actionType = [].concat(action && action.type).join('.');
+        console.group(actionType);
+        console.log('action', action);
+        console.log('before', state);
+        const update = reducer(state, action);
+        console.log('after', update);
+        console.groupEnd(actionType);
+        return update;
+      }
+      return this.createStore(logBefore, initialState, this.applyMiddleware.apply(this, middlewares));
     }
   });
 
-  app.subscribe(function () {
-    console.log('state', app.getState());
-  });
+  // app.subscribe(function () {
+  //   console.log('state', app.getState());
+  // });
 
 </script>
 </body>

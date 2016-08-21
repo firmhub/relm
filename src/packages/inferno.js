@@ -12,8 +12,7 @@ module.exports = function startApp (component, opts) {
     el,
     theme,
     customizePlugins,
-    customizeReducer,
-    customizeMiddleware,
+    customizeStore,
   } = opts || {};
 
   const identity = x => x;
@@ -22,7 +21,7 @@ module.exports = function startApp (component, opts) {
     plugins: (customizePlugins || identity)([
       new StatePlugin(),
       new TasksPlugin(),
-      new ReduxPlugin({ customizeReducer, customizeMiddleware }),
+      new ReduxPlugin({ customizeStore }),
       new CSJSPlugin({ theme }),
       new InfernoPlugin(),
     ])
