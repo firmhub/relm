@@ -7,7 +7,7 @@ import ReduxPlugin from '../plugins/ReduxPlugin';
 import CSJSPlugin from '../plugins/CSJSPlugin';
 import InfernoPlugin from '../plugins/InfernoPlugin';
 
-module.exports = function startApp (component, opts) {
+function inferno (component, opts) {
   const {
     el,
     theme,
@@ -41,4 +41,8 @@ module.exports = function startApp (component, opts) {
   }
 
   return app;
-};
+}
+
+Object.assign(relm, { inferno });
+
+export default relm;

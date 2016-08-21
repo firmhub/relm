@@ -3,9 +3,9 @@
 <head></head>
 <body>
 <div id="app"></div>
-<!--<script src="../dist/relm-inferno.js"></script>-->
+<script src="../../dist/relm-inferno.min.js"></script>
 <!--<script src="relm-inferno.js"></script>-->
-<script src="http://localhost:8080/relm-inferno.js"></script>
+<!--<script src="http://localhost:8080/relm-inferno.js"></script>-->
 <script>
 
   function App (h, { state }) {
@@ -137,6 +137,8 @@
   }
 
   function list (Component) {
+    const cache = new WeakMap();
+
     function List (h, { state, props, children }) {
       const key = props.key;
       return h.Component.render({
@@ -162,12 +164,20 @@
       }
     };
 
+    List.tasks = {
+      Component (task, key, ...args) {
+        task.actions = mapValues(task.actions, (action) => (...args) => action(key, ...args));
+        task.getState = () => task.getState().list[key];
+        return task.next(task, ...args);
+      }
+    };
+
     return List;
   }
 
   /* bootstrap */
 
-  window.app = relm(App, {
+  window.app = relm.inferno(App, {
     el: document.querySelector('#app'),
     customizeStore (reducer, initialState, middlewares) {
       function logBefore (state, action) {

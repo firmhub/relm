@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import { parse } from 'graphql-tag/parser';
+import parse from 'graphql-tag/parser';
 
 export default class GraphQLPlugin {
   constructor (createQuery) {
