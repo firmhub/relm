@@ -23,6 +23,11 @@
   },
   "homepage": "https://github.com/hyperfinite/relm#readme",
   "dependencies": {
-    "lodash": "^4.13.1"
+    "lodash": "4.13.x",
+    "postcss": "5.1.x",
+    "postcss-safe-parser": "1.0.x",
+    "esutils": "2.0.x",
+    "babel-runtime": "6.3.x",
+    "babel-types": "6.9.x"
   }
 }

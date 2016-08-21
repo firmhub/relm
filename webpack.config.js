@@ -5,10 +5,10 @@ const webpack = require('webpack');
 
 if (process.env.NODE_ENV === 'production') {
   module.exports = [
-    development(presetEntry),
-    production(distEntry),
-    production(minEntry),
-    production(libEntry),
+    production(presetEntry),
+    // production(distEntry),
+    // production(minEntry),
+    // production(libEntry),
   ];
 } else {
   module.exports = [
@@ -34,8 +34,6 @@ function common (tx) {
         loader: 'babel',
         exclude: [
           /(node_modules)/,                         // Skip node modules
-          path.resolve(__dirname, 'inferno.js'),    // Don't process compiled versions
-          path.resolve(__dirname, 'main.js'),       // (for instance when required from the examples)
         ]
       }, {
         test: /\.json$/,
@@ -52,6 +50,7 @@ function common (tx) {
 function development (tx) {
   return tx(common(function devTx (config) {
     config.devtool = 'eval-source-map';
+    config.plugins = [];
     return config;
   }));
 }
@@ -61,7 +60,10 @@ function production (tx) {
     config.plugins = [
       new webpack.optimize.DedupePlugin(),
       new webpack.optimize.OccurrenceOrderPlugin(),
-      new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } })
+      // new webpack.DefinePlugin({ 'process.env': { NODE_ENV: JSON.stringify('production') } }),
+      new webpack.EnvironmentPlugin([
+        'NODE_ENV'
+      ])
     ];
 
     return config;
@@ -138,6 +140,11 @@ function libEntry (lib) {
 }
 
 function presetEntry (config) {
+  const babel = config.module.loaders[0];
+  babel.query = {
+    presets: ['es2015']
+  };
+
   delete config.devtool;
   config.target = 'node';
   config.entry = {
@@ -153,6 +160,9 @@ function presetEntry (config) {
     path: path.resolve('./lib'),
     libraryTarget: 'commonjs2',
   };
+  config.plugins.push(
+    new webpack.optimize.UglifyJsPlugin({ compress: { warnings: false } })
+  );
   return config;
 }
 

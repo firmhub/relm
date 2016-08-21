@@ -7,13 +7,12 @@ import ReduxPlugin from '../plugins/ReduxPlugin';
 import CSJSPlugin from '../plugins/CSJSPlugin';
 import InfernoPlugin from '../plugins/InfernoPlugin';
 
-module.exports = function startApp (component, opts) {
+function inferno (component, opts) {
   const {
     el,
     theme,
     customizePlugins,
-    customizeReducer,
-    customizeMiddleware,
+    customizeStore,
   } = opts || {};
 
   const identity = x => x;
@@ -22,7 +21,7 @@ module.exports = function startApp (component, opts) {
     plugins: (customizePlugins || identity)([
       new StatePlugin(),
       new TasksPlugin(),
-      new ReduxPlugin({ customizeReducer, customizeMiddleware }),
+      new ReduxPlugin({ customizeStore }),
       new CSJSPlugin({ theme }),
       new InfernoPlugin(),
     ])
@@ -42,4 +41,8 @@ module.exports = function startApp (component, opts) {
   }
 
   return app;
-};
+}
+
+Object.assign(relm, { inferno });
+
+export default relm;

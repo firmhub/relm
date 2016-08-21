@@ -2,31 +2,28 @@ import _ from 'lodash';
 import * as redux from 'redux';
 
 export default class ReduxPlugin {
-  constructor ({ customizeReducer, customizeMiddleware }) {
-    this.customizeReducer = customizeReducer || _.identity;
-    this.customizeMiddleware = customizeMiddleware || (x => redux.applyMiddleware(x));
+  constructor ({ customizeStore }) {
+    this.customizeStore = customizeStore || function createReduxStore (reducer, initialState, middlewares = []) {
+      return redux.createStore(reducer, initialState, redux.applyMiddleware(...middlewares));
+    };
   }
 
   apply (component, source, root) {
     if (component === root) {
       const { init, update, middleware } = component;
-      const reducer = this.customizeReducer((state = init(), action = {}) => update(state, action));
-      const initialState = _.merge(reducer() || {}, this.initialState || {});
 
-      const store = redux.createStore(reducer, initialState, this.customizeMiddleware(middleware));
+      const store = this.customizeStore.call(redux, update, init(), [].concat(middleware));
 
       component.dispatch = store.dispatch;
       component.getState = store.getState;
       component.subscribe = store.subscribe;
 
       Object.defineProperty(component, 'state', {
-        get: () => store.getState() || component.init()
+        get: () => store.getState() || init()
       });
     } else {
       Object.defineProperty(component, 'state', {
-        get () {
-          return _.get(root.getState(), component.path) || component.init();
-        }
+        get: () => _.get(root.getState(), component.path) || component.init()
       });
     }
   }

@@ -3,9 +3,9 @@
 <head></head>
 <body>
 <div id="app"></div>
-<!--<script src="../dist/relm-inferno.js"></script>-->
+<script src="../../dist/relm-inferno.min.js"></script>
 <!--<script src="relm-inferno.js"></script>-->
-<script src="http://localhost:8080/relm-inferno.js"></script>
+<!--<script src="http://localhost:8080/relm-inferno.js"></script>-->
 <script>
 
   function App (h, { state }) {
@@ -129,25 +129,47 @@
 
   /* Higher order components */
 
-  function list (Component) {
-    function List (h, { state, props, children }) {
-      const wrapped = h.Component;
-      const key = props.key;
+  function mapValues (obj, fn) {
+    return Object.keys(obj).reduce((out, k) => {
+      out[k] = fn(obj[k], k, obj);
+      return out;
+    }, {});
+  }
 
-      return wrapped.render({
-        state: state.list[props.key],
+  function list (Component) {
+    const cache = new WeakMap();
+
+    function List (h, { state, props, children }) {
+      const key = props.key;
+      return h.Component.render({
+        state: state.list[key],
         props,
         children,
-        components: wrapped.components,
-        styles: wrapped.styles,
-        actions: wrapped.actions,
+        components: h.Component.components,
+        styles: h.Component.styles,
+        actions: mapValues(h.Component.actions, (action) => (...args) => action(key, ...args)),
       });
     }
+
+    List.displayName = `list<${Component.displayName || Component.name}>`;
 
     List.components = { Component };
 
     List.actions = {
-      initializeState: state => state.set('list', [])
+      initializeState (state) {
+        return state.set('list', []);
+      },
+      Component (state, next, key, ...args) {
+        return state.set(['list', key], next(state.list[key], ...args));
+      }
+    };
+
+    List.tasks = {
+      Component (task, key, ...args) {
+        task.actions = mapValues(task.actions, (action) => (...args) => action(key, ...args));
+        task.getState = () => task.getState().list[key];
+        return task.next(task, ...args);
+      }
     };
 
     return List;
@@ -155,19 +177,27 @@
 
   /* bootstrap */
 
-  window.app = relm(App, {
+  window.app = relm.inferno(App, {
     el: document.querySelector('#app'),
-    customizeReducer (reducer) {
-      return function logBefore (state, action) {
-        console.log(action);
-        return reducer(state, action);
-      };
+    customizeStore (reducer, initialState, middlewares) {
+      function logBefore (state, action) {
+        if (!action) console.trace(action);
+        const actionType = [].concat(action && action.type).join('.');
+        console.group(actionType);
+        console.log('action', action);
+        console.log('before', state);
+        const update = reducer(state, action);
+        console.log('after', update);
+        console.groupEnd(actionType);
+        return update;
+      }
+      return this.createStore(logBefore, initialState, this.applyMiddleware.apply(this, middlewares));
     }
   });
 
-  app.subscribe(function () {
-    console.log('state', app.getState());
-  });
+  // app.subscribe(function () {
+  //   console.log('state', app.getState());
+  // });
 
 </script>
 </body>

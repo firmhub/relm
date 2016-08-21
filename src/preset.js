@@ -1,12 +1,12 @@
 /* eslint-disable */
-const postcss = require('postcss');
-const safe = require('postcss-safe-parser');
-const autoprefixer = require('autoprefixer');
-const csso = require('postcss-csso');
-const jsxSyntax = require('babel-plugin-syntax-jsx');
-const jsxTransform = require('babel-plugin-transform-react-jsx');
+import postcss from 'postcss';
+import safe from 'postcss-safe-parser';
+import autoprefixer from 'autoprefixer';
+import csso from 'postcss-csso';
+import jsxSyntax from 'babel-plugin-syntax-jsx';
+import jsxTransform from 'babel-plugin-transform-react-jsx';
 
-module.exports = {
+export default {
   presets: [],
   plugins: [
     [jsxSyntax],

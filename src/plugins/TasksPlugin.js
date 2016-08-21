@@ -29,7 +29,7 @@ export default class TasksPlugin {
           queries: targetComponent.queries,
         };
 
-        handleAsyncAction(task, source, action.type, action.args);
+        return handleAsyncAction(task, source, action.type, action.args);
       };
     }
   }

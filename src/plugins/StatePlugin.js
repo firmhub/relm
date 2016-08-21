@@ -6,13 +6,21 @@ export default class StatePlugin {
     const components = component.components;
 
     const handlers = _.reduce(source.actions, function convertChildActions (obj, action, name) {
-      if (_.isFunction(action)) obj[name] = action;
-      if (components[name]) return createOverrideHandler(action);
+      if (!_.isFunction(action)) return obj;
+
+      // Child action override
+      if (components[name]) {
+        obj[name] = createOverrideHandler(action);
+        return obj;
+      }
+
+      obj[name] = action;
       return obj;
     }, {});
 
     component.init = unwrapAfter(function init () {
-      const state = _.mapValues(component.components, invokeInit);
+      console.log(component.displayName, handlers);
+      const state = _.mapValues(component.components, child => child.init());
       if (!handlers.initializeState) return state;
       return handlers.initializeState(makeImmutable(state));
     });
@@ -27,13 +35,16 @@ export default class StatePlugin {
       if (isChildAction) {
         // No override; let the child component handle it
         if (!hasLocalHandler) {
-          return components[head].update(makeImmutable(state[head]), _.defaults({ type: tail }, action));
+          const childAction = _.defaults({ type: tail }, action);
+          const nextChildState = components[head].update(makeImmutable(state[head]), childAction);
+          return state.set(head, nextChildState);
         }
 
         // Action type is overriden, so use the override
         const child = components[head];
-        const next = (childState, ...args) => child.update(makeImmutable(childState), ...args);
-        return handlers[head](state, next, ...action.args);
+        const next = (childState, ...args) => child.update(makeImmutable(childState), { type: tail, args });
+        next.path = tail;
+        return handlers[head](makeImmutable(state), next, ...action.args);
       }
 
       if (hasLocalHandler) {
@@ -61,22 +72,20 @@ export default class StatePlugin {
   }
 }
 
-function createOverrideHandler (obj) {
-  const strategy = _.mapValues(obj, (o) => (_.isFunction(o) ? o : createOverrideHandler(o)));
+function createOverrideHandler (override) {
+  if (_.isFunction(override)) return override;
+
+  const strategy = _.mapValues(override, (o) => (_.isFunction(o) ? o : createOverrideHandler(o)));
 
   return function reducer (state, next, action) {
-    const override = _.get(strategy, action.type[0]);
-    if (override) return override(state, next, action);
+    const fn = _.get(strategy, action.type[0]);
+    if (fn) return fn(state, next, action);
     return next(state, action);
   };
 }
 
-function invokeInit (it) {
-  return it.init();
-}
-
 function unwrapAfter (fn) {
-  return function unwrap (state, ...args) {
-    return unwrapImmutable(fn(makeImmutable(state), ...args));
+  return function unwrap () {
+    return unwrapImmutable(fn.apply(this, arguments));
   };
 }

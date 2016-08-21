@@ -1,5 +1,8 @@
 {
-  "presets": ["es2015", "./src/preset"],
+  "presets": [
+    "es2015-rollup",
+    "./lib/preset"
+  ],
   "env": {
     "production": {
       "plugins": ["lodash"]
