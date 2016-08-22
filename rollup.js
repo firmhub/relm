@@ -140,8 +140,8 @@ function buildPackages () {
 }
 
 Promise.resolve()
-  // .then(buildPreset)
-  // .then(buildLibs)
+  .then(buildPreset)
+  .then(buildLibs)
   .then(buildPackages)
   .then(() => console.log(`Done!`))
   .catch((err) => console.error(err));

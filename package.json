@@ -1,6 +1,5 @@
 {
   "name": "relm",
-  "version": "1.2.0",
   "description": "Composable components",
   "main": "main.js",
   "repository": {
