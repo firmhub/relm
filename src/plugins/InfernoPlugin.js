@@ -2,6 +2,10 @@ import _ from 'lodash';
 import InfernoCreateElement from 'inferno-create-element';
 import ViewPlugin from './ViewPlugin';
 
+export default function InfernoPlugin () {
+  return new ViewPlugin(createElement);
+}
+
 function transformAttributes (source, attrs, k) {
   const v = source[k];
 
@@ -20,8 +24,4 @@ function transformAttributes (source, attrs, k) {
 export function createElement (tag, props, ...children) {
   const attrs = _.reduce(_.keys(props), _.partial(transformAttributes, props), {});
   return InfernoCreateElement(tag, attrs, ...children);
-}
-
-export default function InfernoPlugin () {
-  return new ViewPlugin(createElement);
 }

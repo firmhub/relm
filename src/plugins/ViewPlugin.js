@@ -11,6 +11,7 @@ export default class ViewPlugin {
         props,
         children,
         actions: view.actions,
+        tasks: view.tasks,
         state: view.getState(),
         styles: view.styles,
         components: view.components,
@@ -24,17 +25,18 @@ export default class ViewPlugin {
     const h = extendHyperscript(this.createElement, { components, styles });
     Object.defineProperty(h, 'createElement', { value: this.createElement });
 
-    // Optimization - assign components to h and components object in one pass
+    // Assign components to h and components object in one pass
     _.each(component.components, function assignChildComponents (child, key) {
       components[key] = h[key] = child.view;
       child.view.displayName = key;
     });
 
-    // Optimization - closure elimination - assign necessary props to the view fn
+    // Closure elimination - assign necessary props to the view fn
     _.assign(component.view, {
       render: source.bind(null, h),
       displayName: source.displayName || source.name,
       actions: component.actions,
+      tasks: component.tasks,
       styles,
       components,
       getState: !component.path.length

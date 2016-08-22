@@ -1,7 +1,9 @@
 import _ from 'lodash';
-import t7 from './TemplatePlugin-t7'; global.t7 = t7;
+import t7 from './TemplatePlugin-t7';
 import InfernoCreateElement from 'inferno-create-element';
 import { extendHyperscript } from './ViewPlugin';
+
+global.t7 = t7;
 
 function transformAttributes (attrs, k) {
   const v = this[k];

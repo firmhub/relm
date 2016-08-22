@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { deepCheckComponent } from './types';
-import { router } from './router';
-import { list } from './list';
+import router from './router';
+import list from './list';
 
 function parser (plugins = []) {
   return function parse (component, source, path, root) {
