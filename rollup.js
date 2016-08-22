@@ -72,7 +72,7 @@ function compileForDistribution (srcFilename) {
   const input = {
     entry: path.join(__dirname, 'src', srcFilename),
     plugins: rollupPlugins().concat([
-      babelPlugin({ plugins: 'lodash' }),
+      babelPlugin({ plugins: ['lodash'] }),
       replace({ 'process.env': JSON.stringify({ NODE_ENV: 'production' }) }),
       uglify()
     ])

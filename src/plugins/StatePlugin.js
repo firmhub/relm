@@ -19,7 +19,6 @@ export default class StatePlugin {
     }, {});
 
     component.init = unwrapAfter(function init () {
-      console.log(component.displayName, handlers);
       const state = _.mapValues(component.components, child => child.init());
       if (!handlers.initializeState) return state;
       return handlers.initializeState(makeImmutable(state));
@@ -58,9 +57,6 @@ export default class StatePlugin {
       const type = component.path.concat(actionName);
 
       const fn = (...args) => root.dispatch({ type, args });
-      // const fn = _.startsWith(actionName, '$')
-      //   ? (...args) => root.dispatch({ type, args, component })
-      //   : (...args) => root.dispatch({ type, args });
 
       Object.defineProperties(fn, {
         name: { value: actionName },
