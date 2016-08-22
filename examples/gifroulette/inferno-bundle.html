@@ -7,29 +7,43 @@
 <!--<script src="relm-inferno.js"></script>-->
 <!--<script src="http://localhost:8080/relm-inferno.js"></script>-->
 <script>
+  function getRandomTopic (topicList) {
+    const validTopics = topicList.filter(x => x.topic.length > 2);
+    const randomTopic = Math.floor(Math.random()*validTopics.length);
+    return validTopics[randomTopic].topic;
+  }
 
-  function App (h, { state }) {
+  function App (h, { state, actions }) {
     return h('Flexbox[row]', [
-      h('Flexbox', { style: { flex: 1 } }, h('Sidebar')),
-      h('Flexbox', { style: { flex: 2 } }, `Hello ${state.message}`),
+      h('Flexbox.left', { style: { flex: 1 } }, h('Sidebar', { rollTheWheel: actions.rollTheWheel })),
+      h('Flexbox.right', { style: { flex: 2 } }, h('Routlette')),
     ]);
   }
 
   App.components = {
-    Sidebar,
     Flexbox,
+    Sidebar,
+    Routlette,
   };
 
   App.actions = {
-    initializeState (state) {
-      return state.set('message', 'from state');
+    rollTheWheel (state) {
+      return state.set('Routlette.topic', getRandomTopic(state.Sidebar.Topic.list));
     }
   };
 
-  function Sidebar (h, { state, actions }) {
+  App.tasks = {
+    Routlette (task, next, ...args) {
+      console.log('routing the task', args);
+      next(...args);
+    }
+  };
+
+  function Sidebar (h, { state, actions, props }) {
     return h('div.sidebar', [
+      h('button.roll', { onClick: props.rollTheWheel }, 'Roll It'),
       h('ul.topics', state.Topic.list.map((topic, key) =>
-        h('Topic', { key, onAdd: actions.addTopic, onRemove: actions.removeTopic })
+        h('Topic', { key, addTopic: actions.addTopic, removeTopic: actions.removeTopic })
       )),
       h('div.info', 'ENTER to add a topic'),
       h('div.info', 'BACKSPACE to remove'),
@@ -48,9 +62,16 @@
         { topic: 'horses' },
       ]);
     },
-    addTopic (state) {
-      // TODO: state update from here is replacing the root state; why?
-      return state.concat('Topic.list', { topic: '' });
+    addTopic (state, index) {
+      return state.splice('Topic.list', [
+        [index + 1, 0, { topic: '' }]
+      ]);
+    },
+    removeTopic (state, index) {
+      if (state.Topic.list.length <= 1) return state;
+      return state.splice('Topic.list', [
+        [index, 1]
+      ]);
     }
   };
 
@@ -61,17 +82,18 @@
       padding: 0;
     }
 
-    .addTopic {
-      display: block;
+    .roll {
       width: 100%;
-      padding: 0.2rem;
+      padding: 0.5rem;
+      margin-bottom: 1rem;
       background: transparent;
       border: none;
       transition: 0.2s;
+      background: #fefeff;
     }
 
-    .addTopic:hover {
-      background: #f2f2f2;
+    .roll:hover {
+      background: #f2f2ff;
       cursor: pointer;
     }
 
@@ -84,18 +106,45 @@
     }
   `;
 
-  function Topic (h, { state, actions }) {
+  const BACKSPACE = 8;
+  const ENTER_KEY = 13;
+
+  function Topic (h, { state, actions, props }) {
     return h('input.topic[type=text]', {
       value: state.topic || '',
-      onInput (e) {
-        actions.changeTopic(e.target.value);
+      onInput: actions.changeTopic,
+      onKeyDown (e) {
+
+        if (e.which === BACKSPACE && !e.target.value) {
+          props.removeTopic(props.key);
+
+          // Set focus on previous input
+          const prev = e.target.previousElementSibling;
+          if (prev) prev.focus();
+
+          e.preventDefault();
+          return false;
+        }
+
+        if (e.which === ENTER_KEY && state.topic) {
+          props.addTopic(props.key);
+
+          // Set focus on next input (in next event loop)
+          setTimeout(() => {
+            const next = e.target.nextElementSibling;
+            if (next) next.focus();
+          });
+
+          e.preventDefault();
+          return false;
+        }
       }
     });
   }
 
   Topic.actions = {
-    changeTopic (state, topic) {
-      return state.set('topic', topic);
+    changeTopic (state, e) {
+      return state.set('topic', e.target.value);
     }
   };
 
@@ -103,6 +152,7 @@
     .topic {
       width: 100%;
       background: #f2f2f2;
+      box-sizing: border-box;
       border-radius: 4px;
       border: 2px solid white;
       padding: 0.5rem;
@@ -112,6 +162,97 @@
       margin-top: 0.5rem;
     }
   `;
+
+  function Routlette (h, { state, props, tasks }) {
+    if (state.topic && state.topic !== state.currentTopic) {
+      tasks.loadGif(state.topic);
+      return h('div', 'Loading...');
+    }
+
+    if (!state.currentTopic) {
+      return h('div', 'Roll the wheel to load a gif');
+    }
+
+    if (tasks.loadGif.isRunning || !state.mp4) {
+      return h('div', 'Loading...');
+    }
+
+    const videoAttributes = {
+      width: state.width,
+      height: state.height,
+      autoplay: true,
+      loop: true,
+    };
+
+    return h('div', [
+      h('h1', state.currentTopic),
+      h('video', videoAttributes, [
+        h('source[type=video/mp4]', { src: state.mp4 }, []),
+        'Browser does not support video element'
+      ])
+    ]);
+  }
+
+  Routlette.actions = {
+    changeCurrentTopic (state, topic) {
+      return state.set('currentTopic', topic);
+    },
+    gifRequestSuccessful (state, topic, response) {
+      return state.merge({
+        currentTopic: topic,
+        mp4: response.image_mp4_url,
+        gif: response.image_url,
+        height: response.image_height,
+        width: response.image_width,
+      });
+    },
+    gifRequestFailure (state, err) {
+      console.error(err);
+      return state.set('error', err.message);
+    }
+  };
+
+  Routlette.tasks = {
+    loadGif (task, topic) {
+      // Cancel previous instances
+      if (task.isRunning) task.instances.each(t => t.cancel());
+
+      // Change the active topic (to avoid multiple duplicate requests)
+      task.actions.changeCurrentTopic(topic);
+
+      // Build a request
+      const url = `http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=${topic}`;
+      const runAsync = true;
+      const req = new XMLHttpRequest();
+      req.open('GET', url, runAsync);
+
+      req.onreadystatechange = function callback () {
+        const done = 4;
+        const goodResponse = 200;
+        if (req.readyState !== done) return;
+
+        // Dispatch actions based on the response
+        if (req.status === goodResponse) {
+          const json = JSON.parse(req.responseText);
+          task.actions.gifRequestSuccessful(topic, json.data);
+        } else {
+          task.actions.gifRequestFailure(req.status, req.responseText);
+        }
+
+        // Indicate that our task is done
+        // No further actions can be dispatched
+        task.done();
+      };
+
+      req.send(null);
+
+      // Tasks can return a cancel function to handle any cleanup
+      return function onCancel () {
+        req.abort();
+      };
+    }
+  };
+
 
   /* UI */
 
@@ -194,6 +335,8 @@
       return this.createStore(logBefore, initialState, this.applyMiddleware.apply(this, middlewares));
     }
   });
+
+  app.actions.rollTheWheel();
 
   // app.subscribe(function () {
   //   console.log('state', app.getState());

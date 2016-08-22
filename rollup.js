@@ -72,7 +72,7 @@ function compileForDistribution (srcFilename) {
   const input = {
     entry: path.join(__dirname, 'src', srcFilename),
     plugins: rollupPlugins().concat([
-      babelPlugin({ plugins: 'lodash' }),
+      babelPlugin({ plugins: ['lodash'] }),
       replace({ 'process.env': JSON.stringify({ NODE_ENV: 'production' }) }),
       uglify()
     ])
@@ -140,8 +140,8 @@ function buildPackages () {
 }
 
 Promise.resolve()
-  .then(buildPreset)
-  .then(buildLibs)
+  // .then(buildPreset)
+  // .then(buildLibs)
   .then(buildPackages)
   .then(() => console.log(`Done!`))
   .catch((err) => console.error(err));

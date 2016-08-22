@@ -11,6 +11,7 @@ export default class ViewPlugin {
         props,
         children,
         actions: view.actions,
+        tasks: view.tasks,
         state: view.getState(),
         styles: view.styles,
         components: view.components,
