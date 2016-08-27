@@ -4,10 +4,10 @@ Component based application architecture
 ## How is this different from redux/elm/vue/react/...
 
 * Pure functions - everything comes in as function parameters
-* Project goal is to manage entire application state - from application level to running async tasks to component level state
+* Project goal is to manage entire application state - from application level to async tasks to component level state
 * Components are organized in a tree and state
-* Low boilerplate - infact relm is only needed for bootstrapping the
-
+* Low boilerplate - infact relm is only needed for bootstrapping; components are build from simple functions using the a straightforward structure
+* Plugins for inline styles and css modules with obvious scoping
 
 ## Get started
 
@@ -19,13 +19,13 @@ Create a `html` file on your desktop and copy paste the following:
 <html>
 <body>
 <div id="app"></div>
-<script src="https://rawgit.com/hyperfinite/relm/1.3.0/dist/relm-inferno.min.js"></script>
+<script src="https://cdn.rawgit.com/hyperfinite/relm/master/dist/inferno-starter.min.js"></script>
 <script>
   function App (h) {
     return h('h1', 'Hello world!');
   }
 
-  relm.inferno(App, {
+  relm.start(App, {
     el: document.querySelector('#app')
   });
 </script>
@@ -33,6 +33,8 @@ Create a `html` file on your desktop and copy paste the following:
 ```
 
 ### From NPM with [JSX](#) support
+
+> npm install relm
 
 Add the `relm/preset` to your babel presets:
 
@@ -48,7 +50,7 @@ Add the `relm/preset` to your babel presets:
 Then start writing your app as follows:
 
 ```javascript
-import relm from 'relm/inferno-dom';
+import relm from 'relm/inferno-starter';
 
 function App (h) {
   return (

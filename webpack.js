@@ -8,8 +8,9 @@ const preset = require('./preset/webpack.config');
 if (process.env.NODE_ENV === 'production') {
   Promise.resolve()
     .then(packAndLog(preset))
+      .then(copyPresetToDist)
     .then(packAndLog(production(distEntries)))
-    .then(renameUIExports)
+      .then(renameUIExports)
     .then(packAndLog(production(packageEntry)))
     .then(packAndLog(development(testsEntry)))
     .catch(function failure (err) {
@@ -83,7 +84,7 @@ function packageEntry (cfg) {
   cfg.name = 'packages';
 
   cfg.entry = {
-    'inferno-dom': './src/packages/inferno-dom.js',
+    'inferno-starter': './src/packages/inferno-starter.js',
   };
 
   cfg.output = {
@@ -101,7 +102,7 @@ function testsEntry (cfg) {
   cfg.name = 'tests';
 
   cfg.entry = {
-    'inferno-dom.e2e': './src/packages/__tests__/inferno-dom.e2e.js',
+    'inferno-starter.e2e': './src/packages/__tests__/inferno-starter.e2e.js',
   };
 
   cfg.output = {
@@ -110,7 +111,7 @@ function testsEntry (cfg) {
   };
 
   cfg.externals = [
-    '../inferno-dom'
+    '../inferno-starter'
   ];
 
   return cfg;
@@ -125,10 +126,10 @@ function distEntries (cfg) {
       list: './src/list.js',
       router: './src/router.js',
     },
-    // readDir('./src/plugins', '.js', function readPlugins (entries, filename) {
-    //   entries[filename] = `./src/plugins/${filename}.js`;
-    //   return entries;
-    // }),
+    readDir('./src/plugins', '.js', function readPlugins (entries, filename) {
+      entries[filename] = `./src/plugins/${filename}.js`;
+      return entries;
+    }),
     readDir('./src/ui', '.js', function readUI (entries, filename) {
       entries[`ui/${filename}`] = `./src/ui/${filename}.js`;
       return entries;
@@ -236,4 +237,21 @@ function renameUIExports () {
       console.log(`Renamed ${replacements.length} exports in dist/ui from relm[ui/Component] to relm[Component]`);
     });
   });
+}
+
+function copyFile (source, target) {
+  return new Promise(function exec (resolve, reject) {
+    const readStream = fs.createReadStream(source);
+    readStream.on('error', reject);
+    const writeStream = fs.createWriteStream(target);
+    writeStream.on('error', reject);
+    writeStream.on('finish', resolve);
+    readStream.pipe(writeStream);
+  });
+}
+
+function copyPresetToDist () {
+  const source = path.join(__dirname, 'preset/preset.bundle.js');
+  const target = path.join(__dirname, 'dist/preset.js');
+  return copyFile(source, target);
 }
