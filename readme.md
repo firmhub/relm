@@ -34,21 +34,29 @@ Create a `html` file on your desktop and copy paste the following:
 
 ### From NPM with [JSX](#) support
 
-Create a `html` file on your desktop and copy paste the following:
+Add the `relm/preset` to your babel presets:
 
-```html
-<html>
-<body>
-<div id="app"></div>
-<script src="https://rawgit.com/hyperfinite/relm/1.3.0/dist/relm-inferno.min.js"></script>
-<script>
-  function App (h) {
-    return h('h1', 'Hello world!');
-  }
+```json
+{
+  "presets": [
+    "es2015",
+    "relm/preset"
+  ]
+}
+```
 
-  relm.inferno(App, {
-    el: document.querySelector('#app')
-  });
-</script>
-</html>
+Then start writing your app as follows:
+
+```javascript
+import relm from 'relm/inferno-dom';
+
+function App (h) {
+  return (
+    <h1>Hello world!</h1>
+  );
+}
+
+relm.start(App, {
+  el: document.querySelector('#app')
+});
 ```
