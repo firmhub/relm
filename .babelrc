@@ -1,11 +1,13 @@
 {
   "presets": [
-    "es2015-rollup",
-    "./lib/preset"
+    ["es2015", { "modules": false }],
+    "./preset"
   ],
   "env": {
     "production": {
-      "plugins": ["lodash"]
+      "plugins": [
+        "lodash"
+      ]
     },
     "development": {
     },
