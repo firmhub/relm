@@ -1,6 +1,6 @@
 /* eslint-env mocha, browser */
 /* globals expect, relm */
-describe('inferno-dom can start an app', () => {
+describe('inferno-starter can start an app', () => {
   it('renders a hello world into the dom', (done) => {
     const div = document.createElement('div');
     const initialHTML = '';

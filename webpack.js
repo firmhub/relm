@@ -83,7 +83,7 @@ function packageEntry (cfg) {
   cfg.name = 'packages';
 
   cfg.entry = {
-    'inferno-dom': './src/packages/inferno-dom.js',
+    'inferno-starter': './src/packages/inferno-starter.js',
   };
 
   cfg.output = {
@@ -101,7 +101,7 @@ function testsEntry (cfg) {
   cfg.name = 'tests';
 
   cfg.entry = {
-    'inferno-dom.e2e': './src/packages/__tests__/inferno-dom.e2e.js',
+    'inferno-starter.e2e': './src/packages/__tests__/inferno-starter.e2e.js',
   };
 
   cfg.output = {
@@ -110,7 +110,7 @@ function testsEntry (cfg) {
   };
 
   cfg.externals = [
-    '../inferno-dom'
+    '../inferno-starter'
   ];
 
   return cfg;
