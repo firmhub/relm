@@ -5,5 +5,5 @@ npm-debug.log
 *.dist.js
 *.bundle.js
 
-/dist/*.js
-/dist/*.map
+/dist/**/*.js
+/dist/**/*.map

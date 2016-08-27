@@ -5,78 +5,13 @@ const webpack = require('webpack');
 const unminifiedPlugin = require('unminified-webpack-plugin');
 const preset = require('./preset/webpack.config');
 
-function pack (config) {
-  return new Promise(function exec (resolve, reject) {
-    const compiler = webpack(config);
-    compiler.run(function callback (err, stats) {
-      if (err) return reject(err);
-      const jsonStats = stats.toJson();
-      if (jsonStats.errors.length > 0) return reject(jsonStats.errors);
-      return resolve(stats);
-    });
-  });
-}
-
-function log (stats) {
-  console.log(stats.toString('minimal'));
-  return stats;
-}
-
-function packAndLog (config) {
-  return () => pack(config).then(log);
-}
-
-function stringReplace (filename, source, replacement) {
-  return new Promise(function exec (resolve, reject) {
-    fs.readFile(filename, 'utf8', function fileRead (readError, data) {
-      if (readError) return reject(readError);
-
-      const result = data.replace(source, replacement);
-
-      return fs.writeFile(filename, result, 'utf8', function fileWritten (writeError) {
-        if (writeError) return reject(writeError);
-        return resolve();
-      });
-    });
-  });
-}
-
-// This is a workaround for webpack's umd export
-//
-// We want weback to compile ui files to dist/ui sub directory but want the exports
-// named relm.Button instead of relm[ui/Button]. This cannot be acheived through
-// separate webpack configs as we still want to apply CommonsChunkPlugin across
-// the board (ex: so lodash modules used inside ui components can be extracted to core)
-//
-// The naming only affects the global export; commonjs usage is normal i.e. require('relm/ui/Button')
-//
-// So for now, this method reads all files in dist/ui and replaces the export names
-function renameUIExports () {
-  return Promise.resolve().then(function exec () {
-    const dir = path.join(__dirname, 'dist/ui');
-    const files = fs.readdirSync(dir).map(file => path.join(dir, file));
-
-    const jsRegex = /\["ui\//g;             // replace occurrences of the ui prefix ["ui/
-    const sourceMapRegex = /\[\\"ui\//g;    // sourcemap has quotation escaped [\"ui
-
-    function replacementPromise (promises, filename) {
-      if (filename.endsWith('.js')) return promises.concat(stringReplace(filename, jsRegex, '["'));
-      if (filename.endsWith('.map')) return promises.concat(stringReplace(filename, sourceMapRegex, '[\\"'));
-      return promises;
-    }
-
-    return Promise.all(_.reduce(files, replacementPromise, [])).then(function done (replacements) {
-      console.log(`Renamed ${replacements.length} exports in dist/ui from relm[ui/Component] to relm[Component]`);
-    });
-  });
-}
-
 if (process.env.NODE_ENV === 'production') {
   Promise.resolve()
     .then(packAndLog(preset))
     .then(packAndLog(production(distEntries)))
     .then(renameUIExports)
     .then(packAndLog(production(packageEntry)))
+    .then(packAndLog(development(testsEntry)))
     .catch(function failure (err) {
       console.error(err);
     });
@@ -162,6 +97,25 @@ function packageEntry (cfg) {
   return cfg;
 }
 
+function testsEntry (cfg) {
+  cfg.name = 'tests';
+
+  cfg.entry = {
+    'inferno-dom.e2e': './src/packages/__tests__/inferno-dom.e2e.js',
+  };
+
+  cfg.output = {
+    path: path.join(__dirname, 'dist/__tests__'),
+    filename: '[name].js',
+  };
+
+  cfg.externals = [
+    '../inferno-dom'
+  ];
+
+  return cfg;
+}
+
 function distEntries (cfg) {
   cfg.name = 'dist';
 
@@ -216,4 +170,70 @@ function readDir (dir, ext, f) {
     if (filename.indexOf(ext) === -1) return entries;
     return f(entries, filename.replace(ext, ''));
   }, {});
+}
+
+function pack (config) {
+  return new Promise(function exec (resolve, reject) {
+    const compiler = webpack(config);
+    compiler.run(function callback (err, stats) {
+      if (err) return reject(err);
+      const jsonStats = stats.toJson();
+      if (jsonStats.errors.length > 0) return reject(jsonStats.errors);
+      return resolve(stats);
+    });
+  });
+}
+
+function log (stats) {
+  console.log(stats.toString('minimal'));
+  return stats;
+}
+
+function packAndLog (config) {
+  return () => pack(config).then(log);
+}
+
+function stringReplace (filename, source, replacement) {
+  return new Promise(function exec (resolve, reject) {
+    fs.readFile(filename, 'utf8', function fileRead (readError, data) {
+      if (readError) return reject(readError);
+
+      const result = data.replace(source, replacement);
+
+      return fs.writeFile(filename, result, 'utf8', function fileWritten (writeError) {
+        if (writeError) return reject(writeError);
+        return resolve();
+      });
+    });
+  });
+}
+
+// This is a workaround for webpack's umd export
+//
+// We want weback to compile ui files to dist/ui sub directory but want the exports
+// named relm.Button instead of relm[ui/Button]. This cannot be acheived through
+// separate webpack configs as we still want to apply CommonsChunkPlugin across
+// the board (ex: so lodash modules used inside ui components can be extracted to core)
+//
+// The naming only affects the global export; commonjs usage is normal i.e. require('relm/ui/Button')
+//
+// So for now, this method reads all files in dist/ui and replaces the export names
+function renameUIExports () {
+  return Promise.resolve().then(function exec () {
+    const dir = path.join(__dirname, 'dist/ui');
+    const files = fs.readdirSync(dir).map(file => path.join(dir, file));
+
+    const jsRegex = /\["ui\//g;             // replace occurrences of the ui prefix ["ui/
+    const sourceMapRegex = /\[\\"ui\//g;    // sourcemap has quotation escaped [\"ui
+
+    function replacementPromise (promises, filename) {
+      if (filename.endsWith('.js')) return promises.concat(stringReplace(filename, jsRegex, '["'));
+      if (filename.endsWith('.map')) return promises.concat(stringReplace(filename, sourceMapRegex, '[\\"'));
+      return promises;
+    }
+
+    return Promise.all(_.reduce(files, replacementPromise, [])).then(function done (replacements) {
+      console.log(`Renamed ${replacements.length} exports in dist/ui from relm[ui/Component] to relm[Component]`);
+    });
+  });
 }

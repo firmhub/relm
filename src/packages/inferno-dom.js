@@ -1,24 +1,26 @@
 /* eslint-env browser */
+import _ from 'lodash';
 import InfernoDOM from 'inferno-dom';
-import relm from '../relm';
+import create from '../create';
+import list from '../list';
+import router from '../router';
 import StatePlugin from '../plugins/StatePlugin';
 import TasksPlugin from '../plugins/TasksPlugin';
 import ReduxPlugin from '../plugins/ReduxPlugin';
 import CSJSPlugin from '../plugins/CSJSPlugin';
 import InfernoPlugin from '../plugins/InfernoPlugin';
 
-function inferno (component, opts) {
+function start (component, opts) {
   const {
     el,
     theme,
     customizePlugins,
     customizeStore,
+    scheduler,
   } = opts || {};
 
-  const identity = x => x;
-
-  const app = relm(component, {
-    plugins: (customizePlugins || identity)([
+  const app = create(component, {
+    plugins: (customizePlugins || _.identity)([
       new StatePlugin(),
       new TasksPlugin(),
       new ReduxPlugin({ customizeStore }),
@@ -31,18 +33,26 @@ function inferno (component, opts) {
     app.actions.initializeState();
   }
 
-  function redraw () {
+  function render () {
     InfernoDOM.render(app.view(), el);
   }
 
   if (el) {
-    app.subscribe(requestAnimationFrame.bind(null, redraw));
-    redraw();
+    app.subscribe(_.partial(scheduler || requestAnimationFrame, render));
+    render();
   }
 
   return app;
 }
 
-Object.assign(relm, { inferno });
-
-export default relm;
+export {
+  create,
+  list,
+  router,
+  start,
+  StatePlugin,
+  TasksPlugin,
+  ReduxPlugin,
+  CSJSPlugin,
+  InfernoPlugin,
+};
