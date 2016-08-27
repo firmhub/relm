@@ -1,1 +1,25 @@
-{}
+{
+  "name": "relm",
+  "description": "Composable components",
+  "main": "create.js",
+  "version": "1.4.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/hyperfinite/relm.git"
+  },
+  "keywords": [
+    "frontend",
+    "component",
+    "framework",
+    "inferno",
+    "redux",
+    "elm",
+    "architecture"
+  ],
+  "author": "Amandeep Singh Othi <a-s-o@users.noreply.github.com>",
+  "license": "MIT",
+  "homepage": "https://github.com/hyperfinite/relm#readme",
+  "bugs": {
+    "url": "https://github.com/hyperfinite/relm/issues"
+  }
+}
