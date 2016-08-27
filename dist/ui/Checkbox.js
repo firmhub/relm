@@ -8,9 +8,9 @@
 	else
 		root["relm"] = root["relm"] || {}, root["relm"]["Checkbox"] = factory();
 })(this, function() {
-return webpackJsonprelm__name_([8],{
+return webpackJsonprelm__name_([14],{
 
-/***/ 198:
+/***/ 315:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -33,6 +33,6 @@ Checkbox.styles = function (css) {
 
 /***/ }
 
-},[198])
+},[315])
 });
 ;

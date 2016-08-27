@@ -8,461 +8,15 @@
 	else
 		root["relm"] = root["relm"] || {}, root["relm"]["router"] = factory();
 })(this, function() {
-return webpackJsonprelm__name_([0],{
+return webpackJsonprelm__name_([4],{
 
-/***/ 105:
+/***/ 142:
 /***/ function(module, exports, __webpack_require__) {
 
-var baseEach = __webpack_require__(38),
-    isArrayLike = __webpack_require__(15);
-
-/**
- * The base implementation of `_.map` without support for iteratee shorthands.
- *
- * @private
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @returns {Array} Returns the new mapped array.
- */
-function baseMap(collection, iteratee) {
-  var index = -1,
-      result = isArrayLike(collection) ? Array(collection.length) : [];
-
-  baseEach(collection, function(value, key, collection) {
-    result[++index] = iteratee(value, key, collection);
-  });
-  return result;
-}
-
-module.exports = baseMap;
-
-
-/***/ },
-
-/***/ 110:
-/***/ function(module, exports) {
-
-/**
- * The base implementation of `_.reduce` and `_.reduceRight`, without support
- * for iteratee shorthands, which iterates over `collection` using `eachFunc`.
- *
- * @private
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @param {*} accumulator The initial value.
- * @param {boolean} initAccum Specify using the first or last element of
- *  `collection` as the initial value.
- * @param {Function} eachFunc The function to iterate over `collection`.
- * @returns {*} Returns the accumulated value.
- */
-function baseReduce(collection, iteratee, accumulator, initAccum, eachFunc) {
-  eachFunc(collection, function(value, index, collection) {
-    accumulator = initAccum
-      ? (initAccum = false, value)
-      : iteratee(accumulator, value, index, collection);
-  });
-  return accumulator;
-}
-
-module.exports = baseReduce;
-
-
-/***/ },
-
-/***/ 112:
-/***/ function(module, exports) {
-
-/**
- * The base implementation of `_.slice` without an iteratee call guard.
- *
- * @private
- * @param {Array} array The array to slice.
- * @param {number} [start=0] The start position.
- * @param {number} [end=array.length] The end position.
- * @returns {Array} Returns the slice of `array`.
- */
-function baseSlice(array, start, end) {
-  var index = -1,
-      length = array.length;
-
-  if (start < 0) {
-    start = -start > length ? 0 : (length + start);
-  }
-  end = end > length ? length : end;
-  if (end < 0) {
-    end += length;
-  }
-  length = start > end ? 0 : ((end - start) >>> 0);
-  start >>>= 0;
-
-  var result = Array(length);
-  while (++index < length) {
-    result[index] = array[index + start];
-  }
-  return result;
-}
-
-module.exports = baseSlice;
-
-
-/***/ },
-
-/***/ 166:
-/***/ function(module, exports, __webpack_require__) {
-
-var toNumber = __webpack_require__(168);
-
-/** Used as references for various `Number` constants. */
-var INFINITY = 1 / 0,
-    MAX_INTEGER = 1.7976931348623157e+308;
-
-/**
- * Converts `value` to a finite number.
- *
- * @static
- * @memberOf _
- * @since 4.12.0
- * @category Lang
- * @param {*} value The value to convert.
- * @returns {number} Returns the converted number.
- * @example
- *
- * _.toFinite(3.2);
- * // => 3.2
- *
- * _.toFinite(Number.MIN_VALUE);
- * // => 5e-324
- *
- * _.toFinite(Infinity);
- * // => 1.7976931348623157e+308
- *
- * _.toFinite('3.2');
- * // => 3.2
- */
-function toFinite(value) {
-  if (!value) {
-    return value === 0 ? value : 0;
-  }
-  value = toNumber(value);
-  if (value === INFINITY || value === -INFINITY) {
-    var sign = (value < 0 ? -1 : 1);
-    return sign * MAX_INTEGER;
-  }
-  return value === value ? value : 0;
-}
-
-module.exports = toFinite;
-
-
-/***/ },
-
-/***/ 167:
-/***/ function(module, exports, __webpack_require__) {
-
-var toFinite = __webpack_require__(166);
-
-/**
- * Converts `value` to an integer.
- *
- * **Note:** This method is loosely based on
- * [`ToInteger`](http://www.ecma-international.org/ecma-262/7.0/#sec-tointeger).
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to convert.
- * @returns {number} Returns the converted integer.
- * @example
- *
- * _.toInteger(3.2);
- * // => 3
- *
- * _.toInteger(Number.MIN_VALUE);
- * // => 0
- *
- * _.toInteger(Infinity);
- * // => 1.7976931348623157e+308
- *
- * _.toInteger('3.2');
- * // => 3
- */
-function toInteger(value) {
-  var result = toFinite(value),
-      remainder = result % 1;
-
-  return result === result ? (remainder ? result - remainder : result) : 0;
-}
-
-module.exports = toInteger;
-
-
-/***/ },
-
-/***/ 168:
-/***/ function(module, exports, __webpack_require__) {
-
-var isObject = __webpack_require__(16),
-    isSymbol = __webpack_require__(28);
-
-/** Used as references for various `Number` constants. */
-var NAN = 0 / 0;
-
-/** Used to match leading and trailing whitespace. */
-var reTrim = /^\s+|\s+$/g;
-
-/** Used to detect bad signed hexadecimal string values. */
-var reIsBadHex = /^[-+]0x[0-9a-f]+$/i;
-
-/** Used to detect binary string values. */
-var reIsBinary = /^0b[01]+$/i;
-
-/** Used to detect octal string values. */
-var reIsOctal = /^0o[0-7]+$/i;
-
-/** Built-in method references without a dependency on `root`. */
-var freeParseInt = parseInt;
-
-/**
- * Converts `value` to a number.
- *
- * @static
- * @memberOf _
- * @since 4.0.0
- * @category Lang
- * @param {*} value The value to process.
- * @returns {number} Returns the number.
- * @example
- *
- * _.toNumber(3.2);
- * // => 3.2
- *
- * _.toNumber(Number.MIN_VALUE);
- * // => 5e-324
- *
- * _.toNumber(Infinity);
- * // => Infinity
- *
- * _.toNumber('3.2');
- * // => 3.2
- */
-function toNumber(value) {
-  if (typeof value == 'number') {
-    return value;
-  }
-  if (isSymbol(value)) {
-    return NAN;
-  }
-  if (isObject(value)) {
-    var other = typeof value.valueOf == 'function' ? value.valueOf() : value;
-    value = isObject(other) ? (other + '') : other;
-  }
-  if (typeof value != 'string') {
-    return value === 0 ? value : +value;
-  }
-  value = value.replace(reTrim, '');
-  var isBinary = reIsBinary.test(value);
-  return (isBinary || reIsOctal.test(value))
-    ? freeParseInt(value.slice(2), isBinary ? 2 : 8)
-    : (reIsBadHex.test(value) ? NAN : +value);
-}
-
-module.exports = toNumber;
-
-
-/***/ },
-
-/***/ 169:
-/***/ function(module, exports) {
-
-module.exports = Array.isArray || function (arr) {
-  return Object.prototype.toString.call(arr) == '[object Array]';
-};
-
-
-/***/ },
-
-/***/ 196:
-/***/ function(module, exports, __webpack_require__) {
-
-"use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash_mapValues__ = __webpack_require__(35);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash_mapValues___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_lodash_mapValues__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_assign__ = __webpack_require__(34);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_assign___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_assign__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_lodash_startsWith__ = __webpack_require__(80);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_lodash_startsWith___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_lodash_startsWith__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lodash_map__ = __webpack_require__(78);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lodash_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_lodash_map__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_lodash_tail__ = __webpack_require__(81);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_lodash_tail___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_lodash_tail__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash_reduce__ = __webpack_require__(79);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash_reduce___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_lodash_reduce__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_tcomb__ = __webpack_require__(47);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_tcomb___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_tcomb__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_path_to_regexp__ = __webpack_require__(82);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_path_to_regexp___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_path_to_regexp__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__types__ = __webpack_require__(33);
-/* harmony export */ exports["default"] = router;
-/* harmony export */ __webpack_require__.d(exports, "internals", function() { return internals; });
-
-
-
-
-
-
-
-
-
-
-
-/**
- * Creates a single route parser given a path (ex /some/:named/:path*)
- * The return exec method returns an object of all named parameters
- *
- * Returned exec() method takes a url string and returns an object with route params
- *
- * @param {Regex} path
- * @returns {Object} with exec() method to match against strings
- */
-function routeParser(path) {
-  var keys = [];
-  var re = __WEBPACK_IMPORTED_MODULE_7_path_to_regexp___default()(path, keys);
-
-  return {
-    exec: function exec(str) {
-      var matches = re.exec(str);
-      if (!matches) return null;
-
-      return __WEBPACK_IMPORTED_MODULE_5_lodash_reduce___default()(__WEBPACK_IMPORTED_MODULE_4_lodash_tail___default()(matches), function (obj, match, i) {
-        if (!match) return obj;
-
-        obj[keys[i].name] = match;
-        return obj;
-      }, {});
-    }
-  };
-}
-
-/**
- * Takes multiple route definitions and returns a single
- * parse function to match against all the definitions
- * Example of a definition: {
- *   SomeRoute: [Component, '/some/:named/:path*']
- * }
- * @param {Object} definitions
- * @returns {Function} parser
- */
-function routeMapper(definitions) {
-  var parsers = __WEBPACK_IMPORTED_MODULE_3_lodash_map___default()(definitions, function definitionsToParser(def, name) {
-    var parser = routeParser(def[1]);
-    return function exec(str) {
-      var params = parser.exec(str);
-      if (!params) return null;
-      return { name: name, params: params };
-    };
-  });
-
-  return function parser(str) {
-    var _iteratorNormalCompletion = true;
-    var _didIteratorError = false;
-    var _iteratorError = undefined;
-
-    try {
-      for (var _iterator = parsers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-        var parse = _step.value;
-
-        var result = parse(str);
-        if (result) return result;
-      }
-    } catch (err) {
-      _didIteratorError = true;
-      _iteratorError = err;
-    } finally {
-      try {
-        if (!_iteratorNormalCompletion && _iterator.return) {
-          _iterator.return();
-        }
-      } finally {
-        if (_didIteratorError) {
-          throw _iteratorError;
-        }
-      }
-    }
-
-    return null;
-  };
-}
-
-/**
- * Main router function; takes a set of route definitions and
- * returns a relm component which utilizies those routes
- * Example of a definition: {
- *   SomeRoute: [Component, '/some/:named/:path*']
- * }
- * @param {Object} routeDefinitions
- * @returns {Object} component
- */
-function router(routeDefinitions) {
-  if (false) {
-    (function () {
-      var Path = t.refinement(t.String, function (x) {
-        return _startsWith('/', x);
-      }, 'Path');
-
-      var RouteWithoutOptions = t.tuple([Component, Path], '-');
-      var RouteWithOptions = t.tuple([Component, Path, t.Boolean], '-');
-
-      var RouteDefinition = t.union([RouteWithoutOptions, RouteWithOptions], 'Route');
-
-      RouteDefinition.dispatch = function (x) {
-        return x.length > 2 ? RouteWithOptions : RouteWithoutOptions;
-      };
-
-      t.dict(t.String, RouteDefinition, 'Routes')(routeDefinitions);
-    })();
-  }
-
-  var parseRoute = routeMapper(routeDefinitions);
-
-  function Router(html, params) {
-    var props = params.props;
-    var children = params.children;
-    var components = params.components;
-
-
-    var url = props.url || '';
-    var prefixedUrl = __WEBPACK_IMPORTED_MODULE_2_lodash_startsWith___default()(url, '/') ? url : '/' + url;
-    var route = parseRoute(prefixedUrl);
-    if (!route) return null;
-
-    var child = components[route.name];
-    var childProps = __WEBPACK_IMPORTED_MODULE_1_lodash_assign___default()(props, route.params);
-
-    return child(childProps, children);
-  }
-
-  Router.components = __WEBPACK_IMPORTED_MODULE_0_lodash_mapValues___default()(routeDefinitions, function (def) {
-    return def[0];
-  });
-
-  return Router;
-}
-
-var internals = {
-  routeParser: routeParser,
-  routeMapper: routeMapper
-};
-
-/***/ },
-
-/***/ 78:
-/***/ function(module, exports, __webpack_require__) {
-
-var arrayMap = __webpack_require__(93),
-    baseIteratee = __webpack_require__(21),
-    baseMap = __webpack_require__(105),
-    isArray = __webpack_require__(6);
+var arrayMap = __webpack_require__(88),
+    baseIteratee = __webpack_require__(38),
+    baseMap = __webpack_require__(187),
+    isArray = __webpack_require__(1);
 
 /**
  * Creates an array of values by running each element in `collection` thru
@@ -516,71 +70,13 @@ module.exports = map;
 
 /***/ },
 
-/***/ 79:
+/***/ 144:
 /***/ function(module, exports, __webpack_require__) {
 
-var arrayReduce = __webpack_require__(94),
-    baseEach = __webpack_require__(38),
-    baseIteratee = __webpack_require__(21),
-    baseReduce = __webpack_require__(110),
-    isArray = __webpack_require__(6);
-
-/**
- * Reduces `collection` to a value which is the accumulated result of running
- * each element in `collection` thru `iteratee`, where each successive
- * invocation is supplied the return value of the previous. If `accumulator`
- * is not given, the first element of `collection` is used as the initial
- * value. The iteratee is invoked with four arguments:
- * (accumulator, value, index|key, collection).
- *
- * Many lodash methods are guarded to work as iteratees for methods like
- * `_.reduce`, `_.reduceRight`, and `_.transform`.
- *
- * The guarded methods are:
- * `assign`, `defaults`, `defaultsDeep`, `includes`, `merge`, `orderBy`,
- * and `sortBy`
- *
- * @static
- * @memberOf _
- * @since 0.1.0
- * @category Collection
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} [iteratee=_.identity] The function invoked per iteration.
- * @param {*} [accumulator] The initial value.
- * @returns {*} Returns the accumulated value.
- * @see _.reduceRight
- * @example
- *
- * _.reduce([1, 2], function(sum, n) {
- *   return sum + n;
- * }, 0);
- * // => 3
- *
- * _.reduce({ 'a': 1, 'b': 2, 'c': 1 }, function(result, value, key) {
- *   (result[value] || (result[value] = [])).push(key);
- *   return result;
- * }, {});
- * // => { '1': ['a', 'c'], '2': ['b'] } (iteration order is not guaranteed)
- */
-function reduce(collection, iteratee, accumulator) {
-  var func = isArray(collection) ? arrayReduce : baseReduce,
-      initAccum = arguments.length < 3;
-
-  return func(collection, baseIteratee(iteratee, 4), accumulator, initAccum, baseEach);
-}
-
-module.exports = reduce;
-
-
-/***/ },
-
-/***/ 80:
-/***/ function(module, exports, __webpack_require__) {
-
-var baseClamp = __webpack_require__(96),
-    baseToString = __webpack_require__(54),
-    toInteger = __webpack_require__(167),
-    toString = __webpack_require__(65);
+var baseClamp = __webpack_require__(89),
+    baseToString = __webpack_require__(65),
+    toInteger = __webpack_require__(73),
+    toString = __webpack_require__(74);
 
 /**
  * Checks if `string` starts with the given target string.
@@ -617,10 +113,10 @@ module.exports = startsWith;
 
 /***/ },
 
-/***/ 81:
+/***/ 145:
 /***/ function(module, exports, __webpack_require__) {
 
-var baseSlice = __webpack_require__(112);
+var baseSlice = __webpack_require__(194);
 
 /**
  * Gets all but the first element of `array`.
@@ -646,10 +142,10 @@ module.exports = tail;
 
 /***/ },
 
-/***/ 82:
+/***/ 147:
 /***/ function(module, exports, __webpack_require__) {
 
-var isarray = __webpack_require__(169)
+var isarray = __webpack_require__(277)
 
 /**
  * Expose `pathToRegexp`.
@@ -1079,96 +575,257 @@ function pathToRegexp (path, keys, options) {
 
 /***/ },
 
-/***/ 93:
-/***/ function(module, exports) {
+/***/ 187:
+/***/ function(module, exports, __webpack_require__) {
+
+var baseEach = __webpack_require__(63),
+    isArrayLike = __webpack_require__(21);
 
 /**
- * A specialized version of `_.map` for arrays without support for iteratee
- * shorthands.
+ * The base implementation of `_.map` without support for iteratee shorthands.
  *
  * @private
- * @param {Array} [array] The array to iterate over.
+ * @param {Array|Object} collection The collection to iterate over.
  * @param {Function} iteratee The function invoked per iteration.
  * @returns {Array} Returns the new mapped array.
  */
-function arrayMap(array, iteratee) {
+function baseMap(collection, iteratee) {
   var index = -1,
-      length = array ? array.length : 0,
-      result = Array(length);
+      result = isArrayLike(collection) ? Array(collection.length) : [];
 
+  baseEach(collection, function(value, key, collection) {
+    result[++index] = iteratee(value, key, collection);
+  });
+  return result;
+}
+
+module.exports = baseMap;
+
+
+/***/ },
+
+/***/ 194:
+/***/ function(module, exports) {
+
+/**
+ * The base implementation of `_.slice` without an iteratee call guard.
+ *
+ * @private
+ * @param {Array} array The array to slice.
+ * @param {number} [start=0] The start position.
+ * @param {number} [end=array.length] The end position.
+ * @returns {Array} Returns the slice of `array`.
+ */
+function baseSlice(array, start, end) {
+  var index = -1,
+      length = array.length;
+
+  if (start < 0) {
+    start = -start > length ? 0 : (length + start);
+  }
+  end = end > length ? length : end;
+  if (end < 0) {
+    end += length;
+  }
+  length = start > end ? 0 : ((end - start) >>> 0);
+  start >>>= 0;
+
+  var result = Array(length);
   while (++index < length) {
-    result[index] = iteratee(array[index], index, array);
+    result[index] = array[index + start];
   }
   return result;
 }
 
-module.exports = arrayMap;
+module.exports = baseSlice;
 
 
 /***/ },
 
-/***/ 94:
+/***/ 277:
 /***/ function(module, exports) {
 
-/**
- * A specialized version of `_.reduce` for arrays without support for
- * iteratee shorthands.
- *
- * @private
- * @param {Array} [array] The array to iterate over.
- * @param {Function} iteratee The function invoked per iteration.
- * @param {*} [accumulator] The initial value.
- * @param {boolean} [initAccum] Specify using the first element of `array` as
- *  the initial value.
- * @returns {*} Returns the accumulated value.
- */
-function arrayReduce(array, iteratee, accumulator, initAccum) {
-  var index = -1,
-      length = array ? array.length : 0;
-
-  if (initAccum && length) {
-    accumulator = array[++index];
-  }
-  while (++index < length) {
-    accumulator = iteratee(accumulator, array[index], index, array);
-  }
-  return accumulator;
-}
-
-module.exports = arrayReduce;
+module.exports = Array.isArray || function (arr) {
+  return Object.prototype.toString.call(arr) == '[object Array]';
+};
 
 
 /***/ },
 
-/***/ 96:
-/***/ function(module, exports) {
+/***/ 313:
+/***/ function(module, exports, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash_mapValues__ = __webpack_require__(3);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash_mapValues___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_lodash_mapValues__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_assign__ = __webpack_require__(13);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_lodash_assign___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_lodash_assign__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_lodash_startsWith__ = __webpack_require__(144);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_lodash_startsWith___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_lodash_startsWith__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lodash_map__ = __webpack_require__(142);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_lodash_map___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_lodash_map__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_lodash_tail__ = __webpack_require__(145);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_lodash_tail___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_4_lodash_tail__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash_reduce__ = __webpack_require__(9);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_lodash_reduce___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_lodash_reduce__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_tcomb__ = __webpack_require__(80);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_tcomb___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_tcomb__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_path_to_regexp__ = __webpack_require__(147);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7_path_to_regexp___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_7_path_to_regexp__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__types__ = __webpack_require__(53);
+/* harmony export */ exports["default"] = router;
+/* harmony export */ __webpack_require__.d(exports, "internals", function() { return internals; });
+
+
+
+
+
+
+
+
+
+
 
 /**
- * The base implementation of `_.clamp` which doesn't coerce arguments.
+ * Creates a single route parser given a path (ex /some/:named/:path*)
+ * The return exec method returns an object of all named parameters
  *
- * @private
- * @param {number} number The number to clamp.
- * @param {number} [lower] The lower bound.
- * @param {number} upper The upper bound.
- * @returns {number} Returns the clamped number.
+ * Returned exec() method takes a url string and returns an object with route params
+ *
+ * @param {Regex} path
+ * @returns {Object} with exec() method to match against strings
  */
-function baseClamp(number, lower, upper) {
-  if (number === number) {
-    if (upper !== undefined) {
-      number = number <= upper ? number : upper;
+function routeParser(path) {
+  var keys = [];
+  var re = __WEBPACK_IMPORTED_MODULE_7_path_to_regexp___default()(path, keys);
+
+  return {
+    exec: function exec(str) {
+      var matches = re.exec(str);
+      if (!matches) return null;
+
+      return __WEBPACK_IMPORTED_MODULE_5_lodash_reduce___default()(__WEBPACK_IMPORTED_MODULE_4_lodash_tail___default()(matches), function (obj, match, i) {
+        if (!match) return obj;
+
+        obj[keys[i].name] = match;
+        return obj;
+      }, {});
     }
-    if (lower !== undefined) {
-      number = number >= lower ? number : lower;
-    }
-  }
-  return number;
+  };
 }
 
-module.exports = baseClamp;
+/**
+ * Takes multiple route definitions and returns a single
+ * parse function to match against all the definitions
+ * Example of a definition: {
+ *   SomeRoute: [Component, '/some/:named/:path*']
+ * }
+ * @param {Object} definitions
+ * @returns {Function} parser
+ */
+function routeMapper(definitions) {
+  var parsers = __WEBPACK_IMPORTED_MODULE_3_lodash_map___default()(definitions, function definitionsToParser(def, name) {
+    var parser = routeParser(def[1]);
+    return function exec(str) {
+      var params = parser.exec(str);
+      if (!params) return null;
+      return { name: name, params: params };
+    };
+  });
 
+  return function parser(str) {
+    var _iteratorNormalCompletion = true;
+    var _didIteratorError = false;
+    var _iteratorError = undefined;
+
+    try {
+      for (var _iterator = parsers[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+        var parse = _step.value;
+
+        var result = parse(str);
+        if (result) return result;
+      }
+    } catch (err) {
+      _didIteratorError = true;
+      _iteratorError = err;
+    } finally {
+      try {
+        if (!_iteratorNormalCompletion && _iterator.return) {
+          _iterator.return();
+        }
+      } finally {
+        if (_didIteratorError) {
+          throw _iteratorError;
+        }
+      }
+    }
+
+    return null;
+  };
+}
+
+/**
+ * Main router function; takes a set of route definitions and
+ * returns a relm component which utilizies those routes
+ * Example of a definition: {
+ *   SomeRoute: [Component, '/some/:named/:path*']
+ * }
+ * @param {Object} routeDefinitions
+ * @returns {Object} component
+ */
+function router(routeDefinitions) {
+  if (false) {
+    (function () {
+      var Path = t.refinement(t.String, function (x) {
+        return _startsWith('/', x);
+      }, 'Path');
+
+      var RouteWithoutOptions = t.tuple([Component, Path], '-');
+      var RouteWithOptions = t.tuple([Component, Path, t.Boolean], '-');
+
+      var RouteDefinition = t.union([RouteWithoutOptions, RouteWithOptions], 'Route');
+
+      RouteDefinition.dispatch = function (x) {
+        return x.length > 2 ? RouteWithOptions : RouteWithoutOptions;
+      };
+
+      t.dict(t.String, RouteDefinition, 'Routes')(routeDefinitions);
+    })();
+  }
+
+  var parseRoute = routeMapper(routeDefinitions);
+
+  function Router(html, params) {
+    var props = params.props;
+    var children = params.children;
+    var components = params.components;
+
+
+    var url = props.url || '';
+    var prefixedUrl = __WEBPACK_IMPORTED_MODULE_2_lodash_startsWith___default()(url, '/') ? url : '/' + url;
+    var route = parseRoute(prefixedUrl);
+    if (!route) return null;
+
+    var child = components[route.name];
+    var childProps = __WEBPACK_IMPORTED_MODULE_1_lodash_assign___default()(props, route.params);
+
+    return child(childProps, children);
+  }
+
+  Router.components = __WEBPACK_IMPORTED_MODULE_0_lodash_mapValues___default()(routeDefinitions, function (def) {
+    return def[0];
+  });
+
+  return Router;
+}
+
+var internals = {
+  routeParser: routeParser,
+  routeMapper: routeMapper
+};
 
 /***/ }
 
-},[196])
+},[313])
 });
 ;

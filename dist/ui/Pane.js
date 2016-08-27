@@ -8,9 +8,9 @@
 	else
 		root["relm"] = root["relm"] || {}, root["relm"]["Pane"] = factory();
 })(this, function() {
-return webpackJsonprelm__name_([4],{
+return webpackJsonprelm__name_([10],{
 
-/***/ 202:
+/***/ 319:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -39,6 +39,6 @@ Pane.styles = function (css, _ref2) {
 
 /***/ }
 
-},[202])
+},[319])
 });
 ;

@@ -8,9 +8,9 @@
 	else
 		root["relm"] = root["relm"] || {}, root["relm"]["Flexbox"] = factory();
 })(this, function() {
-return webpackJsonprelm__name_([7],{
+return webpackJsonprelm__name_([13],{
 
-/***/ 199:
+/***/ 316:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -60,6 +60,6 @@ function flex(props) {
 
 /***/ }
 
-},[199])
+},[316])
 });
 ;

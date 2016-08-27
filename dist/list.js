@@ -8,13 +8,13 @@
 	else
 		root["relm"] = root["relm"] || {}, root["relm"]["list"] = factory();
 })(this, function() {
-return webpackJsonprelm__name_([10],{
+return webpackJsonprelm__name_([18],{
 
-/***/ 195:
+/***/ 306:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash_assign__ = __webpack_require__(34);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash_assign__ = __webpack_require__(13);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash_assign___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_lodash_assign__);
 /* harmony export */ exports["default"] = list;
 
@@ -89,6 +89,6 @@ function list(Component) {
 
 /***/ }
 
-},[195])
+},[306])
 });
 ;

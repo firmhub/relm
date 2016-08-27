@@ -8,9 +8,9 @@
 	else
 		root["relm"] = root["relm"] || {}, root["relm"]["Radio"] = factory();
 })(this, function() {
-return webpackJsonprelm__name_([2],{
+return webpackJsonprelm__name_([8],{
 
-/***/ 204:
+/***/ 321:
 /***/ function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -56,6 +56,6 @@ Radio.styles = function (css) {
 
 /***/ }
 
-},[204])
+},[321])
 });
 ;
