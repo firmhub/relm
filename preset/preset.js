@@ -1,29 +1,31 @@
 /* eslint-disable */
-import postcss from 'postcss';
-import safe from 'postcss-safe-parser';
-import autoprefixer from 'autoprefixer';
-import csso from 'postcss-csso';
-import jsxSyntax from 'babel-plugin-syntax-jsx';
-import jsxTransform from 'babel-plugin-transform-react-jsx';
+const postcss = require('postcss');
+const safe = require('postcss-safe-parser');
+const autoprefixer = require('autoprefixer');
+const csso = require('postcss-csso');
+const jsxSyntax = require('babel-plugin-syntax-jsx');
+const jsxTransform = require('babel-plugin-transform-react-jsx');
 
-export default {
-  presets: [],
-  plugins: [
-    [jsxSyntax],
-    [jsxTransform, { pragma: 'h' }],
-  ],
-  env: {
-    production: {
-      plugins: [
-        [csjs, {
-          plugins: [
-            [autoprefixer, { browsers: ['last 2 versions'] }],
-            [csso]
-          ]
-        }]
-      ]
+module.exports = function (context, options) {
+  return {
+    presets: [],
+    plugins: [
+      [jsxSyntax],
+      [jsxTransform, { pragma: (options && options.pragma || 'h') }],
+    ],
+    env: {
+      production: {
+        plugins: [
+          [csjs, {
+            plugins: [
+              [autoprefixer, { browsers: ['last 2 versions'] }],
+              [csso]
+            ]
+          }]
+        ]
+      }
     }
-  }
+  };
 };
 
 function csjs ({ types: t }) {

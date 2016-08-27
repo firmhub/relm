@@ -1,0 +1,19 @@
+{
+  "name": "relm-preset",
+  "version": "1.0.0",
+  "description": "Preset to simplify relm packages with csjs",
+  "main": "preset.bundle.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Amandeep Othi",
+  "license": "MIT",
+  "devDependencies": {
+    "autoprefixer": "^6.4.0",
+    "babel-plugin-syntax-jsx": "^6.13.0",
+    "babel-plugin-transform-react-jsx": "^6.8.0",
+    "postcss": "^5.1.2",
+    "postcss-csso": "^1.1.2",
+    "postcss-safe-parser": "^1.0.7"
+  }
+}
